@@ -265,6 +265,7 @@
 }
 
 @media(max-width:800px){
+  .site-header nav{max-height:calc(100vh - 72px);overflow-y:auto;-webkit-overflow-scrolling:touch;box-shadow:0 25px 50px rgba(0,0,0,.75)}
   .redact-preview{grid-template-columns:1fr}
   .cos-panel{grid-template-columns:1fr}
   .batch-panel{grid-template-columns:1fr}
@@ -273,4 +274,37 @@
   .shortcuts-grid{grid-template-columns:1fr}
   .code-content-wrap{padding:18px}
   .lab-display{padding:18px}
+  .comparison-table th,.comparison-table td{min-width:140px}
+  .comparison-table th.highlight-col,.comparison-table td.highlight-col{min-width:180px}
+}
+
+@media(max-width:520px){
+  .lab-container{border-radius:12px}
+  .lab-tabs{padding:4px 6px;gap:6px;-webkit-overflow-scrolling:touch}
+  .lab-tab{padding:12px 14px;font-size:11px}
+  .panel-controls{flex-direction:column;align-items:stretch;gap:8px}
+  .panel-controls .toggle-pill{width:100%;text-align:center}
+  .doc-sample{padding:16px;font-size:11px;line-height:1.8}
+  .redact-explanation{padding:16px}
+  .cos-tree{padding:14px}
+  .tree-node{font-size:10px;padding:6px 8px}
+  .batch-queue,.batch-actions-box,.measure-sidebar{padding:16px}
+  .blueprint-canvas{min-height:200px}
+  .blueprint-wall{width:160px;height:90px}
+  .blueprint-dimension{top:40px}
+  .dimension-line{width:160px}
+  .scale-select{flex-direction:column;width:100%}
+  .scale-select .pill-sm{width:100%;text-align:center;padding:8px}
+  .shortcuts-box{padding:22px 18px}
+  .shortcuts-copy h2{font-size:32px;letter-spacing:-1.8px}
+  .download-tabs-nav{flex-direction:column;width:100%}
+  .dl-tab{width:100%;text-align:center;padding:10px}
+  .checksum-box{flex-direction:column;align-items:flex-start;gap:8px;padding:10px}
+  .checksum-box code{font-size:8px;line-height:1.5}
+  .btn-tiny{width:100%;justify-content:center;padding:8px}
+  .code-action-bar{flex-direction:column;align-items:flex-start;gap:8px}
+  .copy-btn{width:100%;justify-content:center}
+  .terminal-code{font-size:10.5px;padding:14px}
+  .hero-visual{overflow:hidden}
+  .app-window{max-width:100%;width:100%;transform:none;animation:none}
 }
