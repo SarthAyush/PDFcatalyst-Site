@@ -257,6 +257,167 @@ const comparisonSpecs = [
   },
 ];
 
+function LivePdfEditor() {
+  const [step, setStep] = useState(0);
+  const [paused, setPaused] = useState(false);
+
+  useEffect(() => {
+    if (paused) return;
+    const interval = setInterval(() => {
+      setStep((prev) => (prev + 1) % 4);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, [paused]);
+
+  const stepLabels = [
+    "Highlighting Text",
+    "Digital PKI Signature",
+    "Structural Redaction",
+    "Atomic Verified Save",
+  ];
+
+  return (
+    <div className="live-editor-shell">
+      <div className="live-editor-window">
+        {/* macOS Title Bar */}
+        <div className="live-title-bar">
+          <div className="traffic-lights">
+            <span className="light red" />
+            <span className="light yellow" />
+            <span className="light green" />
+          </div>
+          <div className="live-title-center">
+            <img src="/pdfix-logo.png" alt="" width="15" height="15" />
+            <span>PDFix Workbench — License_Agreement_2026.pdf</span>
+          </div>
+          <div className="live-rec-pill">
+            <span className="live-rec-dot" />
+            <span>LIVE WORKBENCH</span>
+          </div>
+        </div>
+
+        {/* Editor Main Layout */}
+        <div className="live-editor-body">
+          {/* Left Tool Rail */}
+          <aside className="live-tool-rail">
+            <div className={`rail-icon ${step === 0 ? "active-tool gold" : ""}`} title="Text Highlighter">
+              <Icon name="pen" size={14} />
+            </div>
+            <div className={`rail-icon ${step === 1 ? "active-tool blue" : ""}`} title="Digital Signature">
+              <Icon name="shield" size={14} />
+            </div>
+            <div className={`rail-icon ${step === 2 ? "active-tool red" : ""}`} title="Structural Redaction">
+              <Icon name="lock" size={14} />
+            </div>
+            <div className={`rail-icon ${step === 3 ? "active-tool green" : ""}`} title="Atomic Save">
+              <Icon name="check" size={14} />
+            </div>
+            <div className="rail-divider" />
+            <div className="rail-icon" title="Full-text Search">
+              <Icon name="search" size={14} />
+            </div>
+            <div className="rail-icon" title="Scale Measurement">
+              <Icon name="ruler" size={14} />
+            </div>
+          </aside>
+
+          {/* Document Stage */}
+          <div className="live-canvas-stage">
+            {/* The Document Page */}
+            <div className="live-doc-paper">
+              {/* Virtual Cursor */}
+              <div className={`live-cursor pos-step-${step}`}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M3 3l7 18 3.5-7.5L21 10 3 3z"
+                    fill="#2997ff"
+                    stroke="#ffffff"
+                    strokeWidth="1.8"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <span className="cursor-label">{stepLabels[step]}</span>
+              </div>
+
+              <div className="doc-page-header">
+                <span className="doc-num">ISO 32000-2 COMPLIANT · PAGE 1 OF 3</span>
+                <span className="doc-tag">CONFIDENTIAL</span>
+              </div>
+
+              <h4 className="doc-main-heading">MUTUAL SOFTWARE LICENSE & RIGHTS</h4>
+
+              <p className="doc-paragraph">
+                1. <strong>Document Architecture.</strong> This specification governs the implementation of
+                memory-safe document workflows and atomic multi-file batch operations.
+              </p>
+
+              {/* Step 0: Highlighting Line */}
+              <div className="doc-interactive-line highlight-target">
+                <span className={`highlight-sweep ${step >= 0 ? "active" : ""}`} />
+                <p className="doc-paragraph target-text">
+                  2. <strong>License Grant.</strong> Author grants an irrevocable, perpetual, royalty-free
+                  open-source license under Dual MIT and Apache-2.0 protocols.
+                </p>
+                {step === 0 && <span className="action-tag gold">✓ Highlighted (0ms latency)</span>}
+              </div>
+
+              {/* Step 2: Redaction Line */}
+              <div className="doc-interactive-line redact-target-line">
+                <p className="doc-paragraph">
+                  3. <strong>Identity & SSN ID:</strong>{" "}
+                  <span className={`redact-box-wipe ${step >= 2 ? "purged" : "exposed"}`}>
+                    {step >= 2 ? "█████████████" : "SSN: 948-21-0814"}
+                  </span>
+                  {step >= 2 && <span className="action-tag red">🛡️ Stream Purged: 0x00 token</span>}
+                </p>
+              </div>
+
+              {/* Step 1: Digital Signature Line */}
+              <div className="doc-interactive-line signature-target-line">
+                <div className="sig-label">4. Authorized Cryptographic Signature:</div>
+                <div className={`sig-seal-drop ${step >= 1 ? "stamped" : ""}`}>
+                  <div className="sig-handwriting">Sarthak Saxena</div>
+                  <div className="sig-verified-badge">
+                    <Icon name="check" size={11} /> PKI X.509 Cryptographic Timestamp Verified
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Live Status & Controller Bar */}
+        <div className="live-status-bar">
+          <div className="status-message">
+            <span className="status-pulse" />
+            {step === 0 && <span>Highlighter Tool: Selecting text operator & applying appearance stream</span>}
+            {step === 1 && <span>PKI Crypto Engine: Applying digital signature seal with X.509 cert</span>}
+            {step === 2 && <span>Redact Engine: Purging raw content bytes, font subroutines & XREF entries</span>}
+            {step === 3 && <span>Atomic Save: Written to local disk without cloud round-trip</span>}
+          </div>
+          <div className="live-step-pills">
+            {[0, 1, 2, 3].map((s) => (
+              <button
+                key={s}
+                className={`step-dot ${step === s ? "current" : ""}`}
+                onClick={() => setStep(s)}
+                aria-label={`Jump to step ${s + 1}`}
+              />
+            ))}
+            <button
+              className="pause-btn"
+              onClick={() => setPaused(!paused)}
+              title={paused ? "Resume Animation" : "Pause Animation"}
+            >
+              {paused ? "▶" : "❚❚"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -389,12 +550,24 @@ function App() {
       </header>
 
       <main id="top">
-        {/* Apple-Style Hero */}
+        {/* Apple-Style Hero with Prominent App Icon & Name */}
         <section className="hero-section" id="overview">
           <div className="hero-content">
-            <div className="apple-pill" data-reveal>
-              <span className="pill-dot" /> PDFix 1.0 · The Pure Rust Workbench
+            {/* Prominent App Name & Icon at the Top of Home Visual */}
+            <div className="hero-app-brand-banner" data-reveal>
+              <div className="hero-app-icon-ring">
+                <img src="/pdfix-logo.png" alt="PDFix Icon" width="84" height="84" className="hero-app-logo" />
+                <div className="icon-pulse-glow" />
+              </div>
+              <div className="hero-app-text-group">
+                <div className="hero-app-name-row">
+                  <h2 className="hero-app-name">PDFix</h2>
+                  <span className="hero-app-version">v1.0.0</span>
+                </div>
+                <span className="hero-app-sub">The Pure Rust PDF Workbench</span>
+              </div>
             </div>
+
             <h1 className="hero-headline" data-reveal>
               Pro capability.
               <br />
@@ -428,55 +601,9 @@ function App() {
             </div>
           </div>
 
-          {/* Clean Glass App Window Showcase */}
+          {/* Live Animation of PDF Editor (Always Running Like a GIF) */}
           <div className="hero-window-wrap" data-reveal>
-            <div className="glass-window">
-              <div className="window-header">
-                <div className="traffic-lights">
-                  <span className="light red" />
-                  <span className="light yellow" />
-                  <span className="light green" />
-                </div>
-                <div className="window-label">
-                  <img src="/pdfix-logo.png" alt="" width="14" height="14" />
-                  <span>PDFix Workbench — Architectural_Plans_2026.pdf</span>
-                </div>
-                <div className="window-badge">v1.0.0 · wgpu</div>
-              </div>
-
-              <div className="window-canvas-layout">
-                <aside className="canvas-sidebar">
-                  <div className="sidebar-group-label">TOOLS</div>
-                  <div className="tool-row active"><Icon name="file" size={13} /> Document</div>
-                  <div className="tool-row"><Icon name="layers" size={13} /> Batch Studio</div>
-                  <div className="tool-row"><Icon name="ruler" size={13} /> Measurement</div>
-                  <div className="tool-row"><Icon name="shield" size={13} /> Structural Redact</div>
-                  <div className="tool-row"><Icon name="bot" size={13} /> MCP Server</div>
-                  <div className="sidebar-spacer" />
-                  <div className="safe-badge">
-                    <Icon name="check" size={12} /> Atomic verified write
-                  </div>
-                </aside>
-
-                <div className="canvas-stage">
-                  <div className="canvas-doc-page">
-                    <div className="doc-kicker">ENGINEERING SPECIFICATION</div>
-                    <div className="doc-title">Rebuilt in pure Rust.</div>
-                    <div className="doc-rule" />
-                    <div className="doc-meta-grid">
-                      <div><span>PARSER</span><strong>ISO 32000-2</strong></div>
-                      <div><span>SAFETY</span><strong>forbid(unsafe)</strong></div>
-                      <div><span>LATENCY</span><strong>&lt; 1ms render</strong></div>
-                    </div>
-                    <div className="doc-chips">
-                      <span className="chip green">Zero Telemetry</span>
-                      <span className="chip blue">Atomic Transactions</span>
-                      <span className="chip purple">MCP Protocol</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <LivePdfEditor />
           </div>
         </section>
 
