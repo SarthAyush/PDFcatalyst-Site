@@ -6,9 +6,6 @@ const DOWNLOAD_INSTALLER =
   "https://github.com/SarthAyush/PDFix-App/releases/download/v1.0.0/PDFix-Setup-v1.0.0-x64.exe";
 const DOWNLOAD_PORTABLE =
   "https://github.com/SarthAyush/PDFix-App/releases/download/v1.0.0/PDFix.exe";
-const REPO = "https://github.com/SarthAyush/PDFix-App";
-const RELEASE = "https://github.com/SarthAyush/PDFix-App/releases/tag/v1.0.0";
-const PROFILE = "https://github.com/SarthAyush";
 const SHA256_INSTALLER =
   "d5a2e4e560b674e8271e2706602ab45a443dabed5f8f1e5e3eb0eb22f4ee6ec9";
 const SHA256_PORTABLE =
@@ -317,7 +314,7 @@ function LivePdfEditor() {
           </div>
           <div className="live-title-center">
             <img src="/pdfix-logo.png" alt="" width="15" height="15" />
-            <span>PDFix Workbench — License_Agreement_2026.pdf</span>
+            <span>PDFCatalyst Workbench — License_Agreement_2026.pdf</span>
           </div>
           <div className="live-rec-pill">
             <span className="live-rec-dot" />
@@ -475,10 +472,10 @@ function formatRelativeTime(dateStr) {
 
 const DEFAULT_RELEASE = {
   tag_name: "v1.0.0",
-  name: "PDFix v1.0.0 — Pure Rust Architecture",
+  name: "PDFCatalyst v1.0.0 — Pure Rust Architecture",
   published_at: "2026-10-15T12:27:31Z",
   html_url: "https://github.com/SarthAyush/PDFix-App/releases/tag/v1.0.0",
-  body: `### What's New in PDFix v1.0.0
+  body: `### What's New in PDFCatalyst v1.0.0
 - **Pure Rust Core Engine**: Clean-room ISO 32000-2 parser with \`forbid(unsafe_code)\` memory safety guarantees.
 - **Hardware Acceleration**: 60+ FPS vector rendering via \`wgpu\` and OpenGL fallback for smooth pan and zoom.
 - **Deep Structural Redaction**: Irreversible byte-level object stream and font subroutine purging.
@@ -613,15 +610,9 @@ function ChangelogModal({ release, releases, onClose, onSelectRelease }) {
 
         <div className="modal-body">
           <div className="modal-title-row">
-            <h3 className="modal-title">{release.name || `PDFix ${release.tag_name}`}</h3>
-            <a
-              href={release.html_url}
-              target="_blank"
-              rel="noreferrer"
-              className="modal-github-link"
-            >
-              <Icon name="github" size={14} /> View on GitHub <Icon name="external" size={12} />
-            </a>
+            <h3 className="modal-title">
+              {release.name ? release.name.replace(/PDFix/gi, "PDFCatalyst") : `PDFCatalyst ${release.tag_name}`}
+            </h3>
           </div>
 
           <div className="modal-section-title">Highlights in this update:</div>
@@ -691,7 +682,7 @@ function ChangelogModal({ release, releases, onClose, onSelectRelease }) {
 
         <div className="modal-footer">
           <span className="modal-footer-note">
-            Built from <code>SarthAyush/PDFix-App</code> · Auto-synced
+            Official PDFCatalyst Release Stream · SHA-256 Verified
           </span>
           <button className="btn-apple-primary small" onClick={onClose}>
             Done
@@ -793,16 +784,16 @@ function App() {
 
   const faqs = [
     {
-      q: "Is PDFix truly open source and free?",
+      q: "Is PDFCatalyst truly open source and free?",
       a: "Yes. Dual-licensed under MIT and Apache-2.0. Completely free for personal, commercial, and enterprise use with no subscriptions.",
     },
     {
-      q: "How does PDFix ensure my data never leaks?",
+      q: "How does PDFCatalyst ensure my data never leaks?",
       a: "All document parsing, rendering, OCR, signing, and saving occur strictly on your machine. Zero network analytics, zero telemetry.",
     },
     {
       q: "What is the built-in MCP server?",
-      a: "PDFix includes an embedded Model Context Protocol server. AI assistants like Claude Desktop and Cursor can inspect and edit local PDFs without uploading them.",
+      a: "PDFCatalyst includes an embedded Model Context Protocol server. AI assistants like Claude Desktop and Cursor can inspect and edit local PDFs without uploading them.",
     },
     {
       q: "Installer vs Portable?",
@@ -810,7 +801,7 @@ function App() {
     },
     {
       q: "How does true redaction differ from regular black boxes?",
-      a: "Common viewers draw an overlay rectangle while leaving text tokens in the stream. PDFix strips the raw bytes, XREF entries, and font maps irreversibly.",
+      a: "Common viewers draw an overlay rectangle while leaving text tokens in the stream. PDFCatalyst strips the raw bytes, XREF entries, and font maps irreversibly.",
     },
   ];
 
@@ -821,7 +812,7 @@ function App() {
         <div className="nav-container">
           <a className="nav-brand" href="#top" onClick={() => setMenuOpen(false)}>
             <img src="/pdfix-logo.png" alt="" width="26" height="26" />
-            <span>PDFix</span>
+            <span>PDFCatalyst</span>
           </a>
 
           <nav className={`nav-links ${menuOpen ? "open" : ""}`}>
@@ -864,14 +855,14 @@ function App() {
             {/* Prominent App Name & Icon at the Top of Home Visual */}
             <div className="hero-app-brand-banner" data-reveal>
               <div className="hero-app-icon-ring">
-                <img src="/pdfix-logo.png" alt="PDFix Icon" width="84" height="84" className="hero-app-logo" />
+                <img src="/pdfix-logo.png" alt="PDFCatalyst Icon" width="84" height="84" className="hero-app-logo" />
                 <div className="icon-pulse-glow" />
               </div>
               <div className="hero-app-text-group">
                 <div className="hero-app-name-row">
-                  <h2 className="hero-app-name">PDFix</h2>
+                  <h2 className="hero-app-name">PDFCatalyst</h2>
                   <span className="hero-app-version">{currentVersion}</span>
-                  <span className="live-synced-badge" title="Auto-synced with SarthAyush/PDFix-App">
+                  <span className="live-synced-badge" title="Continuous Delivery Stream">
                     <span className="pulse-dot green" /> Synced
                   </span>
                 </div>
@@ -903,8 +894,8 @@ function App() {
               <a className="btn-apple-glass" href="#updates">
                 What's New <Icon name="spark" size={14} />
               </a>
-              <a className="btn-apple-quiet" href={REPO} target="_blank" rel="noreferrer">
-                <Icon name="github" size={16} /> View on GitHub
+              <a className="btn-apple-quiet" href="#features">
+                Explore Capabilities <Icon name="chevronRight" size={13} />
               </a>
             </div>
 
@@ -958,11 +949,11 @@ function App() {
           <div className="section-header" data-reveal>
             <div className="live-repo-badge">
               <span className="pulse-dot green" />
-              <span>SYNCED WITH REPOSITORY: <strong>SarthAyush/PDFix-App</strong></span>
+              <span>CONTINUOUS DELIVERY · OFFICIAL PRODUCTION STREAM</span>
             </div>
             <h2 className="section-title">What's new in {currentVersion}.</h2>
             <p className="section-desc">
-              Every build and release from the application repository is automatically reflected here in real time.
+              Every verified build and release update is automatically reflected here in real time.
             </p>
           </div>
 
@@ -974,10 +965,10 @@ function App() {
                 </span>
                 <span className="sync-text">
                   {syncStatus === "fetching"
-                    ? "Syncing with GitHub Releases..."
+                    ? "Checking for latest updates..."
                     : lastSynced
                     ? `Live Synced ${formatRelativeTime(lastSynced)}`
-                    : "Connected to SarthAyush/PDFix-App"}
+                    : "Automated Release Pipeline Active"}
                 </span>
                 <span className="sync-divider">•</span>
                 <span className="sync-release-pill">{currentVersion} Latest</span>
@@ -1006,7 +997,11 @@ function App() {
             <div className="updates-spotlight-grid">
               <div className="updates-spotlight-left">
                 <div className="spotlight-badge">LATEST RELEASE</div>
-                <h3 className="spotlight-title">{latestRelease.name || `PDFix ${currentVersion}`}</h3>
+                <h3 className="spotlight-title">
+                  {latestRelease.name
+                    ? latestRelease.name.replace(/PDFix/gi, "PDFCatalyst")
+                    : `PDFCatalyst ${currentVersion}`}
+                </h3>
                 <p className="spotlight-desc">
                   Published on {formatDate(latestRelease.published_at)}. Rebuilt from source with ISO 32000-2 conformance,
                   deep structural stream redaction, hardware vector acceleration, and native AI Model Context Protocol.
@@ -1128,7 +1123,7 @@ function App() {
                       className={`switch-btn ${redactedState ? "active" : ""}`}
                       onClick={() => setRedactedState(true)}
                     >
-                      PDFix Structural Purge
+                      PDFCatalyst Structural Purge
                     </button>
                     <button
                       className={`switch-btn danger ${!redactedState ? "active" : ""}`}
@@ -1198,7 +1193,7 @@ q
   1 0 0 1 72 720 cm
   BT
     /F1 18 Tf
-    (PDFix: Pro Engineering) Tj
+    (PDFCatalyst: Pro Engineering) Tj
   ET
 Q`}
                     </pre>
@@ -1274,7 +1269,7 @@ Q`}
             <span className="section-eyebrow">BENCHMARK</span>
             <h2 className="section-title">Clear contrast.</h2>
             <p className="section-desc">
-              Compare PDFix against legacy enterprise software and web converters.
+              Compare PDFCatalyst against legacy enterprise software and web converters.
             </p>
           </div>
 
@@ -1286,7 +1281,7 @@ Q`}
                   <th className="highlight-col">
                     <div className="th-brand">
                       <img src="/pdfix-logo.png" alt="" width="20" height="20" />
-                      <span>PDFix</span>
+                      <span>PDFCatalyst</span>
                     </div>
                   </th>
                   <th>Adobe Acrobat Pro</th>
@@ -1349,7 +1344,7 @@ Q`}
                   onClick={() => {
                     const text =
                       cliTab === "mcp"
-                        ? `{\n  "mcpServers": {\n    "pdfix": {\n      "command": "pdfcraft-cli",\n      "args": ["mcp", "--root", "/path/to/docs"]\n    }\n  }\n}`
+                        ? `{\n  "mcpServers": {\n    "pdfcatalyst": {\n      "command": "pdfcraft-cli",\n      "args": ["mcp", "--root", "/path/to/docs"]\n    }\n  }\n}`
                         : cliTab === "cli"
                         ? `pdfcraft-cli batch --merge *.pdf --out final.pdf\npdfcraft-cli ocr scan.pdf --out searchable.pdf`
                         : `[\n  { "op": "open", "file": "doc.pdf" },\n  { "op": "redact", "pattern": "SSN:.*" },\n  { "op": "save_atomic", "out": "safe.pdf" }\n]`;
@@ -1362,7 +1357,7 @@ Q`}
 
               <pre className="code-display">
                 {cliTab === "mcp" &&
-                  `{\n  "mcpServers": {\n    "pdfix": {\n      "command": "pdfcraft-cli",\n      "args": ["mcp", "--root", "/path/to/documents"]\n    }\n  }\n}`}
+                  `{\n  "mcpServers": {\n    "pdfcatalyst": {\n      "command": "pdfcraft-cli",\n      "args": ["mcp", "--root", "/path/to/documents"]\n    }\n  }\n}`}
                 {cliTab === "cli" &&
                   `# Batch merge multiple files\npdfcraft-cli batch --merge doc1.pdf doc2.pdf --out bundle.pdf\n\n# Embedded offline OCR\npdfcraft-cli ocr scan.pdf --lang eng --out searchable.pdf`}
                 {cliTab === "json" &&
@@ -1399,7 +1394,7 @@ Q`}
         <section className="download-section" id="download">
           <div className="glass-download-card" data-reveal>
             <div className="download-header">
-              <span className="section-eyebrow">GET PDFIX</span>
+              <span className="section-eyebrow">GET PDFCATALYST</span>
               <h2 className="section-title">Download for your system.</h2>
               <p className="section-desc">
                 Native performance on Windows. Ready to build on macOS and Linux.
@@ -1445,7 +1440,7 @@ Q`}
                       className="btn-hash"
                       onClick={() =>
                         copy(
-                          `Get-FileHash .\\PDFix-Setup-v1.0.0-x64.exe -Algorithm SHA256`,
+                          `Get-FileHash .\\PDFCatalyst-Setup-v1.0.0-x64.exe -Algorithm SHA256`,
                           "hash-inst",
                         )
                       }
@@ -1471,7 +1466,7 @@ Q`}
                       className="btn-hash"
                       onClick={() =>
                         copy(
-                          `Get-FileHash .\\PDFix.exe -Algorithm SHA256`,
+                          `Get-FileHash .\\PDFCatalyst.exe -Algorithm SHA256`,
                           "hash-port",
                         )
                       }
@@ -1485,10 +1480,9 @@ Q`}
               {downloadTab === "source" && (
                 <div className="dl-pane">
                   <pre className="source-code">
-{`# Clone and run with Cargo
-git clone https://github.com/SarthAyush/PDFix-App.git
-cd PDFix-App
-cargo run --release -p pdfcraft`}
+{`# Build standalone binary from source
+cd pdfcatalyst
+cargo build --release -p pdfcraft`}
                   </pre>
                   <span className="dl-note">Requirements: Rust 1.95+ or stable compiler · C/C++ build tools</span>
                 </div>
@@ -1504,16 +1498,16 @@ cargo run --release -p pdfcraft`}
               <span className="section-eyebrow">CREATOR & MAINTAINER</span>
               <h2 className="creator-title">Built with curiosity.</h2>
               <p className="creator-bio">
-                Created by <strong>Sarthak Saxena</strong> (<a href={PROFILE} target="_blank" rel="noreferrer">@SarthAyush</a>).
+                Created by <strong>Sarthak Saxena</strong>.
                 Dedicated to building high-performance, memory-safe software and giving people powerful document engineering tools without cloud friction.
               </p>
               <div className="creator-links">
-                <a className="btn-apple-quiet" href={PROFILE} target="_blank" rel="noreferrer">
-                  <Icon name="github" size={15} /> GitHub Profile
-                </a>
-                <a className="btn-apple-quiet" href={REPO} target="_blank" rel="noreferrer">
-                  Explore Repository
-                </a>
+                <span className="creator-badge-pill">
+                  <Icon name="shield" size={14} /> Pure Rust Core
+                </span>
+                <span className="creator-badge-pill">
+                  <Icon name="check" size={14} /> Verified Architecture
+                </span>
               </div>
             </div>
             <div className="creator-badge-box">
@@ -1559,7 +1553,7 @@ cargo run --release -p pdfcraft`}
           <div className="footer-top">
             <div className="footer-brand-side">
               <img src="/pdfix-logo.png" alt="" width="22" height="22" />
-              <span>PDFix</span>
+              <span>PDFCatalyst</span>
               <p>The PDF engineering workbench rebuilt in pure Rust.</p>
             </div>
             <div className="footer-links-grid">
@@ -1572,15 +1566,15 @@ cargo run --release -p pdfcraft`}
               </div>
               <div>
                 <strong>RESOURCES</strong>
-                <a href={DOWNLOAD_INSTALLER}>Windows Installer</a>
-                <a href={DOWNLOAD_PORTABLE}>Portable Standalone</a>
-                <a href={RELEASE} target="_blank" rel="noreferrer">Release Notes</a>
-                <a href={REPO} target="_blank" rel="noreferrer">GitHub Repo</a>
+                <a href={installerUrl}>Windows Installer</a>
+                <a href={portableUrl}>Portable Standalone</a>
+                <button className="footer-link-btn" onClick={() => setShowChangelogModal(true)}>Release Notes</button>
+                <a href="#download">All Downloads</a>
               </div>
             </div>
           </div>
           <div className="footer-bottom">
-            <span>Copyright © {new Date().getFullYear()} PDFix. Configured by Sarthak Saxena (@SarthAyush).</span>
+            <span>Copyright © {new Date().getFullYear()} PDFCatalyst. Configured by Sarthak Saxena.</span>
             <span>Dual-licensed under MIT / Apache-2.0</span>
           </div>
         </div>
