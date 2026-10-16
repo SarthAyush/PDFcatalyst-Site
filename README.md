@@ -1,6 +1,6 @@
-# PDFix Product Website
+# PDFCatalyst Product Website
 
-A responsive, animated product landing page for PDFix built with React + Vite. It uses the supplied PDFix logo, CSS-generated app mockups, scroll reveals, reduced-motion support, responsive navigation, persistent dark/light theme toggle, detailed feature guide, creator profile, FAQ accordion, and working links to the Windows installer, GitHub repository, and release notes.
+A responsive, animated product landing page for PDFCatalyst built with React + Vite. It features Apple-inspired glassmorphism, CSS-generated interactive app mockups, scroll reveals, reduced-motion support, responsive navigation, persistent dark/light theme toggle, detailed feature guide, creator profile, FAQ accordion, and working links to the Windows installer, GitHub repository, and release notes.
 
 ## Run locally
 
@@ -26,7 +26,7 @@ The production output is generated in `dist/`.
 
 ### Git-based deployment (recommended)
 
-1. Push this folder to a new GitHub repository (or add it to your existing website repository).
+1. Push this folder to your website repository.
 2. Sign in to Vercel and choose **Add New → Project**.
 3. Import the repository.
 4. Vercel should detect Vite. Confirm these settings:
@@ -54,11 +54,11 @@ In Vercel, open the project **Settings → Domains**, add your domain, then appl
 
 ## Continuous GitHub Release Synchronization
 
-This website is automatically synchronized with the application repository **[SarthAyush/PDFix-App](https://github.com/SarthAyush/PDFix-App)**:
+This website is automatically synchronized with the application repository **[SarthAyush/PDFcatalyst-App](https://github.com/SarthAyush/PDFcatalyst-App)**:
 
 1. **Instant Client-Side Auto-Sync**:
-   - When visitors load the site, it queries the GitHub Releases API (`https://api.github.com/repos/SarthAyush/PDFix-App/releases`).
-   - The latest release tag (e.g. `v1.0.0`, `v1.1.0`), release notes, publish date, and installer binaries (`PDFix-Setup-*.exe` and `PDFix.exe`) are extracted automatically.
+   - When visitors load the site, it queries the GitHub Releases API (`https://api.github.com/repos/SarthAyush/PDFcatalyst-App/releases`).
+   - The latest release tag (e.g. `v1.0.0`, `v1.1.0`), release notes, publish date, and installer binaries (`PDFcatalyst-Setup-*.exe` and `PDFcatalyst.exe`) are extracted automatically.
    - Result is cached in `localStorage` for 5 minutes with fallback data for offline visits.
    - Visitors can manually trigger **"Check for Updates"** at any time.
 
@@ -68,7 +68,7 @@ This website is automatically synchronized with the application repository **[Sa
    - Primary download buttons across the Hero, Navigation, and Download Hub automatically bind to the newest built assets with zero manual site edits required.
 
 3. **Automated CI/CD Deployment**:
-   - A GitHub Actions workflow (`.github/workflows/deploy.yml`) is included for automatic GitHub Pages deployment and supports `repository_dispatch` triggers from the main `PDFix-App` repo.
+   - A GitHub Actions workflow (`.github/workflows/deploy.yml`) is included for automatic GitHub Pages deployment and supports `repository_dispatch` triggers from the main `PDFcatalyst-App` repo.
 
 ## Customize
 
@@ -79,6 +79,6 @@ This website is automatically synchronized with the application repository **[Sa
 
 ## Notes
 
-- All download links dynamically link to the latest verified release binaries from `SarthAyush/PDFix-App`.
+- All download links dynamically link to the latest verified release binaries from `SarthAyush/PDFcatalyst-App`.
 - The website honors `prefers-reduced-motion` and includes keyboard-accessible navigation, modal ESC handling, and FAQ controls.
 - This static website does not collect user data, cookie tracking, or telemetry.

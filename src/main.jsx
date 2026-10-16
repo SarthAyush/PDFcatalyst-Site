@@ -3,13 +3,13 @@ import { createRoot } from "react-dom/client";
 import "./styles.css";
 
 const DOWNLOAD_INSTALLER =
-  "https://github.com/SarthAyush/PDFix-App/releases/download/v1.0.0/PDFix-Setup-v1.0.0-x64.exe";
+  "https://github.com/SarthAyush/PDFcatalyst-App/releases/download/v1.0.0/PDFcatalyst-Setup-v1.0.0-x64.exe";
 const DOWNLOAD_PORTABLE =
-  "https://github.com/SarthAyush/PDFix-App/releases/download/v1.0.0/PDFix.exe";
+  "https://github.com/SarthAyush/PDFcatalyst-App/releases/download/v1.0.0/PDFcatalyst.exe";
 const SHA256_INSTALLER =
-  "d5a2e4e560b674e8271e2706602ab45a443dabed5f8f1e5e3eb0eb22f4ee6ec9";
+  "04a04855a984b84d9bd6c5afedda611d63f5eb259fd78f42fa2237cb4cf74b79";
 const SHA256_PORTABLE =
-  "0f58ca15cb116852126903a9a8c6589eefc4794fe1d65c813cc87c20a8dcec6a";
+  "f4c06b245767378391146604bb29e83616374027d0d5de00cc41578e3c9cbc86";
 
 function Icon({ name, size = 18, stroke = 1.8 }) {
   const common = {
@@ -472,9 +472,9 @@ function formatRelativeTime(dateStr) {
 
 const DEFAULT_RELEASE = {
   tag_name: "v1.0.0",
-  name: "PDFCatalyst v1.0.0 — Pure Rust Architecture",
-  published_at: "2026-10-15T12:27:31Z",
-  html_url: "https://github.com/SarthAyush/PDFix-App/releases/tag/v1.0.0",
+  name: "PDFcatalyst v1.0.0 — Pure Rust Architecture",
+  published_at: "2026-10-16T11:41:07Z",
+  html_url: "https://github.com/SarthAyush/PDFcatalyst-App/releases/tag/v1.0.0",
   body: `### What's New in PDFCatalyst v1.0.0
 - **Pure Rust Core Engine**: Clean-room ISO 32000-2 parser with \`forbid(unsafe_code)\` memory safety guarantees.
 - **Hardware Acceleration**: 60+ FPS vector rendering via \`wgpu\` and OpenGL fallback for smooth pan and zoom.
@@ -484,16 +484,18 @@ const DEFAULT_RELEASE = {
 - **Atomic File Transactions**: Zero file corruption on system crash or sudden power loss.`,
   assets: [
     {
-      name: "PDFix-Setup-v1.0.0-x64.exe",
-      size: 19411480,
-      download_count: 4,
-      browser_download_url: "https://github.com/SarthAyush/PDFix-App/releases/download/v1.0.0/PDFix-Setup-v1.0.0-x64.exe",
+      name: "PDFcatalyst-Setup-v1.0.0-x64.exe",
+      size: 19875336,
+      download_count: 0,
+      browser_download_url: "https://github.com/SarthAyush/PDFcatalyst-App/releases/download/v1.0.0/PDFcatalyst-Setup-v1.0.0-x64.exe",
+      digest: "sha256:04a04855a984b84d9bd6c5afedda611d63f5eb259fd78f42fa2237cb4cf74b79",
     },
     {
-      name: "PDFix.exe",
-      size: 67118560,
-      download_count: 1,
-      browser_download_url: "https://github.com/SarthAyush/PDFix-App/releases/download/v1.0.0/PDFix.exe",
+      name: "PDFcatalyst.exe",
+      size: 67598832,
+      download_count: 0,
+      browser_download_url: "https://github.com/SarthAyush/PDFcatalyst-App/releases/download/v1.0.0/PDFcatalyst.exe",
+      digest: "sha256:f4c06b245767378391146604bb29e83616374027d0d5de00cc41578e3c9cbc86",
     },
   ],
 };
@@ -508,8 +510,8 @@ function useGitHubReleases() {
   const fetchReleases = async (force = false) => {
     setIsLoading(true);
     setSyncStatus("fetching");
-    const cacheKey = "pdfix_github_releases";
-    const cacheTimeKey = "pdfix_github_releases_time";
+    const cacheKey = "pdfcatalyst_github_releases";
+    const cacheTimeKey = "pdfcatalyst_github_releases_time";
 
     try {
       if (!force) {
@@ -528,7 +530,7 @@ function useGitHubReleases() {
         }
       }
 
-      const res = await fetch("https://api.github.com/repos/SarthAyush/PDFix-App/releases");
+      const res = await fetch("https://api.github.com/repos/SarthAyush/PDFcatalyst-App/releases");
       if (!res.ok) {
         throw new Error(`GitHub API returned status ${res.status}`);
       }
@@ -723,8 +725,14 @@ function App() {
 
   const installerUrl = installerAsset?.browser_download_url || DOWNLOAD_INSTALLER;
   const portableUrl = portableAsset?.browser_download_url || DOWNLOAD_PORTABLE;
-  const installerSize = installerAsset ? formatBytes(installerAsset.size) : "19.4 MB";
-  const portableSize = portableAsset ? formatBytes(portableAsset.size) : "67.1 MB";
+  const installerSize = installerAsset ? formatBytes(installerAsset.size) : "19.9 MB";
+  const portableSize = portableAsset ? formatBytes(portableAsset.size) : "67.6 MB";
+  const installerSha = installerAsset?.digest
+    ? installerAsset.digest.replace(/^sha256:/i, "")
+    : SHA256_INSTALLER;
+  const portableSha = portableAsset?.digest
+    ? portableAsset.digest.replace(/^sha256:/i, "")
+    : SHA256_PORTABLE;
   const currentVersion = latestRelease.tag_name || "v1.0.0";
 
   const [theme, setTheme] = useState(() => {
@@ -825,6 +833,14 @@ function App() {
             <a href="#compare" onClick={() => setMenuOpen(false)}>Compare</a>
             <a href="#developers" onClick={() => setMenuOpen(false)}>Developers</a>
             <a href="#download" onClick={() => setMenuOpen(false)}>Download</a>
+            <a
+              href="https://github.com/SarthAyush/PDFcatalyst-App"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setMenuOpen(false)}
+            >
+              GitHub
+            </a>
             <button
               className="theme-button"
               type="button"
@@ -1435,12 +1451,12 @@ Q`}
                   </div>
                   <div className="hash-row">
                     <span>SHA-256:</span>
-                    <code>{SHA256_INSTALLER}</code>
+                    <code>{installerSha}</code>
                     <button
                       className="btn-hash"
                       onClick={() =>
                         copy(
-                          `Get-FileHash .\\PDFCatalyst-Setup-v1.0.0-x64.exe -Algorithm SHA256`,
+                          `Get-FileHash .\\${installerAsset?.name || "PDFcatalyst-Setup-v1.0.0-x64.exe"} -Algorithm SHA256`,
                           "hash-inst",
                         )
                       }
@@ -1461,12 +1477,12 @@ Q`}
                   </div>
                   <div className="hash-row">
                     <span>SHA-256:</span>
-                    <code>{SHA256_PORTABLE}</code>
+                    <code>{portableSha}</code>
                     <button
                       className="btn-hash"
                       onClick={() =>
                         copy(
-                          `Get-FileHash .\\PDFCatalyst.exe -Algorithm SHA256`,
+                          `Get-FileHash .\\${portableAsset?.name || "PDFcatalyst.exe"} -Algorithm SHA256`,
                           "hash-port",
                         )
                       }
@@ -1569,6 +1585,7 @@ cargo build --release -p pdfcraft`}
                 <a href={installerUrl}>Windows Installer</a>
                 <a href={portableUrl}>Portable Standalone</a>
                 <button className="footer-link-btn" onClick={() => setShowChangelogModal(true)}>Release Notes</button>
+                <a href="https://github.com/SarthAyush/PDFcatalyst-App" target="_blank" rel="noopener noreferrer">GitHub Repository</a>
                 <a href="#download">All Downloads</a>
               </div>
             </div>
