@@ -152,6 +152,35 @@ function Icon({ name, size = 18, stroke = 1.8 }) {
       </>
     ),
     zap: <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />,
+    refresh: (
+      <>
+        <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+        <path d="M3 3v5h5" />
+        <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+        <path d="M16 21h5v-5" />
+      </>
+    ),
+    tag: (
+      <>
+        <path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z" />
+        <circle cx="7" cy="7" r="1.5" />
+      </>
+    ),
+    external: (
+      <>
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+        <polyline points="15 3 21 3 21 9" />
+        <line x1="10" y1="14" x2="21" y2="3" />
+      </>
+    ),
+    calendar: (
+      <>
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+        <line x1="16" y1="2" x2="16" y2="6" />
+        <line x1="8" y1="2" x2="8" y2="6" />
+        <line x1="3" y1="10" x2="21" y2="10" />
+      </>
+    ),
   };
   return <svg {...common}>{paths[name] || paths.file}</svg>;
 }
@@ -418,7 +447,267 @@ function LivePdfEditor() {
   );
 }
 
+function formatBytes(bytes) {
+  if (!bytes || isNaN(bytes)) return "";
+  const mb = bytes / (1024 * 1024);
+  return `${mb.toFixed(1)} MB`;
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function formatRelativeTime(dateStr) {
+  if (!dateStr) return "";
+  const diffSec = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+  if (diffSec < 60) return "Just now";
+  if (diffSec < 3600) return `${Math.floor(diffSec / 60)}m ago`;
+  if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}h ago`;
+  if (diffSec < 86400 * 30) return `${Math.floor(diffSec / 86400)}d ago`;
+  return formatDate(dateStr);
+}
+
+const DEFAULT_RELEASE = {
+  tag_name: "v1.0.0",
+  name: "PDFix v1.0.0 — Pure Rust Architecture",
+  published_at: "2026-10-15T12:27:31Z",
+  html_url: "https://github.com/SarthAyush/PDFix-App/releases/tag/v1.0.0",
+  body: `### What's New in PDFix v1.0.0
+- **Pure Rust Core Engine**: Clean-room ISO 32000-2 parser with \`forbid(unsafe_code)\` memory safety guarantees.
+- **Hardware Acceleration**: 60+ FPS vector rendering via \`wgpu\` and OpenGL fallback for smooth pan and zoom.
+- **Deep Structural Redaction**: Irreversible byte-level object stream and font subroutine purging.
+- **Model Context Protocol (MCP)**: Native integration for AI agents (Claude Desktop, Cursor) without uploading files.
+- **Embedded Offline OCR**: Local neural character recognition running 100% on-device.
+- **Atomic File Transactions**: Zero file corruption on system crash or sudden power loss.`,
+  assets: [
+    {
+      name: "PDFix-Setup-v1.0.0-x64.exe",
+      size: 19411480,
+      download_count: 4,
+      browser_download_url: "https://github.com/SarthAyush/PDFix-App/releases/download/v1.0.0/PDFix-Setup-v1.0.0-x64.exe",
+    },
+    {
+      name: "PDFix.exe",
+      size: 67118560,
+      download_count: 1,
+      browser_download_url: "https://github.com/SarthAyush/PDFix-App/releases/download/v1.0.0/PDFix.exe",
+    },
+  ],
+};
+
+function useGitHubReleases() {
+  const [releases, setReleases] = useState([DEFAULT_RELEASE]);
+  const [latestRelease, setLatestRelease] = useState(DEFAULT_RELEASE);
+  const [isLoading, setIsLoading] = useState(false);
+  const [lastSynced, setLastSynced] = useState(null);
+  const [syncStatus, setSyncStatus] = useState("synced");
+
+  const fetchReleases = async (force = false) => {
+    setIsLoading(true);
+    setSyncStatus("fetching");
+    const cacheKey = "pdfix_github_releases";
+    const cacheTimeKey = "pdfix_github_releases_time";
+
+    try {
+      if (!force) {
+        const cached = localStorage.getItem(cacheKey);
+        const cachedTime = localStorage.getItem(cacheTimeKey);
+        if (cached && cachedTime && Date.now() - parseInt(cachedTime, 10) < 5 * 60 * 1000) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setReleases(parsed);
+            setLatestRelease(parsed[0]);
+            setLastSynced(new Date(parseInt(cachedTime, 10)));
+            setSyncStatus("synced");
+            setIsLoading(false);
+            return;
+          }
+        }
+      }
+
+      const res = await fetch("https://api.github.com/repos/SarthAyush/PDFix-App/releases");
+      if (!res.ok) {
+        throw new Error(`GitHub API returned status ${res.status}`);
+      }
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        setReleases(data);
+        setLatestRelease(data[0]);
+        const now = Date.now();
+        try {
+          localStorage.setItem(cacheKey, JSON.stringify(data));
+          localStorage.setItem(cacheTimeKey, now.toString());
+        } catch {}
+        setLastSynced(new Date(now));
+        setSyncStatus("synced");
+      }
+    } catch (err) {
+      console.warn("Using fallback/cached release data:", err);
+      setSyncStatus("fallback");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchReleases();
+  }, []);
+
+  return {
+    releases,
+    latestRelease,
+    isLoading,
+    lastSynced,
+    syncStatus,
+    refresh: () => fetchReleases(true),
+  };
+}
+
+function ChangelogModal({ release, releases, onClose, onSelectRelease }) {
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
+  const defaultHighlights = [
+    { title: "Pure Rust Core Parser", desc: "Engineered to ISO 32000-2 specifications. Free of C/C++ memory vulnerabilities." },
+    { title: "Hardware wgpu Acceleration", desc: "Native 60+ FPS vector rendering pipeline with automatic OpenGL fallback." },
+    { title: "Deep Structural Redaction", desc: "Irreversible purging of raw content bytes, font subroutines, and XREF entries." },
+    { title: "Model Context Protocol (MCP)", desc: "Direct headless AI integration for Claude Desktop and Cursor without cloud uploads." },
+    { title: "On-Device Neural OCR", desc: "Offline character recognition running strictly on local CPU/GPU." },
+    { title: "Atomic File Transactions", desc: "Never corrupts open documents on crash, writing verified state atomically to disk." },
+  ];
+
+  const hasDetailedBody =
+    release.body && release.body.length > 80 && !release.body.startsWith("**Full Changelog**");
+
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="glass-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <div className="modal-brand-tag">
+            <img src="/pdfix-logo.png" alt="" width="26" height="26" />
+            <div className="modal-tag-meta">
+              <div className="modal-tag-row">
+                <span className="modal-version-pill">{release.tag_name}</span>
+                <span className="modal-sync-indicator">
+                  <span className="status-pulse" /> Live Synced
+                </span>
+              </div>
+              <span className="modal-date">Published {formatDate(release.published_at)}</span>
+            </div>
+          </div>
+          <button className="modal-close-btn" onClick={onClose} aria-label="Close dialog">
+            <Icon name="x" size={18} />
+          </button>
+        </div>
+
+        <div className="modal-body">
+          <div className="modal-title-row">
+            <h3 className="modal-title">{release.name || `PDFix ${release.tag_name}`}</h3>
+            <a
+              href={release.html_url}
+              target="_blank"
+              rel="noreferrer"
+              className="modal-github-link"
+            >
+              <Icon name="github" size={14} /> View on GitHub <Icon name="external" size={12} />
+            </a>
+          </div>
+
+          <div className="modal-section-title">Highlights in this update:</div>
+
+          {hasDetailedBody ? (
+            <div className="modal-body-markdown">
+              <pre className="markdown-pre">{release.body}</pre>
+            </div>
+          ) : (
+            <div className="modal-highlights-grid">
+              {defaultHighlights.map((h, i) => (
+                <div key={i} className="highlight-item">
+                  <div className="highlight-icon-box">
+                    <Icon name="check" size={13} />
+                  </div>
+                  <div className="highlight-text">
+                    <strong>{h.title}</strong>
+                    <p>{h.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="modal-section-title">Verified Release Binaries:</div>
+          <div className="modal-assets-grid">
+            {release.assets?.map((asset, i) => (
+              <a
+                key={i}
+                href={asset.browser_download_url}
+                className="modal-asset-card"
+                download
+              >
+                <div className="asset-icon-ring">
+                  <Icon name="download" size={16} />
+                </div>
+                <div className="asset-info">
+                  <span className="asset-name">{asset.name}</span>
+                  <div className="asset-meta">
+                    <span>{formatBytes(asset.size)}</span>
+                    <span>•</span>
+                    <span>{asset.download_count} downloads</span>
+                  </div>
+                </div>
+                <Icon name="chevronRight" size={15} />
+              </a>
+            ))}
+          </div>
+
+          {releases.length > 1 && (
+            <div className="modal-version-history">
+              <div className="modal-section-title">Release History:</div>
+              <div className="version-history-pills">
+                {releases.map((r, i) => (
+                  <button
+                    key={i}
+                    className={`version-history-pill ${r.tag_name === release.tag_name ? "active" : ""}`}
+                    onClick={() => onSelectRelease(r)}
+                  >
+                    <Icon name="tag" size={11} /> {r.tag_name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="modal-footer">
+          <span className="modal-footer-note">
+            Built from <code>SarthAyush/PDFix-App</code> · Auto-synced
+          </span>
+          <button className="btn-apple-primary small" onClick={onClose}>
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function App() {
+  const { releases, latestRelease, isLoading, lastSynced, syncStatus, refresh } =
+    useGitHubReleases();
+  const [showChangelogModal, setShowChangelogModal] = useState(false);
+  const [selectedRelease, setSelectedRelease] = useState(null);
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
@@ -430,6 +719,22 @@ function App() {
   const [batchFinished, setBatchFinished] = useState(false);
   const [activeFaq, setActiveFaq] = useState(null);
   const [blueprintScale, setBlueprintScale] = useState("1/4");
+
+  const installerAsset =
+    latestRelease.assets?.find(
+      (a) => a.name.toLowerCase().includes("setup") && a.name.endsWith(".exe")
+    ) || latestRelease.assets?.[0];
+
+  const portableAsset =
+    latestRelease.assets?.find(
+      (a) => !a.name.toLowerCase().includes("setup") && a.name.endsWith(".exe")
+    ) || latestRelease.assets?.[1];
+
+  const installerUrl = installerAsset?.browser_download_url || DOWNLOAD_INSTALLER;
+  const portableUrl = portableAsset?.browser_download_url || DOWNLOAD_PORTABLE;
+  const installerSize = installerAsset ? formatBytes(installerAsset.size) : "19.4 MB";
+  const portableSize = portableAsset ? formatBytes(portableAsset.size) : "67.1 MB";
+  const currentVersion = latestRelease.tag_name || "v1.0.0";
 
   const [theme, setTheme] = useState(() => {
     try {
@@ -522,6 +827,9 @@ function App() {
           <nav className={`nav-links ${menuOpen ? "open" : ""}`}>
             <a href="#overview" onClick={() => setMenuOpen(false)}>Overview</a>
             <a href="#features" onClick={() => setMenuOpen(false)}>Features</a>
+            <a href="#updates" onClick={() => setMenuOpen(false)} className="nav-link-badge-wrap">
+              What's New <span className="nav-badge-new">{currentVersion}</span>
+            </a>
             <a href="#lab" onClick={() => setMenuOpen(false)}>Studio Lab</a>
             <a href="#compare" onClick={() => setMenuOpen(false)}>Compare</a>
             <a href="#developers" onClick={() => setMenuOpen(false)}>Developers</a>
@@ -534,7 +842,7 @@ function App() {
             >
               <Icon name={theme === "dark" ? "sun" : "moon"} size={15} />
             </button>
-            <a className="nav-cta" href={DOWNLOAD_INSTALLER} onClick={() => setMenuOpen(false)}>
+            <a className="nav-cta" href={installerUrl} onClick={() => setMenuOpen(false)}>
               Download <Icon name="chevronRight" size={13} />
             </a>
           </nav>
@@ -562,10 +870,20 @@ function App() {
               <div className="hero-app-text-group">
                 <div className="hero-app-name-row">
                   <h2 className="hero-app-name">PDFix</h2>
-                  <span className="hero-app-version">v1.0.0</span>
+                  <span className="hero-app-version">{currentVersion}</span>
+                  <span className="live-synced-badge" title="Auto-synced with SarthAyush/PDFix-App">
+                    <span className="pulse-dot green" /> Synced
+                  </span>
                 </div>
                 <span className="hero-app-sub">The Pure Rust PDF Workbench</span>
               </div>
+              <button
+                className="btn-hero-whatsnew"
+                onClick={() => setShowChangelogModal(true)}
+                title="See what's new in this release"
+              >
+                ✨ What's New <Icon name="chevronRight" size={12} />
+              </button>
             </div>
 
             <h1 className="hero-headline" data-reveal>
@@ -579,11 +897,11 @@ function App() {
             </p>
 
             <div className="hero-cta-group" data-reveal>
-              <a className="btn-apple-primary" href={DOWNLOAD_INSTALLER}>
-                <Icon name="download" size={16} /> Download for Windows
+              <a className="btn-apple-primary" href={installerUrl}>
+                <Icon name="download" size={16} /> Download {currentVersion} for Windows
               </a>
-              <a className="btn-apple-glass" href="#lab">
-                Try Studio Lab <Icon name="chevronRight" size={14} />
+              <a className="btn-apple-glass" href="#updates">
+                What's New <Icon name="spark" size={14} />
               </a>
               <a className="btn-apple-quiet" href={REPO} target="_blank" rel="noreferrer">
                 <Icon name="github" size={16} /> View on GitHub
@@ -632,6 +950,134 @@ function App() {
                 <div className="glass-glare" />
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* What's New & Continuous GitHub Sync Hub */}
+        <section className="updates-section" id="updates">
+          <div className="section-header" data-reveal>
+            <div className="live-repo-badge">
+              <span className="pulse-dot green" />
+              <span>SYNCED WITH REPOSITORY: <strong>SarthAyush/PDFix-App</strong></span>
+            </div>
+            <h2 className="section-title">What's new in {currentVersion}.</h2>
+            <p className="section-desc">
+              Every build and release from the application repository is automatically reflected here in real time.
+            </p>
+          </div>
+
+          <div className="glass-updates-hub" data-reveal>
+            <div className="updates-sync-bar">
+              <div className="sync-status-group">
+                <span className="sync-icon-circle">
+                  <Icon name="refresh" size={12} />
+                </span>
+                <span className="sync-text">
+                  {syncStatus === "fetching"
+                    ? "Syncing with GitHub Releases..."
+                    : lastSynced
+                    ? `Live Synced ${formatRelativeTime(lastSynced)}`
+                    : "Connected to SarthAyush/PDFix-App"}
+                </span>
+                <span className="sync-divider">•</span>
+                <span className="sync-release-pill">{currentVersion} Latest</span>
+              </div>
+
+              <div className="sync-actions">
+                <button
+                  className="sync-refresh-btn"
+                  onClick={refresh}
+                  disabled={isLoading}
+                  title="Check for new releases now"
+                >
+                  <Icon name="refresh" size={13} />
+                  <span>Check for Updates</span>
+                </button>
+                <button
+                  className="sync-notes-btn"
+                  onClick={() => setShowChangelogModal(true)}
+                >
+                  <span>Full Release Notes</span>
+                  <Icon name="chevronRight" size={13} />
+                </button>
+              </div>
+            </div>
+
+            <div className="updates-spotlight-grid">
+              <div className="updates-spotlight-left">
+                <div className="spotlight-badge">LATEST RELEASE</div>
+                <h3 className="spotlight-title">{latestRelease.name || `PDFix ${currentVersion}`}</h3>
+                <p className="spotlight-desc">
+                  Published on {formatDate(latestRelease.published_at)}. Rebuilt from source with ISO 32000-2 conformance,
+                  deep structural stream redaction, hardware vector acceleration, and native AI Model Context Protocol.
+                </p>
+
+                <div className="spotlight-stats">
+                  <div className="stat-pill">
+                    <span className="stat-label">Version</span>
+                    <strong>{currentVersion}</strong>
+                  </div>
+                  <div className="stat-pill">
+                    <span className="stat-label">Architecture</span>
+                    <strong>Pure Rust</strong>
+                  </div>
+                  <div className="stat-pill">
+                    <span className="stat-label">Sync</span>
+                    <strong className="green">Active</strong>
+                  </div>
+                </div>
+
+                <div className="spotlight-cta-row">
+                  <a className="btn-apple-primary" href={installerUrl}>
+                    <Icon name="download" size={16} /> Download {currentVersion} ({installerSize})
+                  </a>
+                  <button
+                    className="btn-apple-glass"
+                    onClick={() => setShowChangelogModal(true)}
+                  >
+                    Read Changelog
+                  </button>
+                </div>
+              </div>
+
+              <div className="updates-spotlight-right">
+                <div className="spotlight-cards-header">
+                  <span>HIGHLIGHTS IN THIS UPDATE</span>
+                  <span className="mono-sub">{currentVersion}</span>
+                </div>
+
+                <div className="spotlight-changelog-list">
+                  <div className="change-item">
+                    <div className="change-bullet green">✓</div>
+                    <div className="change-content">
+                      <strong>Clean-Room Rust Parser</strong>
+                      <p>Full ISO 32000-2 parsing core strictly compiled with <code>forbid(unsafe_code)</code>.</p>
+                    </div>
+                  </div>
+                  <div className="change-item">
+                    <div className="change-bullet blue">✓</div>
+                    <div className="change-content">
+                      <strong>wgpu Vector Pipeline</strong>
+                      <p>Hardware accelerated 60+ FPS multi-threaded rendering engine with zero lag.</p>
+                    </div>
+                  </div>
+                  <div className="change-item">
+                    <div className="change-bullet red">✓</div>
+                    <div className="change-content">
+                      <strong>Deep Structural Redaction</strong>
+                      <p>Irreversible byte-level stream, XREF, and font subroutine destruction.</p>
+                    </div>
+                  </div>
+                  <div className="change-item">
+                    <div className="change-bullet purple">✓</div>
+                    <div className="change-content">
+                      <strong>AI Model Context Protocol (MCP)</strong>
+                      <p>Native headless server for Claude Desktop, Cursor, and automated pipelines.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -985,12 +1431,12 @@ Q`}
               {downloadTab === "installer" && (
                 <div className="dl-pane">
                   <div className="dl-action-row">
-                    <a className="btn-apple-primary large" href={DOWNLOAD_INSTALLER}>
-                      <Icon name="download" size={17} /> Download Installer (19.4 MB)
+                    <a className="btn-apple-primary large" href={installerUrl}>
+                      <Icon name="download" size={17} /> Download Installer ({installerSize})
                     </a>
-                    <a className="btn-apple-glass" href={RELEASE} target="_blank" rel="noreferrer">
-                      Release Notes (v1.0.0) <Icon name="chevronRight" size={14} />
-                    </a>
+                    <button className="btn-apple-glass" onClick={() => setShowChangelogModal(true)}>
+                      Release Notes ({currentVersion}) <Icon name="chevronRight" size={14} />
+                    </button>
                   </div>
                   <div className="hash-row">
                     <span>SHA-256:</span>
@@ -1013,8 +1459,8 @@ Q`}
               {downloadTab === "portable" && (
                 <div className="dl-pane">
                   <div className="dl-action-row">
-                    <a className="btn-apple-primary large" href={DOWNLOAD_PORTABLE}>
-                      <Icon name="download" size={17} /> Download Standalone Portable (67.1 MB)
+                    <a className="btn-apple-primary large" href={portableUrl}>
+                      <Icon name="download" size={17} /> Download Standalone Portable ({portableSize})
                     </a>
                     <span className="dl-note">Runs immediately without installation or admin privileges.</span>
                   </div>
@@ -1139,6 +1585,18 @@ cargo run --release -p pdfcraft`}
           </div>
         </div>
       </footer>
+
+      {showChangelogModal && (
+        <ChangelogModal
+          release={selectedRelease || latestRelease}
+          releases={releases}
+          onClose={() => {
+            setShowChangelogModal(false);
+            setSelectedRelease(null);
+          }}
+          onSelectRelease={(r) => setSelectedRelease(r)}
+        />
+      )}
     </div>
   );
 }
