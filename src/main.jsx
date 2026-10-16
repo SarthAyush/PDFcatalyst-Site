@@ -2,9 +2,8 @@ import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./styles.css";
 
-const DOWNLOAD =
+const DOWNLOAD_INSTALLER =
   "https://github.com/SarthAyush/PDFix-App/releases/download/v1.0.0/PDFix-Setup-v1.0.0-x64.exe";
-const DOWNLOAD_INSTALLER = DOWNLOAD;
 const DOWNLOAD_PORTABLE =
   "https://github.com/SarthAyush/PDFix-App/releases/download/v1.0.0/PDFix.exe";
 const REPO = "https://github.com/SarthAyush/PDFix-App";
@@ -34,6 +33,7 @@ function Icon({ name, size = 18, stroke = 1.8 }) {
         <path d="m12 5 7 7-7 7" />
       </>
     ),
+    chevronRight: <path d="m9 18 6-6-6-6" />,
     sun: (
       <>
         <circle cx="12" cy="12" r="4" />
@@ -96,14 +96,6 @@ function Icon({ name, size = 18, stroke = 1.8 }) {
     check: <path d="m5 12 4 4L19 6" />,
     menu: <path d="M4 6h16M4 12h16M4 18h16" />,
     x: <path d="m18 6-12 12M6 6l12 12" />,
-    merge: (
-      <>
-        <path d="M8 6h8a4 4 0 0 1 4 4v8" />
-        <path d="m16 14 4 4 4-4" />
-        <path d="M16 18H8a4 4 0 0 1-4-4V6" />
-        <path d="m8 10-4-4-4 4" />
-      </>
-    ),
     terminal: (
       <>
         <polyline points="4 17 10 11 4 5" />
@@ -159,213 +151,124 @@ function Icon({ name, size = 18, stroke = 1.8 }) {
         <path d="M12 7h5a3 3 0 0 1 0 6H7a3 3 0 0 0 0 6h5" />
       </>
     ),
-    keyboard: (
-      <>
-        <rect x="2" y="4" width="20" height="16" rx="2" />
-        <line x1="6" y1="8" x2="6.01" y2="8" />
-        <line x1="10" y1="8" x2="10.01" y2="8" />
-        <line x1="14" y1="8" x2="14.01" y2="8" />
-        <line x1="18" y1="8" x2="18.01" y2="8" />
-        <line x1="6" y1="12" x2="6.01" y2="12" />
-        <line x1="18" y1="12" x2="18.01" y2="12" />
-        <line x1="7" y1="16" x2="17" y2="16" />
-      </>
-    ),
-    checkCircle: (
-      <>
-        <circle cx="12" cy="12" r="10" />
-        <path d="m9 12 2 2 4-4" />
-      </>
-    ),
-    xCircle: (
-      <>
-        <circle cx="12" cy="12" r="10" />
-        <line x1="15" y1="9" x2="9" y2="15" />
-        <line x1="9" y1="9" x2="15" y2="15" />
-      </>
-    ),
+    zap: <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />,
   };
   return <svg {...common}>{paths[name] || paths.file}</svg>;
 }
 
-const features = [
+const bentoFeatures = [
   {
-    n: "01",
-    icon: "file",
-    title: "Read without limits",
-    desc: "A focused reader with continuous scroll, book layouts, presentation mode, bookmarks, and full-text regex search.",
-    tags: ["Smart search", "Bookmarks", "wgpu Accel"],
+    tag: "HARDWARE ENGINE",
+    title: "wgpu Accelerated",
+    desc: "Ultra-fluid vector rendering with OpenGL fallback. Complete support for complex world scripts, vertical text, blend modes, and opacity masks.",
+    badge: "Native 60+ FPS",
+    icon: "zap",
   },
   {
-    n: "02",
-    icon: "layers",
-    title: "Make pages behave",
-    desc: "Reorder pages visually. Rotate, extract, split, and merge documents without the busywork.",
-    tags: ["Drag & drop", "Batch ready", "Atomic writes"],
-  },
-  {
-    n: "03",
-    icon: "pen",
-    title: "Mark it up",
-    desc: "Highlights, notes, underlines, freehand drawing, stamps, and threaded comments keep feedback in context.",
-    tags: ["Annotations", "Comments", "Pressure ink"],
-  },
-  {
-    n: "04",
+    tag: "PRIVACY",
+    title: "100% Offline & Private",
+    desc: "No accounts. No telemetry. Zero cloud round-trips. Your documents, signatures, and data never leave your local machine.",
+    badge: "Zero Tracking",
     icon: "shield",
-    title: "Keep it yours",
-    desc: "Fill forms, sign documents, redact sensitive content, and sanitize hidden data with zero cloud detours.",
-    tags: ["Digital PKI signatures", "Deep redaction"],
   },
   {
-    n: "05",
-    icon: "search",
-    title: "Make scans searchable",
-    desc: "Run OCR locally to turn scanned pages and images into searchable, selectable text without third-party services.",
-    tags: ["Offline OCR", "Local ML inference"],
+    tag: "SECURITY",
+    title: "Structural Redaction",
+    desc: "True object stream purging. Irreversibly strips text tokens, font subroutines, metadata, and attachments.",
+    badge: "Deep Sanitization",
+    icon: "lock",
   },
   {
-    n: "06",
-    icon: "spark",
-    title: "Batch Workflow Studio",
-    desc: "Batch merge, convert, compress, and watermark 20+ files in a single unified pipeline in seconds.",
-    tags: ["Batch workflows", "Watermarks", "Lossless compress"],
-  },
-  {
-    n: "07",
-    icon: "file",
-    title: "Parametric Templates",
-    desc: "Generate professional invoices, proposals, certificates, and notebooks with live parameters and a reusable personal library.",
-    tags: ["Document templates", "Live parameters"],
-  },
-  {
-    n: "08",
-    icon: "ruler",
-    title: "Measure with precision",
-    desc: "Distance, perimeter, and area measurement tools with scale calibration calibrated for architectural & engineering blueprints.",
-    tags: ["Distance & area", "Scale calibration"],
-  },
-  {
-    n: "09",
+    tag: "AUTOMATION",
+    title: "AI Model Context Protocol",
+    desc: "First-class MCP server. Connect Claude Desktop, Cursor, and AI agents to parse, edit, and sign documents programmatically.",
+    badge: "MCP Ready",
     icon: "bot",
-    title: "Headless CLI & AI MCP Server",
-    desc: "Automate PDF pipelines from terminal scripts or connect Claude Desktop & AI agents via built-in Model Context Protocol (MCP).",
-    tags: ["CLI automation", "MCP Protocol", "AI Agents"],
+  },
+  {
+    tag: "PRODUCTIVITY",
+    title: "Batch Workflow Studio",
+    desc: "Process 20+ documents simultaneously. Merge, convert, compress, and apply watermarks across massive file sets.",
+    badge: "High Throughput",
+    icon: "layers",
+  },
+  {
+    tag: "INTELLIGENCE",
+    title: "Offline Machine OCR",
+    desc: "Embedded neural inference. Turn scanned receipts, contracts, and images into fully searchable, selectable PDF text.",
+    badge: "Local ML",
+    icon: "search",
   },
 ];
 
-const crates = [
-  {
-    name: "apps/pdfcraft",
-    badge: "GUI APP",
-    desc: "Native desktop shell built on eframe & wgpu with OpenGL fallback. Multi-tab dockable workspace.",
-  },
-  {
-    name: "apps/pdfcraft-cli",
-    badge: "HEADLESS & MCP",
-    desc: "CLI runner for automated JSON scripts, batch conversions, compliance auditing, and embedded AI MCP server.",
-  },
-  {
-    name: "crates/cos",
-    badge: "PDF SYNTAX",
-    desc: "Low-level ISO 32000-2 syntax parser, cross-reference table/stream decoders, and object graph serializer.",
-  },
-  {
-    name: "crates/render",
-    badge: "HARDWARE ENGINE",
-    desc: "High-fidelity vector and raster rasterizer handling world scripts, blend modes, soft masks, and gradients.",
-  },
-  {
-    name: "crates/crypt",
-    badge: "SECURITY",
-    desc: "Standard PDF security handlers, revision tracking, and AES-256 decryption with memory zeroing.",
-  },
-  {
-    name: "crates/sign",
-    badge: "PKI CRYPTO",
-    desc: "Digital PKI certificate signatures, validation, self-signed keys, and cryptographic timestamps.",
-  },
-  {
-    name: "crates/ocr",
-    badge: "OFFLINE ML",
-    desc: "Embedded offline optical character recognition inference engine for scanned docs and image layers.",
-  },
-  {
-    name: "crates/redact",
-    badge: "SANITIZATION",
-    desc: "True structural redaction removing targeted text, hidden metadata, attachments, and raw stream tokens irreversibly.",
-  },
+const cratesList = [
+  { name: "apps/pdfcraft", type: "Native GUI", info: "Multi-tab egui & wgpu shell for Windows, macOS, Linux" },
+  { name: "apps/pdfcraft-cli", type: "Headless CLI & MCP", info: "Command runner and embedded AI agent MCP server" },
+  { name: "crates/cos", type: "PDF Syntax", info: "ISO 32000-2 low-level parser and xref stream decoder" },
+  { name: "crates/render", type: "Hardware Rasterizer", info: "DisplayList vector and font rasterization engine" },
+  { name: "crates/crypt", type: "Security", info: "Standard security handlers & AES-256 decryption" },
+  { name: "crates/sign", type: "PKI Digital Crypto", info: "X.509 certificate signatures & cryptographic timestamps" },
+  { name: "crates/ocr", type: "Embedded ML", info: "Offline optical character recognition neural engine" },
+  { name: "crates/redact", type: "Sanitization", info: "Irreversible deep structural stream destruction" },
 ];
 
-const comparisonData = [
+const comparisonSpecs = [
   {
-    feature: "Pricing & License",
-    pdfix: "100% Free & Open Source (Dual MIT / Apache 2.0)",
-    acrobat: "$239.88 / year subscription",
-    cloud: "Free tier capped; requires monthly sub",
+    item: "License & Cost",
+    pdfix: "100% Free · Dual MIT / Apache 2.0",
+    acrobat: "$239.88/year subscription",
+    cloud: "Usage caps · Monthly fees",
   },
   {
-    feature: "Data Privacy & Telemetry",
-    pdfix: "100% On-Device, zero telemetry, zero analytics",
-    acrobat: "Account required, cloud telemetry & tracking",
-    cloud: "Files uploaded to third-party cloud servers",
+    item: "Data Privacy",
+    pdfix: "100% On-Device · Zero telemetry",
+    acrobat: "Cloud sync · Telemetry tracking",
+    cloud: "Files sent to 3rd-party servers",
   },
   {
-    feature: "Engine Architecture & Safety",
-    pdfix: "Pure Rust (forbid(unsafe_code)) + Atomic Saves",
-    acrobat: "Legacy C++ codebase, historical CVE targets",
-    cloud: "Browser JS sandbox or unknown server stack",
+    item: "Memory Safety",
+    pdfix: "Pure Rust (forbid(unsafe_code))",
+    acrobat: "Legacy C++ codebase",
+    cloud: "Web sandbox limitations",
   },
   {
-    feature: "AI Agent & CLI Automation",
-    pdfix: "Native Model Context Protocol (MCP) + Headless CLI",
-    acrobat: "Expensive Enterprise Acrobat SDK only",
-    cloud: "Restricted rate-limited web REST APIs",
+    item: "AI Agent MCP Integration",
+    pdfix: "Native Model Context Protocol Server",
+    acrobat: "Enterprise SDK only",
+    cloud: "Not supported",
   },
   {
-    feature: "True Structural Redaction",
-    pdfix: "Purges underlying object streams, XMP & font subsets",
-    acrobat: "Included in Pro, but prone to user errors",
-    cloud: "Often just flattens to raster or draws a black box",
+    item: "Structural Redaction",
+    pdfix: "Irreversible token & stream purge",
+    acrobat: "Manual tool · Risk of oversight",
+    cloud: "Superficial visual mask only",
   },
   {
-    feature: "Offline Availability",
-    pdfix: "Fully functional without internet or login",
-    acrobat: "Requires periodic Adobe cloud sign-in",
-    cloud: "Zero functionality without active internet",
+    item: "Crash Resilience",
+    pdfix: "Atomic verified writes",
+    acrobat: "Can corrupt open files",
+    cloud: "Browser tab timeout loss",
   },
   {
-    feature: "Resource Footprint",
-    pdfix: "Starts in <1s, lean memory usage via wgpu",
-    acrobat: "Background daemons, high idle RAM usage",
-    cloud: "Browser tab memory bloat",
+    item: "Offline Operation",
+    pdfix: "Full functionality without internet",
+    acrobat: "Periodic Adobe login checks",
+    cloud: "Requires constant connection",
   },
-];
-
-const shortcutsList = [
-  { key: "Ctrl + O", desc: "Open document" },
-  { key: "Ctrl + S", desc: "Atomic save verified" },
-  { key: "Ctrl + F", desc: "Full-text regex search" },
-  { key: "Ctrl + Z / Y", desc: "Deep undo / redo stack" },
-  { key: "Space + Drag", desc: "Smooth canvas pan" },
-  { key: "Ctrl + Wheel", desc: "Sub-pixel zoom" },
-  { key: "F11", desc: "Distraction-free presentation" },
-  { key: "Ctrl + Shift + R", desc: "Permanent redaction mode" },
 ];
 
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [activeFaq, setActiveFaq] = useState(0);
   const [scrolled, setScrolled] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
-  const [activeLabTab, setActiveLabTab] = useState("redact");
-  const [activeCliTab, setActiveCliTab] = useState("mcp");
-  const [activeDownloadTab, setActiveDownloadTab] = useState("windows");
-  const [redactRevealed, setRedactRevealed] = useState(false);
-  const [batchRunning, setBatchRunning] = useState(false);
-  const [batchCompleted, setBatchCompleted] = useState(false);
-  const [selectedCosNode, setSelectedCosNode] = useState("catalog");
-  const [measuredFeet, setMeasuredFeet] = useState("18.4 ft");
+  const [labTab, setLabTab] = useState("redact");
+  const [cliTab, setCliTab] = useState("mcp");
+  const [downloadTab, setDownloadTab] = useState("installer");
+  const [redactedState, setRedactedState] = useState(true);
+  const [batchActive, setBatchActive] = useState(false);
+  const [batchFinished, setBatchFinished] = useState(false);
+  const [activeFaq, setActiveFaq] = useState(null);
+  const [blueprintScale, setBlueprintScale] = useState("1/4");
 
   const [theme, setTheme] = useState(() => {
     try {
@@ -383,723 +286,407 @@ function App() {
   }, [theme]);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
 
-    const nodes = document.querySelectorAll("[data-reveal]");
-    const reduce = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    if (reduce || !("IntersectionObserver" in window)) {
-      nodes.forEach((n) => n.classList.add("is-visible"));
-      return () => window.removeEventListener("scroll", onScroll);
-    }
     const observer = new IntersectionObserver(
-      (entries) =>
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-visible");
-            observer.unobserve(entry.target);
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add("revealed");
+            observer.unobserve(e.target);
           }
-        }),
-      { threshold: 0.12, rootMargin: "0px 0px -30px 0px" },
+        });
+      },
+      { threshold: 0.1, rootMargin: "0px 0px -40px 0px" },
     );
-    nodes.forEach((n) => observer.observe(n));
+
+    document.querySelectorAll("[data-reveal]").forEach((el) => observer.observe(el));
     return () => {
-      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("scroll", handleScroll);
       observer.disconnect();
     };
   }, []);
 
-  const closeMenu = () => setMenuOpen(false);
-
-  const copyToClipboard = (text, id) => {
+  const copy = (text, id) => {
     navigator.clipboard.writeText(text);
     setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2200);
+    setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const runBatchSimulation = () => {
-    if (batchRunning) return;
-    setBatchRunning(true);
-    setBatchCompleted(false);
+  const triggerBatch = () => {
+    if (batchActive) return;
+    setBatchActive(true);
+    setBatchFinished(false);
     setTimeout(() => {
-      setBatchRunning(false);
-      setBatchCompleted(true);
-    }, 1200);
+      setBatchActive(false);
+      setBatchFinished(true);
+    }, 900);
   };
 
   const faqs = [
-    [
-      "Is PDFix free and open-source?",
-      "Yes! PDFix is dual-licensed under MIT and Apache-2.0. The code is 100% open on GitHub, with zero subscriptions, paywalls, or hidden limitations.",
-    ],
-    [
-      "Do my documents get uploaded to any servers?",
-      "Never. PDFix is built entirely around local processing. The application has zero analytics, zero telemetry, and performs all OCR, parsing, conversions, digital signing, and redactions directly on your local hardware.",
-    ],
-    [
-      "What is the Model Context Protocol (MCP) feature?",
-      "PDFix includes an embedded MCP server (`pdfcraft-cli mcp`). You can connect it to AI coding and assistant tools like Claude Desktop, Cursor, or custom autonomous agents to let AI inspect, summarize, and edit PDFs locally without uploading files to cloud APIs.",
-    ],
-    [
-      "What is the difference between the Installer and Portable versions?",
-      "The Windows Installer (`PDFix-Setup.exe` ~19 MB) installs PDFix into your system with start menu shortcuts and file associations. The Portable `.exe` (~67 MB) runs self-contained from any USB drive or folder without touching the registry.",
-    ],
-    [
-      "Can I run PDFix on macOS, Linux, or Web?",
-      "Yes. PDFix is written in pure cross-platform Rust (`eframe`/`wgpu`). You can compile and run natively on macOS and Linux with `cargo run --release -p pdfcraft`. A WebAssembly browser build (`apps/pdfcraft-web`) is also included in the repository.",
-    ],
-    [
-      "How does PDFix handle deep structural redaction?",
-      "Most free PDF viewers simply draw a black rectangle over sensitive text, leaving the underlying text, vectors, and metadata extractable. PDFix's `crates/redact` purges the underlying content stream tokens, font character mappings, and metadata permanently.",
-    ],
+    {
+      q: "Is PDFix truly open source and free?",
+      a: "Yes. Dual-licensed under MIT and Apache-2.0. Completely free for personal, commercial, and enterprise use with no subscriptions.",
+    },
+    {
+      q: "How does PDFix ensure my data never leaks?",
+      a: "All document parsing, rendering, OCR, signing, and saving occur strictly on your machine. Zero network analytics, zero telemetry.",
+    },
+    {
+      q: "What is the built-in MCP server?",
+      a: "PDFix includes an embedded Model Context Protocol server. AI assistants like Claude Desktop and Cursor can inspect and edit local PDFs without uploading them.",
+    },
+    {
+      q: "Installer vs Portable?",
+      a: "The Windows Installer (~19 MB) integrates file associations. The Portable .exe (~67 MB) runs standalone from any folder or USB with zero installation.",
+    },
+    {
+      q: "How does true redaction differ from regular black boxes?",
+      a: "Common viewers draw an overlay rectangle while leaving text tokens in the stream. PDFix strips the raw bytes, XREF entries, and font maps irreversibly.",
+    },
   ];
 
   return (
-    <>
-      <div className="noise" aria-hidden="true" />
+    <div className="apple-shell">
+      {/* Sleek Frosted Glass Header */}
+      <header className={`apple-nav ${scrolled ? "nav-blur" : ""}`}>
+        <div className="nav-container">
+          <a className="nav-brand" href="#top" onClick={() => setMenuOpen(false)}>
+            <img src="/pdfix-logo.png" alt="" width="26" height="26" />
+            <span>PDFix</span>
+          </a>
 
-      {/* Navigation */}
-      <header className={`site-header ${scrolled ? "header-scrolled" : ""}`}>
-        <a
-          className="brand"
-          href="#top"
-          aria-label="PDFix home"
-          onClick={closeMenu}
-        >
-          <img src="/pdfix-logo.png" alt="" />
-          <span>PDFix</span>
-        </a>
-        <button
-          className="mobile-toggle"
-          aria-label={menuOpen ? "Close navigation" : "Open navigation"}
-          aria-expanded={menuOpen}
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
-          <Icon name={menuOpen ? "x" : "menu"} size={22} />
-        </button>
-        <nav
-          className={menuOpen ? "nav-open" : ""}
-          aria-label="Main navigation"
-        >
-          <a href="#features" onClick={closeMenu}>
-            Features
-          </a>
-          <a href="#lab" onClick={closeMenu}>
-            Studio Lab
-          </a>
-          <a href="#compare" onClick={closeMenu}>
-            Compare
-          </a>
-          <a href="#cli-mcp" onClick={closeMenu}>
-            CLI & MCP
-          </a>
-          <a href="#architecture" onClick={closeMenu}>
-            Architecture
-          </a>
-          <a href="#privacy" onClick={closeMenu}>
-            Privacy
-          </a>
-          <a href="#download" onClick={closeMenu}>
-            Download
-          </a>
+          <nav className={`nav-links ${menuOpen ? "open" : ""}`}>
+            <a href="#overview" onClick={() => setMenuOpen(false)}>Overview</a>
+            <a href="#features" onClick={() => setMenuOpen(false)}>Features</a>
+            <a href="#lab" onClick={() => setMenuOpen(false)}>Studio Lab</a>
+            <a href="#compare" onClick={() => setMenuOpen(false)}>Compare</a>
+            <a href="#developers" onClick={() => setMenuOpen(false)}>Developers</a>
+            <a href="#download" onClick={() => setMenuOpen(false)}>Download</a>
+            <button
+              className="theme-button"
+              type="button"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              aria-label="Toggle theme"
+            >
+              <Icon name={theme === "dark" ? "sun" : "moon"} size={15} />
+            </button>
+            <a className="nav-cta" href={DOWNLOAD_INSTALLER} onClick={() => setMenuOpen(false)}>
+              Download <Icon name="chevronRight" size={13} />
+            </a>
+          </nav>
+
           <button
-            className="theme-toggle"
-            type="button"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
-            title={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
+            className="mobile-btn"
+            aria-label="Toggle navigation"
+            onClick={() => setMenuOpen(!menuOpen)}
           >
-            <Icon name={theme === "dark" ? "sun" : "moon"} size={16} />
-            <span>{theme === "dark" ? "Light" : "Dark"}</span>
+            <Icon name={menuOpen ? "x" : "menu"} size={20} />
           </button>
-          <a className="nav-download" href={DOWNLOAD} onClick={closeMenu}>
-            Get PDFix <Icon name="arrow" size={15} />
-          </a>
-        </nav>
+        </div>
       </header>
 
       <main id="top">
-        {/* Hero Section */}
-        <section className="hero section-wrap">
-          <div className="hero-copy">
-            <div className="eyebrow reveal-in">
-              <span className="live-dot" /> THE RUST PDF WORKBENCH · V1.0.0
+        {/* Apple-Style Hero */}
+        <section className="hero-section" id="overview">
+          <div className="hero-content">
+            <div className="apple-pill" data-reveal>
+              <span className="pill-dot" /> PDFix 1.0 · The Pure Rust Workbench
             </div>
-            <h1 className="hero-title">
-              <span>Every PDF.</span>
+            <h1 className="hero-headline" data-reveal>
+              Pro capability.
               <br />
-              <span className="gradient-text">Under control.</span>
+              <span className="shimmer-text">Zero cloud.</span>
             </h1>
-            <p className="hero-lede">
-              Read, edit, organize, sign, batch process, and irreversibly redact
-              documents in one blazing fast desktop workbench. Pure Rust. Zero
-              telemetry. Native AI MCP integration.
+            <p className="hero-subhead" data-reveal>
+              The high-performance PDF workbench engineered from the ground up in pure, memory-safe Rust.
+              Read, edit, sign, batch process, and structurally redact documents. Blazing fast. 100% offline.
             </p>
-            <div className="hero-actions">
-              <a className="button button-primary" href={DOWNLOAD_INSTALLER}>
-                <Icon name="download" size={17} /> Download for Windows{" "}
-                <span className="button-arrow">
-                  <Icon name="arrow" size={15} />
-                </span>
+
+            <div className="hero-cta-group" data-reveal>
+              <a className="btn-apple-primary" href={DOWNLOAD_INSTALLER}>
+                <Icon name="download" size={16} /> Download for Windows
               </a>
-              <a className="button button-quiet" href="#lab">
-                <Icon name="sliders" size={17} /> Try Interactive Lab
+              <a className="btn-apple-glass" href="#lab">
+                Try Studio Lab <Icon name="chevronRight" size={14} />
               </a>
-              <a
-                className="button button-quiet"
-                href={REPO}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <Icon name="github" size={17} /> GitHub
+              <a className="btn-apple-quiet" href={REPO} target="_blank" rel="noreferrer">
+                <Icon name="github" size={16} /> View on GitHub
               </a>
             </div>
-            <div className="hero-proof">
-              <span>
-                <Icon name="shield" size={15} /> 100% Offline & Private
-              </span>
-              <i />
-              <span>
-                <Icon name="spark" size={15} /> Pure Rust (wgpu)
-              </span>
-              <i />
-              <span>
-                <Icon name="bot" size={15} /> AI Agent MCP Ready
-              </span>
-              <i />
-              <span>Windows · macOS · Linux · Web</span>
+
+            <div className="hero-spec-strip" data-reveal>
+              <span><Icon name="shield" size={14} /> Local-first Privacy</span>
+              <span className="divider">•</span>
+              <span><Icon name="cpu" size={14} /> wgpu Acceleration</span>
+              <span className="divider">•</span>
+              <span><Icon name="bot" size={14} /> AI MCP Ready</span>
+              <span className="divider">•</span>
+              <span>Dual MIT / Apache 2.0</span>
             </div>
           </div>
 
-          <div
-            className="hero-visual"
-            aria-label="Illustration of the PDFix document workspace"
-          >
-            <div className="orbit orbit-one" />
-            <div className="orbit orbit-two" />
-            <div className="glow-ball" />
-            <div className="floating-label label-top">
-              <span className="mini-check">
-                <Icon name="check" size={12} />
-              </span>{" "}
-              forbid(unsafe_code)
-            </div>
-            <div className="floating-label label-bottom">
-              <span className="label-icon">
-                <Icon name="bot" size={15} />
-              </span>{" "}
-              AI MCP Server Ready
-            </div>
-            <div className="app-window">
-              <div className="window-top">
-                <div className="window-dots">
-                  <i />
-                  <i />
-                  <i />
+          {/* Clean Glass App Window Showcase */}
+          <div className="hero-window-wrap" data-reveal>
+            <div className="glass-window">
+              <div className="window-header">
+                <div className="traffic-lights">
+                  <span className="light red" />
+                  <span className="light yellow" />
+                  <span className="light green" />
                 </div>
-                <div className="window-title">
-                  <img src="/pdfix-logo.png" alt="" /> <span>PDFix v1.0.0</span>
+                <div className="window-label">
+                  <img src="/pdfix-logo.png" alt="" width="14" height="14" />
+                  <span>PDFix Workbench — Architectural_Plans_2026.pdf</span>
                 </div>
-                <div className="window-actions">
-                  <span />
-                  <span />
-                  <span />
-                </div>
+                <div className="window-badge">v1.0.0 · wgpu</div>
               </div>
-              <div className="window-body">
-                <aside className="mock-sidebar">
-                  <div className="sidebar-section">WORKSPACE</div>
-                  <div className="sidebar-item selected">
-                    <Icon name="file" size={14} /> Documents
-                  </div>
-                  <div className="sidebar-item">
-                    <Icon name="layers" size={14} /> Batch Studio
-                  </div>
-                  <div className="sidebar-item">
-                    <Icon name="pen" size={14} /> Annotate
-                  </div>
-                  <div className="sidebar-item">
-                    <Icon name="shield" size={14} /> Redact & Sign
-                  </div>
-                  <div className="sidebar-item">
-                    <Icon name="terminal" size={14} /> CLI & MCP
-                  </div>
-                  <div className="sidebar-bottom">
-                    <div className="sidebar-section">RECENT PIPELINES</div>
-                    <div className="recent-file">
-                      <span className="pdf-mini">PDF</span>
-                      <span>
-                        Batch-24-files.pdf<small>Merged & compressed</small>
-                      </span>
-                    </div>
-                    <div className="recent-file">
-                      <span className="pdf-mini gray">PDF</span>
-                      <span>
-                        Contract_redacted.pdf<small>Stream purged</small>
-                      </span>
-                    </div>
+
+              <div className="window-canvas-layout">
+                <aside className="canvas-sidebar">
+                  <div className="sidebar-group-label">TOOLS</div>
+                  <div className="tool-row active"><Icon name="file" size={13} /> Document</div>
+                  <div className="tool-row"><Icon name="layers" size={13} /> Batch Studio</div>
+                  <div className="tool-row"><Icon name="ruler" size={13} /> Measurement</div>
+                  <div className="tool-row"><Icon name="shield" size={13} /> Structural Redact</div>
+                  <div className="tool-row"><Icon name="bot" size={13} /> MCP Server</div>
+                  <div className="sidebar-spacer" />
+                  <div className="safe-badge">
+                    <Icon name="check" size={12} /> Atomic verified write
                   </div>
                 </aside>
-                <div className="mock-canvas">
-                  <div className="canvas-toolbar">
-                    <span className="crumb">
-                      Engineering Blueprint <b>/</b> Page 01
-                    </span>
-                    <div className="tool-pills">
-                      <span>
-                        <Icon name="search" size={12} />
-                      </span>
-                      <span>
-                        <Icon name="ruler" size={12} />
-                      </span>
-                      <span>
-                        <Icon name="pen" size={12} />
-                      </span>
-                      <span>
-                        <Icon name="download" size={12} />
-                      </span>
+
+                <div className="canvas-stage">
+                  <div className="canvas-doc-page">
+                    <div className="doc-kicker">ENGINEERING SPECIFICATION</div>
+                    <div className="doc-title">Rebuilt in pure Rust.</div>
+                    <div className="doc-rule" />
+                    <div className="doc-meta-grid">
+                      <div><span>PARSER</span><strong>ISO 32000-2</strong></div>
+                      <div><span>SAFETY</span><strong>forbid(unsafe)</strong></div>
+                      <div><span>LATENCY</span><strong>&lt; 1ms render</strong></div>
                     </div>
-                  </div>
-                  <div className="paper">
-                    <div className="paper-kicker">
-                      ISO 32000-2 <span>RUST V1.0</span>
+                    <div className="doc-chips">
+                      <span className="chip green">Zero Telemetry</span>
+                      <span className="chip blue">Atomic Transactions</span>
+                      <span className="chip purple">MCP Protocol</span>
                     </div>
-                    <div className="paper-title">
-                      The PDF
-                      <br />
-                      Engineering
-                      <br />
-                      <em>Workbench.</em>
-                    </div>
-                    <div className="paper-rule" />
-                    <div className="paper-lines">
-                      <i />
-                      <i />
-                      <i />
-                      <i />
-                    </div>
-                    <div className="paper-subhead">01 / ARCHITECTURE</div>
-                    <div className="paper-lines short">
-                      <i />
-                      <i />
-                      <i />
-                    </div>
-                    <div className="paper-highlight">
-                      100% Local · No Telemetry · Memory Safe
-                    </div>
-                    <div className="paper-footer">
-                      <span>PDFIX WORKBENCH</span>
-                      <span>01 — 12</span>
-                    </div>
-                  </div>
-                  <div className="page-chip">
-                    <span className="page-chip-icon">
-                      <Icon name="check" size={13} />
-                    </span>
-                    <span>
-                      <b>Atomic verified save</b>
-                      <small>Original file never corrupted</small>
-                    </span>
                   </div>
                 </div>
               </div>
-              <div className="window-status">
-                <span>
-                  <i /> Hardware accelerated (wgpu)
-                </span>
-                <span>
-                  100% <b>·</b> Page 1 of 12
-                </span>
-              </div>
             </div>
-            <div className="float-card card-ocr">
-              <div className="float-icon">
-                <Icon name="search" size={16} />
-              </div>
-              <span>
-                <b>Offline OCR</b>
-                <small>Embedded ML inference</small>
-              </span>
-              <span className="tiny-check">
-                <Icon name="check" size={12} />
-              </span>
-            </div>
-            <div className="float-card card-secure">
-              <div className="float-icon shield-icon">
-                <Icon name="shield" size={16} />
-              </div>
-              <span>
-                <b>True Redaction</b>
-                <small>Streams purged forever</small>
-              </span>
-            </div>
-          </div>
-          <div className="hero-bottom-note">
-            <span className="note-line" /> Pure Rust · Dual MIT / Apache 2.0 ·
-            Clean-room implementation <span className="note-line" />
           </div>
         </section>
 
-        {/* Capabilities Ticker */}
-        <section className="ticker" aria-label="PDFix capabilities">
-          <div className="ticker-track">
-            {[
-              "PURE RUST ENGINE",
-              "HARDWARE WGPU RENDERING",
-              "AI MCP SERVER",
-              "HEADLESS CLI RUNNER",
-              "TRUE REDACTION",
-              "OFFLINE OCR",
-              "BATCH STUDIO",
-              "PKI SIGNATURES",
-              "MEASUREMENT CALIBRATION",
-              "PURE RUST ENGINE",
-              "HARDWARE WGPU RENDERING",
-              "AI MCP SERVER",
-              "HEADLESS CLI RUNNER",
-              "TRUE REDACTION",
-              "OFFLINE OCR",
-              "BATCH STUDIO",
-              "PKI SIGNATURES",
-              "MEASUREMENT CALIBRATION",
-            ].map((t, i) => (
-              <span key={i}>
-                {t}
-                <b>✳</b>
-              </span>
+        {/* Apple Bento Grid */}
+        <section className="bento-section" id="features">
+          <div className="section-header" data-reveal>
+            <span className="section-eyebrow">CAPABILITIES</span>
+            <h2 className="section-title">Engineered to outperform.</h2>
+            <p className="section-desc">
+              Every workflow you need in one unified, memory-safe architecture.
+            </p>
+          </div>
+
+          <div className="bento-grid">
+            {bentoFeatures.map((f, i) => (
+              <div className="bento-card" key={i} data-reveal>
+                <div className="bento-card-top">
+                  <span className="bento-tag">{f.tag}</span>
+                  <span className="bento-badge">{f.badge}</span>
+                </div>
+                <div className="bento-icon-wrap">
+                  <Icon name={f.icon} size={22} />
+                </div>
+                <h3 className="bento-title">{f.title}</h3>
+                <p className="bento-desc">{f.desc}</p>
+                <div className="glass-glare" />
+              </div>
             ))}
           </div>
         </section>
 
-        {/* Feature Grid Section */}
-        <section className="intro section-wrap" id="features">
-          <div className="section-heading" data-reveal>
-            <div className="eyebrow">
-              <span className="eyebrow-num">01 / CAPABILITIES</span>
-            </div>
-            <h2>
-              Engineered for depth.
-              <br />
-              <span className="muted-title">Streamlined for speed.</span>
-            </h2>
-            <p>
-              PDFix brings everyday document tasks and advanced engineering
-              workflows into one native, memory-safe desktop workspace.
-            </p>
-          </div>
-          <div className="feature-grid">
-            {features.map((f, i) => (
-              <article
-                className={`feature-card feature-${i + 1}`}
-                data-reveal
-                style={{ "--delay": `${i * 65}ms` }}
-                key={f.n}
-              >
-                <div className="feature-top">
-                  <span className="feature-number">{f.n}</span>
-                  <span className="feature-icon">
-                    <Icon name={f.icon} size={20} />
-                  </span>
-                </div>
-                <h3>{f.title}</h3>
-                <p>{f.desc}</p>
-                <div className="feature-tags">
-                  {f.tags.map((t) => (
-                    <span key={t}>{t}</span>
-                  ))}
-                </div>
-                <div className="feature-card-glow" />
-              </article>
-            ))}
-          </div>
-        </section>
-
-        {/* Interactive Studio Lab (The WOW Factor) */}
-        <section className="interactive-lab section-wrap" id="lab">
-          <div className="section-heading" data-reveal>
-            <div className="eyebrow">
-              <span className="eyebrow-num">02 / INTERACTIVE STUDIO LAB</span>
-            </div>
-            <h2>
-              Test the mechanics.
-              <br />
-              <span className="muted-title">Right here in your browser.</span>
-            </h2>
-            <p>
-              Explore the difference between surface-level viewers and true PDF
-              engineering.
+        {/* Interactive Studio Lab */}
+        <section className="lab-section" id="lab">
+          <div className="section-header" data-reveal>
+            <span className="section-eyebrow">INTERACTIVE LAB</span>
+            <h2 className="section-title">Experience the mechanics.</h2>
+            <p className="section-desc">
+              Interact with the core capabilities live in your browser.
             </p>
           </div>
 
-          <div className="lab-container" data-reveal>
-            <div className="lab-tabs">
+          <div className="glass-lab-box" data-reveal>
+            <div className="lab-nav">
               <button
-                className={`lab-tab ${activeLabTab === "redact" ? "active" : ""}`}
-                onClick={() => setActiveLabTab("redact")}
+                className={`lab-btn ${labTab === "redact" ? "active" : ""}`}
+                onClick={() => setLabTab("redact")}
               >
-                <Icon name="shield" size={16} /> True Redaction vs Marker
+                <Icon name="shield" size={15} /> True Redaction
               </button>
               <button
-                className={`lab-tab ${activeLabTab === "cos" ? "active" : ""}`}
-                onClick={() => setActiveLabTab("cos")}
+                className={`lab-btn ${labTab === "cos" ? "active" : ""}`}
+                onClick={() => setLabTab("cos")}
               >
-                <Icon name="tree" size={16} /> Low-Level COS Inspector
+                <Icon name="tree" size={15} /> COS Syntax Tree
               </button>
               <button
-                className={`lab-tab ${activeLabTab === "batch" ? "active" : ""}`}
-                onClick={() => setActiveLabTab("batch")}
+                className={`lab-btn ${labTab === "batch" ? "active" : ""}`}
+                onClick={() => setLabTab("batch")}
               >
-                <Icon name="layers" size={16} /> Batch Pipeline Studio
+                <Icon name="layers" size={15} /> Batch Studio
               </button>
               <button
-                className={`lab-tab ${activeLabTab === "measure" ? "active" : ""}`}
-                onClick={() => setActiveLabTab("measure")}
+                className={`lab-btn ${labTab === "measure" ? "active" : ""}`}
+                onClick={() => setLabTab("measure")}
               >
-                <Icon name="ruler" size={16} /> Blueprint Calibrator
+                <Icon name="ruler" size={15} /> Blueprint Scale
               </button>
             </div>
 
-            <div className="lab-display">
-              {activeLabTab === "redact" && (
-                <div className="lab-panel redact-panel">
-                  <div className="panel-controls">
-                    <span>INSPECTION MODE:</span>
+            <div className="lab-body">
+              {labTab === "redact" && (
+                <div className="lab-pane redact-pane">
+                  <div className="pane-switcher">
+                    <span>MODE:</span>
                     <button
-                      className={`toggle-pill ${!redactRevealed ? "selected" : ""}`}
-                      onClick={() => setRedactRevealed(false)}
+                      className={`switch-btn ${redactedState ? "active" : ""}`}
+                      onClick={() => setRedactedState(true)}
                     >
                       PDFix Structural Purge
                     </button>
                     <button
-                      className={`toggle-pill danger ${redactRevealed ? "selected" : ""}`}
-                      onClick={() => setRedactRevealed(true)}
+                      className={`switch-btn danger ${!redactedState ? "active" : ""}`}
+                      onClick={() => setRedactedState(false)}
                     >
-                      Common "Black Box" Flaw
+                      Common Black Box Flaw
                     </button>
                   </div>
-                  <div className="redact-preview">
-                    <div className="doc-sample">
-                      <div className="doc-header">
-                        CONFIDENTIAL PATIENT RECORD — DEPARTMENT OF HEALTH
-                      </div>
+                  <div className="redact-card-grid">
+                    <div className="doc-view">
+                      <div className="doc-watermark">CONFIDENTIAL RECORD</div>
+                      <p>Patient Name: <strong>Jane Doe</strong></p>
                       <p>
-                        Patient: <strong>Johnathan Doe</strong> | SSN:{" "}
-                        <span
-                          className={`redact-target ${redactRevealed ? "leaked" : "purged"}`}
-                        >
-                          {redactRevealed ? "982-41-0091" : "███████████"}
+                        Social Security:{" "}
+                        <span className={`redact-token ${redactedState ? "purged" : "leaked"}`}>
+                          {redactedState ? "███████████" : "382-91-4402"}
                         </span>
                       </p>
                       <p>
-                        Primary Diagnosis:{" "}
-                        <span
-                          className={`redact-target ${redactRevealed ? "leaked" : "purged"}`}
-                        >
-                          {redactRevealed
-                            ? "Stage 2 Cardiomegaly"
-                            : "████████████████████"}
-                        </span>
-                      </p>
-                      <p>
-                        Prescribed Medication:{" "}
-                        <span
-                          className={`redact-target ${redactRevealed ? "leaked" : "purged"}`}
-                        >
-                          {redactRevealed
-                            ? "Lisinopril 20mg daily"
-                            : "█████████████████████"}
+                        Diagnosis:{" "}
+                        <span className={`redact-token ${redactedState ? "purged" : "leaked"}`}>
+                          {redactedState ? "██████████████████" : "Aortic Insufficiency"}
                         </span>
                       </p>
                     </div>
-                    <div className="redact-explanation">
-                      <h4>
-                        {redactRevealed
-                          ? "⚠️ The Dangerous Common Flaw:"
-                          : "🛡️ How PDFix Protects You:"}
-                      </h4>
+                    <div className="analysis-view">
+                      <h4>{redactedState ? "✓ Structural Stream Purged" : "⚠️ Raw Text Leaked"}</h4>
                       <p>
-                        {redactRevealed
-                          ? "Most basic PDF tools simply draw a black rectangle annotation over the canvas. The text stream, font glyph IDs, and clipboard copy remain 100% accessible to anyone inspecting the file."
-                          : "PDFix completely strips the underlying content stream bytes, recalculates the XREF table, sanitizes document metadata, and zeroes out the raw dictionary stream tokens."}
+                        {redactedState
+                          ? "Content stream bytes are purged, font subroutines unmapped, and XREF tables updated. Copying text produces nothing."
+                          : "Traditional editors draw an opaque rectangle overlay while the underlying stream operators remain in the PDF file."}
                       </p>
-                      <div className="byte-status">
-                        Stream status:{" "}
-                        <code>
-                          {redactRevealed
-                            ? "TOKEN_EXISTS [Leaked: 0x4A6F68...]"
-                            : "ZEROED_AND_PURGED [0x00]"}
-                        </code>
+                      <div className="byte-indicator">
+                        Status: <code>{redactedState ? "PURGED (0x00)" : "EXTRACTABLE (0x333832...)"}</code>
                       </div>
                     </div>
                   </div>
                 </div>
               )}
 
-              {activeLabTab === "cos" && (
-                <div className="lab-panel cos-panel">
-                  <div className="cos-tree">
-                    <div className="tree-heading">ISO 32000-2 OBJECT GRAPH</div>
-                    <button
-                      className={`tree-node ${selectedCosNode === "catalog" ? "active" : ""}`}
-                      onClick={() => setSelectedCosNode("catalog")}
-                    >
-                      📁 1 0 obj &lt;&lt; /Type /Catalog /Pages 2 0 R &gt;&gt;
-                    </button>
-                    <button
-                      className={`tree-node child-1 ${selectedCosNode === "pages" ? "active" : ""}`}
-                      onClick={() => setSelectedCosNode("pages")}
-                    >
-                      📁 2 0 obj &lt;&lt; /Type /Pages /Kids [3 0 R] /Count 1
-                      &gt;&gt;
-                    </button>
-                    <button
-                      className={`tree-node child-2 ${selectedCosNode === "page" ? "active" : ""}`}
-                      onClick={() => setSelectedCosNode("page")}
-                    >
-                      📄 3 0 obj &lt;&lt; /Type /Page /Contents 4 0 R &gt;&gt;
-                    </button>
-                    <button
-                      className={`tree-node child-3 ${selectedCosNode === "stream" ? "active" : ""}`}
-                      onClick={() => setSelectedCosNode("stream")}
-                    >
-                      ⚡ 4 0 obj &lt;&lt; /Filter /FlateDecode /Length 184
-                      &gt;&gt; stream
-                    </button>
+              {labTab === "cos" && (
+                <div className="lab-pane cos-pane">
+                  <div className="cos-tree-side">
+                    <div className="tree-lbl">ISO 32000-2 OBJECT HIERARCHY</div>
+                    <div className="node selected">📁 1 0 obj &lt;&lt; /Type /Catalog /Pages 2 0 R &gt;&gt;</div>
+                    <div className="node indent-1">📁 2 0 obj &lt;&lt; /Type /Pages /Count 1 &gt;&gt;</div>
+                    <div className="node indent-2">📄 3 0 obj &lt;&lt; /Type /Page /Contents 4 0 R &gt;&gt;</div>
+                    <div className="node indent-3">⚡ 4 0 obj &lt;&lt; /Filter /FlateDecode &gt;&gt; stream</div>
                   </div>
-                  <div className="cos-inspector">
-                    <div className="inspector-head">
-                      <span>DECODED STREAM INSPECTOR</span>
-                      <span className="tag">Pure Rust Parser</span>
+                  <div className="cos-code-side">
+                    <div className="code-header">
+                      <span>DECODED STREAM TOKENS</span>
+                      <span className="badge-rust">crates/cos</span>
                     </div>
-                    <pre className="code-box">
-                      {selectedCosNode === "catalog" &&
-                        `% PDF Catalog Root\n1 0 obj\n<<\n  /Type /Catalog\n  /Pages 2 0 R\n  /ViewerPreferences << /DisplayDocTitle true >>\n  /PageLayout /SinglePage\n>>\nendobj`}
-                      {selectedCosNode === "pages" &&
-                        `% Page Tree Hierarchy\n2 0 obj\n<<\n  /Type /Pages\n  /Kids [ 3 0 R ]\n  /Count 1\n  /MediaBox [ 0 0 612 792 ] % US Letter\n>>\nendobj`}
-                      {selectedCosNode === "page" &&
-                        `% Page Object with Resource Dictionary\n3 0 obj\n<<\n  /Type /Page\n  /Parent 2 0 R\n  /Resources <<\n    /Font << /F1 5 0 R >>\n    /ProcSet [ /PDF /Text /ImageB ]\n  >>\n  /Contents 4 0 R\n>>\nendobj`}
-                      {selectedCosNode === "stream" &&
-                        `% Decoded Content Stream Operators (crates/cos)\nq\n1 0 0 1 72 710 cm\nBT\n  /F1 16 Tf\n  (PDFix: The PDF Engineering Workbench) Tj\n  0 -24 Td\n  /F1 10 Tf\n  (Compiled with pure Rust and memory safety.) Tj\nET\nQ`}
+                    <pre className="syntax-code">
+{`% Clean-room ISO 32000-2 parser
+1 0 obj
+<<
+  /Type /Catalog
+  /Pages 2 0 R
+  /ViewerPreferences << /DisplayDocTitle true >>
+>>
+endobj
+
+% Hardware stream rasterizer
+q
+  1 0 0 1 72 720 cm
+  BT
+    /F1 18 Tf
+    (PDFix: Pro Engineering) Tj
+  ET
+Q`}
                     </pre>
                   </div>
                 </div>
               )}
 
-              {activeLabTab === "batch" && (
-                <div className="lab-panel batch-panel">
-                  <div className="batch-queue">
-                    <div className="queue-title">
-                      BATCH QUEUE (3 FILES QUEUED)
-                    </div>
-                    <div className="queue-item">
-                      <Icon name="file" size={16} />
-                      <span>financial_report_q3.pdf (4.8 MB)</span>
-                      <span className="badge">Ready</span>
-                    </div>
-                    <div className="queue-item">
-                      <Icon name="file" size={16} />
-                      <span>scanned_receipts.png (12.1 MB)</span>
-                      <span className="badge">Ready</span>
-                    </div>
-                    <div className="queue-item">
-                      <Icon name="file" size={16} />
-                      <span>executive_brief.pdf (1.2 MB)</span>
-                      <span className="badge">Ready</span>
-                    </div>
+              {labTab === "batch" && (
+                <div className="lab-pane batch-pane">
+                  <div className="batch-col">
+                    <div className="batch-lbl">DOCUMENT QUEUE (3 FILES)</div>
+                    <div className="file-chip"><Icon name="file" size={14} /> Annual_Report.pdf <span>4.2 MB</span></div>
+                    <div className="file-chip"><Icon name="file" size={14} /> Invoice_Receipts.png <span>8.8 MB</span></div>
+                    <div className="file-chip"><Icon name="file" size={14} /> Legal_Contract.pdf <span>1.6 MB</span></div>
                   </div>
-                  <div className="batch-actions-box">
-                    <div className="options-title">ACTIVE PIPELINES</div>
-                    <label className="checkbox-row">
-                      <input type="checkbox" defaultChecked />
-                      <span>Lossless Stream Compression (reduce ~42%)</span>
-                    </label>
-                    <label className="checkbox-row">
-                      <input type="checkbox" defaultChecked />
-                      <span>Run Offline OCR on Image Scans</span>
-                    </label>
-                    <label className="checkbox-row">
-                      <input type="checkbox" defaultChecked />
-                      <span>Stamp Header: "CONFIDENTIAL / INTERNAL ONLY"</span>
-                    </label>
-                    <button
-                      className="button button-primary"
-                      onClick={runBatchSimulation}
-                      disabled={batchRunning}
-                    >
-                      {batchRunning ? (
-                        <>Processing Rust Pipeline...</>
-                      ) : batchCompleted ? (
-                        <>
-                          <Icon name="checkCircle" size={16} /> Done in 410ms!
-                        </>
-                      ) : (
-                        <>
-                          <Icon name="spark" size={16} /> Run Batch Pipeline
-                        </>
-                      )}
+                  <div className="batch-col controls">
+                    <div className="batch-lbl">PIPELINE EXECUTION</div>
+                    <div className="preset-toggle">✓ Lossless Compression (~40%)</div>
+                    <div className="preset-toggle">✓ Offline OCR Scans</div>
+                    <div className="preset-toggle">✓ Merge into Single Document</div>
+                    <button className="btn-apple-primary full" onClick={triggerBatch}>
+                      {batchActive ? "Processing Rust Stream..." : batchFinished ? "✓ Pipeline Complete in 380ms" : "Run Batch Pipeline"}
                     </button>
-                    {batchCompleted && (
-                      <div className="batch-result">
-                        ✓ 3 files merged & processed into{" "}
-                        <code>batch_bundle.pdf</code> (5.1 MB total, down from
-                        18.1 MB).
+                    {batchFinished && (
+                      <div className="batch-success-box">
+                        ✓ 3 files merged into <code>bundle_optimized.pdf</code> (4.9 MB total).
                       </div>
                     )}
                   </div>
                 </div>
               )}
 
-              {activeLabTab === "measure" && (
-                <div className="lab-panel measure-panel">
-                  <div className="blueprint-canvas">
-                    <div className="grid-overlay" />
-                    <div className="blueprint-wall" />
-                    <div className="blueprint-dimension">
-                      <div className="dimension-line" />
-                      <span className="dimension-label">{measuredFeet}</span>
+              {labTab === "measure" && (
+                <div className="lab-pane measure-pane">
+                  <div className="blueprint-stage">
+                    <div className="blueprint-box">
+                      <div className="scale-line" />
+                      <span className="scale-tag">{blueprintScale === "1/4" ? "18.4 ft" : "36.8 ft"}</span>
                     </div>
                   </div>
-                  <div className="measure-sidebar">
-                    <h4>CALIBRATION & SCALE</h4>
-                    <p>
-                      Calibrate directly against known blueprint title blocks:
-                    </p>
-                    <div className="scale-select">
+                  <div className="measure-side">
+                    <h4>ARCHITECTURAL SCALE</h4>
+                    <p>Calibrate measurements against technical blueprint title blocks:</p>
+                    <div className="scale-buttons">
                       <button
-                        className={`pill-sm ${measuredFeet === "18.4 ft" ? "active" : ""}`}
-                        onClick={() => setMeasuredFeet("18.4 ft")}
+                        className={`scale-btn ${blueprintScale === "1/4" ? "active" : ""}`}
+                        onClick={() => setBlueprintScale("1/4")}
                       >
-                        1/4" = 1'-0" (Architectural)
+                        1/4" = 1'-0"
                       </button>
                       <button
-                        className={`pill-sm ${measuredFeet === "36.8 ft" ? "active" : ""}`}
-                        onClick={() => setMeasuredFeet("36.8 ft")}
+                        className={`scale-btn ${blueprintScale === "1/8" ? "active" : ""}`}
+                        onClick={() => setBlueprintScale("1/8")}
                       >
-                        1/8" = 1'-0" (Site Plan)
+                        1/8" = 1'-0"
                       </button>
                     </div>
-                    <div className="measurement-results">
-                      <div className="result-row">
-                        <span>Distance:</span>
-                        <strong>{measuredFeet}</strong>
-                      </div>
-                      <div className="result-row">
-                        <span>Wall Perimeter:</span>
-                        <strong>
-                          {measuredFeet === "18.4 ft" ? "73.6 ft" : "147.2 ft"}
-                        </strong>
-                      </div>
-                      <div className="result-row">
-                        <span>Enclosed Area:</span>
-                        <strong>
-                          {measuredFeet === "18.4 ft"
-                            ? "338.5 sq ft"
-                            : "1,354.2 sq ft"}
-                        </strong>
-                      </div>
+                    <div className="spec-output">
+                      <div><span>Dimension:</span> <strong>{blueprintScale === "1/4" ? "18.4 ft" : "36.8 ft"}</strong></div>
+                      <div><span>Perimeter:</span> <strong>{blueprintScale === "1/4" ? "73.6 ft" : "147.2 ft"}</strong></div>
+                      <div><span>Floor Area:</span> <strong>{blueprintScale === "1/4" ? "338.5 sq ft" : "1,354.2 sq ft"}</strong></div>
                     </div>
                   </div>
                 </div>
@@ -1108,46 +695,38 @@ function App() {
           </div>
         </section>
 
-        {/* Comparison Matrix: PDFix vs Adobe Acrobat vs Cloud */}
-        <section className="comparison-section section-wrap" id="compare">
-          <div className="section-heading" data-reveal>
-            <div className="eyebrow">
-              <span className="eyebrow-num">03 / HONEST COMPARISON</span>
-            </div>
-            <h2>
-              Why choose PDFix?
-              <br />
-              <span className="muted-title">See the difference side-by-side.</span>
-            </h2>
-            <p>
-              Compare PDFix against legacy bloated software and privacy-invasive
-              cloud upload converters.
+        {/* Apple-Style Comparison Matrix */}
+        <section className="compare-section" id="compare">
+          <div className="section-header" data-reveal>
+            <span className="section-eyebrow">BENCHMARK</span>
+            <h2 className="section-title">Clear contrast.</h2>
+            <p className="section-desc">
+              Compare PDFix against legacy enterprise software and web converters.
             </p>
           </div>
 
-          <div className="table-wrapper" data-reveal>
-            <table className="comparison-table">
+          <div className="glass-table-container" data-reveal>
+            <table className="apple-table">
               <thead>
                 <tr>
-                  <th>FEATURE & ARCHITECTURE</th>
+                  <th>FEATURE</th>
                   <th className="highlight-col">
-                    <div className="brand-header">
-                      <img src="/pdfix-logo.png" alt="" />
+                    <div className="th-brand">
+                      <img src="/pdfix-logo.png" alt="" width="20" height="20" />
                       <span>PDFix</span>
-                      <small>Pure Rust</small>
                     </div>
                   </th>
                   <th>Adobe Acrobat Pro</th>
-                  <th>Cloud Tools (iLovePDF, etc.)</th>
+                  <th>Cloud Converters</th>
                 </tr>
               </thead>
               <tbody>
-                {comparisonData.map((row, i) => (
+                {comparisonSpecs.map((row, i) => (
                   <tr key={i}>
-                    <td className="row-feature">{row.feature}</td>
-                    <td className="highlight-col cell-pdfix">{row.pdfix}</td>
-                    <td className="cell-other">{row.acrobat}</td>
-                    <td className="cell-other">{row.cloud}</td>
+                    <td className="row-title">{row.item}</td>
+                    <td className="highlight-col pdfix-val">{row.pdfix}</td>
+                    <td className="other-val">{row.acrobat}</td>
+                    <td className="other-val">{row.cloud}</td>
                   </tr>
                 ))}
               </tbody>
@@ -1155,575 +734,285 @@ function App() {
           </div>
         </section>
 
-        {/* CLI & AI MCP Server Integration Showcase */}
-        <section className="cli-mcp-section section-wrap" id="cli-mcp">
-          <div className="section-heading" data-reveal>
-            <div className="eyebrow">
-              <span className="eyebrow-num">04 / DEVELOPER & AI AGENTS</span>
-            </div>
-            <h2>
-              Automate with CLI.
-              <br />
-              <span className="muted-title">Connect to AI via MCP.</span>
-            </h2>
-            <p>
-              PDFix ships with <code>apps/pdfcraft-cli</code> and a built-in{" "}
-              <strong>Model Context Protocol (MCP) server</strong>. Let Claude
-              Desktop, Cursor, and AI agents inspect, edit, sign, and render PDFs
-              locally.
+        {/* Developer & AI Model Context Protocol Showcase */}
+        <section className="dev-section" id="developers">
+          <div className="section-header" data-reveal>
+            <span className="section-eyebrow">DEVELOPERS & AI</span>
+            <h2 className="section-title">Programmatic power.</h2>
+            <p className="section-desc">
+              Connect AI coding assistants directly through the Model Context Protocol.
             </p>
           </div>
 
-          <div className="cli-mcp-box" data-reveal>
-            <div className="code-nav">
+          <div className="glass-terminal-card" data-reveal>
+            <div className="terminal-tabs">
               <button
-                className={`code-tab ${activeCliTab === "mcp" ? "active" : ""}`}
-                onClick={() => setActiveCliTab("mcp")}
+                className={`tab-btn ${cliTab === "mcp" ? "active" : ""}`}
+                onClick={() => setCliTab("mcp")}
               >
-                <Icon name="bot" size={15} /> Claude Desktop MCP Config
+                <Icon name="bot" size={14} /> Claude Desktop MCP
               </button>
               <button
-                className={`code-tab ${activeCliTab === "cli" ? "active" : ""}`}
-                onClick={() => setActiveCliTab("cli")}
+                className={`tab-btn ${cliTab === "cli" ? "active" : ""}`}
+                onClick={() => setCliTab("cli")}
               >
-                <Icon name="terminal" size={15} /> Terminal Automation
+                <Icon name="terminal" size={14} /> Headless CLI
               </button>
               <button
-                className={`code-tab ${activeCliTab === "json" ? "active" : ""}`}
-                onClick={() => setActiveCliTab("json")}
+                className={`tab-btn ${cliTab === "json" ? "active" : ""}`}
+                onClick={() => setCliTab("json")}
               >
-                <Icon name="file" size={15} /> Headless Script Pipeline
+                <Icon name="file" size={14} /> Pipeline JSON
               </button>
             </div>
 
-            <div className="code-content-wrap">
-              {activeCliTab === "mcp" && (
-                <>
-                  <div className="code-action-bar">
-                    <span>
-                      Add to <code>claude_desktop_config.json</code>:
-                    </span>
-                    <button
-                      className="copy-btn"
-                      onClick={() =>
-                        copyToClipboard(
-                          `{\n  "mcpServers": {\n    "pdfix": {\n      "command": "pdfcraft-cli",\n      "args": ["mcp", "--root", "/path/to/documents"]\n    }\n  }\n}`,
-                          "mcp",
-                        )
-                      }
-                    >
-                      <Icon name="copy" size={14} />{" "}
-                      {copiedId === "mcp" ? "Copied!" : "Copy Snippet"}
-                    </button>
-                  </div>
-                  <pre className="terminal-code">
-                    {`{\n  "mcpServers": {\n    "pdfix": {\n      "command": "pdfcraft-cli",\n      "args": [\n        "mcp",\n        "--root", "/path/to/workspace"\n      ]\n    }\n  }\n}`}
-                  </pre>
-                  <p className="code-caption">
-                    ✓ Autonomous inspection, OCR, page splitting, and document
-                    assembly directly inside your AI coding assistant.
-                  </p>
-                </>
-              )}
+            <div className="terminal-viewport">
+              <div className="terminal-actions">
+                <span className="terminal-label">
+                  {cliTab === "mcp" ? "claude_desktop_config.json" : cliTab === "cli" ? "Terminal Command" : "pipeline.json"}
+                </span>
+                <button
+                  className="copy-chip"
+                  onClick={() => {
+                    const text =
+                      cliTab === "mcp"
+                        ? `{\n  "mcpServers": {\n    "pdfix": {\n      "command": "pdfcraft-cli",\n      "args": ["mcp", "--root", "/path/to/docs"]\n    }\n  }\n}`
+                        : cliTab === "cli"
+                        ? `pdfcraft-cli batch --merge *.pdf --out final.pdf\npdfcraft-cli ocr scan.pdf --out searchable.pdf`
+                        : `[\n  { "op": "open", "file": "doc.pdf" },\n  { "op": "redact", "pattern": "SSN:.*" },\n  { "op": "save_atomic", "out": "safe.pdf" }\n]`;
+                    copy(text, cliTab);
+                  }}
+                >
+                  <Icon name="copy" size={13} /> {copiedId === cliTab ? "Copied" : "Copy"}
+                </button>
+              </div>
 
-              {activeCliTab === "cli" && (
-                <>
-                  <div className="code-action-bar">
-                    <span>Shell Automation Commands:</span>
-                    <button
-                      className="copy-btn"
-                      onClick={() =>
-                        copyToClipboard(
-                          `# Merge multiple files\npdfcraft-cli batch --merge file1.pdf file2.pdf --out merged.pdf\n\n# Run offline OCR on scanned document\npdfcraft-cli ocr input_scan.pdf --lang eng --out searchable.pdf\n\n# Headless pipeline with JSON instructions\npdfcraft-cli run --script pipeline.json --root ./docs`,
-                          "cli",
-                        )
-                      }
-                    >
-                      <Icon name="copy" size={14} />{" "}
-                      {copiedId === "cli" ? "Copied!" : "Copy Commands"}
-                    </button>
-                  </div>
-                  <pre className="terminal-code">
-                    {`# Batch merge multiple PDFs\n$ pdfcraft-cli batch --merge doc1.pdf doc2.pdf --out merged.pdf\n\n# Run offline OCR on scanned documents\n$ pdfcraft-cli ocr scanned_invoice.pdf --lang eng --out searchable.pdf\n\n# Headless scripted pipeline\n$ pdfcraft-cli run --script pipeline.json --root ./workspace`}
-                  </pre>
-                  <p className="code-caption">
-                    ✓ Full headless execution for continuous integration,
-                    nightly cron jobs, and high-throughput servers.
-                  </p>
-                </>
-              )}
-
-              {activeCliTab === "json" && (
-                <>
-                  <div className="code-action-bar">
-                    <span>
-                      Pipeline Definition: <code>pipeline.json</code>
-                    </span>
-                    <button
-                      className="copy-btn"
-                      onClick={() =>
-                        copyToClipboard(
-                          `[\n  { "op": "open", "file": "contract.pdf" },\n  { "op": "redact", "pattern": "SSN:\\\\s*\\\\d{3}-\\\\d{2}-\\\\d{4}" },\n  { "op": "watermark", "text": "CONFIDENTIAL", "opacity": 0.15 },\n  { "op": "save_atomic", "out": "contract_sanitized.pdf" }\n]`,
-                          "json",
-                        )
-                      }
-                    >
-                      <Icon name="copy" size={14} />{" "}
-                      {copiedId === "json" ? "Copied!" : "Copy JSON"}
-                    </button>
-                  </div>
-                  <pre className="terminal-code">
-                    {`[\n  { "op": "open", "file": "contract.pdf" },\n  { "op": "redact", "pattern": "SSN:\\\\s*\\\\d{3}-\\\\d{2}-\\\\d{4}" },\n  { "op": "watermark", "text": "CONFIDENTIAL", "opacity": 0.15 },\n  { "op": "save_atomic", "out": "contract_sanitized.pdf" }\n]`}
-                  </pre>
-                  <p className="code-caption">
-                    ✓ Declarative, audit-ready workflows that can be checked
-                    directly into your git repositories.
-                  </p>
-                </>
-              )}
+              <pre className="code-display">
+                {cliTab === "mcp" &&
+                  `{\n  "mcpServers": {\n    "pdfix": {\n      "command": "pdfcraft-cli",\n      "args": ["mcp", "--root", "/path/to/documents"]\n    }\n  }\n}`}
+                {cliTab === "cli" &&
+                  `# Batch merge multiple files\npdfcraft-cli batch --merge doc1.pdf doc2.pdf --out bundle.pdf\n\n# Embedded offline OCR\npdfcraft-cli ocr scan.pdf --lang eng --out searchable.pdf`}
+                {cliTab === "json" &&
+                  `[\n  { "op": "open", "file": "agreement.pdf" },\n  { "op": "redact", "pattern": "SSN:\\\\s*\\\\d{3}-\\\\d{2}-\\\\d{4}" },\n  { "op": "watermark", "text": "CONFIDENTIAL" },\n  { "op": "save_atomic", "out": "sanitized.pdf" }\n]`}
+              </pre>
             </div>
           </div>
         </section>
 
         {/* Pure Rust Modular Architecture */}
-        <section className="architecture-section section-wrap" id="architecture">
-          <div className="section-heading" data-reveal>
-            <div className="eyebrow">
-              <span className="eyebrow-num">05 / MODULAR RUST ARCHITECTURE</span>
-            </div>
-            <h2>
-              Clean-room design.
-              <br />
-              <span className="muted-title">Built crate by crate.</span>
-            </h2>
-            <p>
-              PDFix was rebuilt from first principles without a single line of
-              Adobe code or GPL contamination. Every crate is total and panic-free.
+        <section className="crates-section">
+          <div className="section-header" data-reveal>
+            <span className="section-eyebrow">ARCHITECTURE</span>
+            <h2 className="section-title">Built crate by crate.</h2>
+            <p className="section-desc">
+              Clean-room implementation. Zero Adobe code. Strict panic-free memory guarantees.
             </p>
           </div>
 
-          <div className="crate-grid" data-reveal>
-            {crates.map((c, i) => (
-              <div className="crate-card" key={i}>
-                <div className="crate-top">
+          <div className="crates-grid" data-reveal>
+            {cratesList.map((c, i) => (
+              <div className="crate-glass-card" key={i}>
+                <div className="crate-header">
                   <span className="crate-name">{c.name}</span>
-                  <span className="crate-badge">{c.badge}</span>
+                  <span className="crate-type">{c.type}</span>
                 </div>
-                <p className="crate-desc">{c.desc}</p>
+                <p className="crate-info">{c.info}</p>
               </div>
             ))}
           </div>
         </section>
 
-        {/* Keyboard Shortcuts Cheatsheet */}
-        <section className="shortcuts-section section-wrap" id="shortcuts">
-          <div className="shortcuts-box" data-reveal>
-            <div className="shortcuts-copy">
-              <div className="eyebrow">
-                <span className="eyebrow-num">06 / PRODUCTIVITY</span>
-              </div>
-              <h2>
-                Keyboard first.
-                <br />
-                <span className="muted-title">Zero friction navigation.</span>
-              </h2>
-              <p>
-                Everything in the PDFix workspace is mapped to high-speed
-                shortcuts for power users and document engineers.
-              </p>
-            </div>
-            <div className="shortcuts-grid">
-              {shortcutsList.map((s, i) => (
-                <div className="shortcut-row" key={i}>
-                  <kbd>{s.key}</kbd>
-                  <span>{s.desc}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Privacy Section */}
-        <section className="privacy-section" id="privacy">
-          <div className="privacy-inner section-wrap">
-            <div className="privacy-visual" data-reveal>
-              <div className="privacy-ring ring-a" />
-              <div className="privacy-ring ring-b" />
-              <div className="privacy-orb">
-                <img src="/pdfix-logo.png" alt="PDFix logo" />
-              </div>
-              <div className="privacy-chip chip-one">
-                <Icon name="lock" size={15} /> 100% On-device processing
-              </div>
-              <div className="privacy-chip chip-two">
-                <span className="green-pulse" /> Zero telemetry
-              </div>
-              <div className="privacy-chip chip-three">
-                <Icon name="shield" size={15} /> forbid(unsafe_code)
-              </div>
-            </div>
-            <div className="privacy-copy" data-reveal>
-              <div className="eyebrow">
-                <span className="eyebrow-num">
-                  07 / YOUR DOCUMENTS, YOUR PRIVACY
-                </span>
-              </div>
-              <h2>
-                Privacy isn't
-                <br />a premium add-on.
-              </h2>
-              <p>
-                Confidential contracts, tax records, medical files, and personal
-                notes belong on your computer — not on third-party cloud
-                servers. PDFix is engineered with a strict local-first policy.
-              </p>
-              <ul className="privacy-list">
-                <li>
-                  <span>
-                    <Icon name="check" size={14} />
-                  </span>{" "}
-                  No user accounts, subscriptions, or credit cards required
-                </li>
-                <li>
-                  <span>
-                    <Icon name="check" size={14} />
-                  </span>{" "}
-                  Zero network phone-home, crash-telemetry, or tracking pixels
-                </li>
-                <li>
-                  <span>
-                    <Icon name="check" size={14} />
-                  </span>{" "}
-                  OCR, conversion, and signing run entirely on local CPU/GPU
-                </li>
-                <li>
-                  <span>
-                    <Icon name="check" size={14} />
-                  </span>{" "}
-                  Irreversible structural redaction permanently purges content
-                </li>
-              </ul>
-              <a
-                href={REPO}
-                className="text-link"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Inspect the open-source code on GitHub{" "}
-                <Icon name="arrow" size={16} />
-              </a>
-            </div>
-          </div>
-        </section>
-
         {/* Download Hub */}
-        <section className="download-section section-wrap" id="download">
-          <div className="download-panel" data-reveal>
-            <div className="download-glow" />
-            <div className="download-copy">
-              <div className="eyebrow">
-                <span className="live-dot" /> OFFICIAL RELEASE · V1.0.0
-              </div>
-              <h2>
-                Get PDFix today.
-                <br />
-                Freedom from PDF pain.
-              </h2>
-              <p>
-                Download the official native application for Windows, or build
-                from source for macOS and Linux.
+        <section className="download-section" id="download">
+          <div className="glass-download-card" data-reveal>
+            <div className="download-header">
+              <span className="section-eyebrow">GET PDFIX</span>
+              <h2 className="section-title">Download for your system.</h2>
+              <p className="section-desc">
+                Native performance on Windows. Ready to build on macOS and Linux.
               </p>
+            </div>
 
-              <div className="download-tabs-nav">
-                <button
-                  className={`dl-tab ${activeDownloadTab === "windows" ? "active" : ""}`}
-                  onClick={() => setActiveDownloadTab("windows")}
-                >
-                  Windows (.exe)
-                </button>
-                <button
-                  className={`dl-tab ${activeDownloadTab === "portable" ? "active" : ""}`}
-                  onClick={() => setActiveDownloadTab("portable")}
-                >
-                  Standalone Portable
-                </button>
-                <button
-                  className={`dl-tab ${activeDownloadTab === "linux-mac" ? "active" : ""}`}
-                  onClick={() => setActiveDownloadTab("linux-mac")}
-                >
-                  macOS & Linux
-                </button>
-              </div>
+            <div className="download-pill-nav">
+              <button
+                className={`dl-pill ${downloadTab === "installer" ? "active" : ""}`}
+                onClick={() => setDownloadTab("installer")}
+              >
+                Windows Installer (.exe)
+              </button>
+              <button
+                className={`dl-pill ${downloadTab === "portable" ? "active" : ""}`}
+                onClick={() => setDownloadTab("portable")}
+              >
+                Standalone Portable (.exe)
+              </button>
+              <button
+                className={`dl-pill ${downloadTab === "source" ? "active" : ""}`}
+                onClick={() => setDownloadTab("source")}
+              >
+                macOS & Linux
+              </button>
+            </div>
 
-              {activeDownloadTab === "windows" && (
-                <div className="dl-tab-content">
-                  <div className="download-actions">
-                    <a
-                      className="button button-primary button-large"
-                      href={DOWNLOAD_INSTALLER}
-                    >
-                      <Icon name="download" size={18} /> Download Installer (.exe)
-                      <Icon name="arrow" size={16} />
+            <div className="download-view">
+              {downloadTab === "installer" && (
+                <div className="dl-pane">
+                  <div className="dl-action-row">
+                    <a className="btn-apple-primary large" href={DOWNLOAD_INSTALLER}>
+                      <Icon name="download" size={17} /> Download Installer (19.4 MB)
                     </a>
-                    <a
-                      href={RELEASE}
-                      className="release-link"
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      Release Notes <Icon name="arrow" size={14} />
+                    <a className="btn-apple-glass" href={RELEASE} target="_blank" rel="noreferrer">
+                      Release Notes (v1.0.0) <Icon name="chevronRight" size={14} />
                     </a>
                   </div>
-                  <div className="checksum-box">
-                    <span>SHA-256 Checksum:</span>
+                  <div className="hash-row">
+                    <span>SHA-256:</span>
                     <code>{SHA256_INSTALLER}</code>
                     <button
-                      className="btn-tiny"
+                      className="btn-hash"
                       onClick={() =>
-                        copyToClipboard(
+                        copy(
                           `Get-FileHash .\\PDFix-Setup-v1.0.0-x64.exe -Algorithm SHA256`,
                           "hash-inst",
                         )
                       }
                     >
-                      <Icon name="copy" size={12} />{" "}
-                      {copiedId === "hash-inst"
-                        ? "Copied PowerShell command!"
-                        : "Copy Verify Cmd"}
+                      <Icon name="copy" size={11} /> {copiedId === "hash-inst" ? "Copied" : "Verify Cmd"}
                     </button>
                   </div>
                 </div>
               )}
 
-              {activeDownloadTab === "portable" && (
-                <div className="dl-tab-content">
-                  <div className="download-actions">
-                    <a
-                      className="button button-primary button-large"
-                      href={DOWNLOAD_PORTABLE}
-                    >
-                      <Icon name="download" size={18} /> Download Portable (.exe)
-                      <Icon name="arrow" size={16} />
+              {downloadTab === "portable" && (
+                <div className="dl-pane">
+                  <div className="dl-action-row">
+                    <a className="btn-apple-primary large" href={DOWNLOAD_PORTABLE}>
+                      <Icon name="download" size={17} /> Download Standalone Portable (67.1 MB)
                     </a>
-                    <span className="portable-note">
-                      Runs directly without installation or admin privileges.
-                    </span>
+                    <span className="dl-note">Runs immediately without installation or admin privileges.</span>
                   </div>
-                  <div className="checksum-box">
-                    <span>SHA-256 Checksum:</span>
+                  <div className="hash-row">
+                    <span>SHA-256:</span>
                     <code>{SHA256_PORTABLE}</code>
                     <button
-                      className="btn-tiny"
+                      className="btn-hash"
                       onClick={() =>
-                        copyToClipboard(
+                        copy(
                           `Get-FileHash .\\PDFix.exe -Algorithm SHA256`,
                           "hash-port",
                         )
                       }
                     >
-                      <Icon name="copy" size={12} />{" "}
-                      {copiedId === "hash-port"
-                        ? "Copied PowerShell command!"
-                        : "Copy Verify Cmd"}
+                      <Icon name="copy" size={11} /> {copiedId === "hash-port" ? "Copied" : "Verify Cmd"}
                     </button>
                   </div>
                 </div>
               )}
 
-              {activeDownloadTab === "linux-mac" && (
-                <div className="dl-tab-content">
-                  <p className="compile-note">
-                    Build natively with Rust 1.95+ or stable compiler:
-                  </p>
-                  <pre className="terminal-code mini">
-                    {`# Clone repository\ngit clone https://github.com/SarthAyush/PDFix-App.git\ncd PDFix-App\n\n# Run native desktop app\ncargo run --release -p pdfcraft\n\n# Or install CLI automation\ncargo install --path apps/pdfcraft-cli`}
+              {downloadTab === "source" && (
+                <div className="dl-pane">
+                  <pre className="source-code">
+{`# Clone and run with Cargo
+git clone https://github.com/SarthAyush/PDFix-App.git
+cd PDFix-App
+cargo run --release -p pdfcraft`}
                   </pre>
-                  <span className="req-note">
-                    Dependencies: Visual Studio C++ (Win) · build-essential
-                    libx11-dev libfontconfig1-dev (Linux) · Xcode Tools (macOS)
-                  </span>
+                  <span className="dl-note">Requirements: Rust 1.95+ or stable compiler · C/C++ build tools</span>
                 </div>
               )}
             </div>
-
-            <div className="download-art">
-              <div className="art-grid" />
-              <div className="art-halo halo-1" />
-              <div className="art-halo halo-2" />
-              <img src="/pdfix-logo.png" alt="PDFix app icon" />
-              <div className="art-caption">
-                <span>PDFIX WORKBENCH</span>
-                <small>VERSION 1.0.0 · RUST</small>
-              </div>
-            </div>
           </div>
         </section>
 
-        {/* Creator Section */}
-        <section className="creator-section section-wrap" id="creator">
-          <div className="creator-card" data-reveal>
-            <div className="creator-monogram" aria-hidden="true">
-              SS
-            </div>
-            <div className="creator-copy">
-              <div className="eyebrow">
-                <span className="eyebrow-num">
-                  08 / THE PERSON BEHIND PDFIX
-                </span>
-              </div>
-              <h2>
-                Built with curiosity.
-                <br />
-                <span className="muted-title">Designed for real work.</span>
-              </h2>
-              <p>
-                I'm <strong>Sarthak Saxena</strong>, the creator and maintainer.
-                I build software with a focus on high-performance tools,
-                thoughtful engineering, and making complex workflows feel
-                seamless and private. PDFix is my effort to give everyone an
-                exceptional, open-source PDF engineering workbench.
+        {/* Creator Profile */}
+        <section className="creator-section">
+          <div className="glass-creator-card" data-reveal>
+            <div className="creator-info">
+              <span className="section-eyebrow">CREATOR & MAINTAINER</span>
+              <h2 className="creator-title">Built with curiosity.</h2>
+              <p className="creator-bio">
+                Created by <strong>Sarthak Saxena</strong> (<a href={PROFILE} target="_blank" rel="noreferrer">@SarthAyush</a>).
+                Dedicated to building high-performance, memory-safe software and giving people powerful document engineering tools without cloud friction.
               </p>
-              <p>
-                PDFix is completely free, open-source under dual MIT / Apache
-                2.0 licenses, and built with love in pure Rust. Explore the
-                codebase, contribute features, and star the repository!
-              </p>
-              <div className="creator-actions">
-                <a
-                  className="button button-quiet"
-                  href={PROFILE}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <Icon name="github" size={16} /> GitHub profile{" "}
-                  <Icon name="arrow" size={14} />
+              <div className="creator-links">
+                <a className="btn-apple-quiet" href={PROFILE} target="_blank" rel="noreferrer">
+                  <Icon name="github" size={15} /> GitHub Profile
                 </a>
-                <a
-                  className="text-link"
-                  href={REPO}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Explore PDFix Source <Icon name="arrow" size={15} />
+                <a className="btn-apple-quiet" href={REPO} target="_blank" rel="noreferrer">
+                  Explore Repository
                 </a>
               </div>
             </div>
-            <div className="creator-side">
-              <span className="creator-side-label">MAINTAINER</span>
-              <img src="/pdfix-logo.png" alt="PDFix logo" />
+            <div className="creator-badge-box">
+              <img src="/pdfix-logo.png" alt="" width="80" height="80" />
               <strong>Sarthak Saxena</strong>
-              <span>Software Engineer & Creator</span>
-              <span className="creator-divider" />
-              <span className="creator-tech">
-                RUST · PDF ENGINE · OPEN SOURCE
-              </span>
+              <span>Software Engineer</span>
+              <small>Rust · PDF Engineering</small>
             </div>
           </div>
         </section>
 
-        {/* FAQ Section */}
-        <section className="faq-section section-wrap" id="faq">
-          <div className="faq-intro" data-reveal>
-            <div className="eyebrow">
-              <span className="eyebrow-num">09 / GOOD TO KNOW</span>
-            </div>
-            <h2>
-              Fair questions.
-              <br />
-              <span className="muted-title">Straight answers.</span>
-            </h2>
-            <p>
-              Everything you need to know about PDFix's licensing, privacy, and
-              capabilities.
-            </p>
+        {/* Clean FAQ */}
+        <section className="faq-section">
+          <div className="section-header" data-reveal>
+            <span className="section-eyebrow">QUESTIONS</span>
+            <h2 className="section-title">Frequently asked.</h2>
           </div>
-          <div className="faq-list" data-reveal>
-            {faqs.map(([q, a], i) => (
-              <div
-                className={`faq-item ${activeFaq === i ? "faq-active" : ""}`}
-                key={q}
-              >
+
+          <div className="faq-glass-list" data-reveal>
+            {faqs.map((faq, i) => (
+              <div className={`faq-card ${activeFaq === i ? "expanded" : ""}`} key={i}>
                 <button
-                  className="faq-question"
-                  aria-expanded={activeFaq === i}
-                  onClick={() => setActiveFaq(activeFaq === i ? -1 : i)}
+                  className="faq-trigger"
+                  onClick={() => setActiveFaq(activeFaq === i ? null : i)}
                 >
-                  <span>
-                    <i>0{i + 1}</i>
-                    {q}
-                  </span>
-                  <b>{activeFaq === i ? "−" : "+"}</b>
+                  <span>{faq.q}</span>
+                  <span className="faq-plus">{activeFaq === i ? "−" : "+"}</span>
                 </button>
-                <div
-                  className="faq-answer"
-                  style={{ gridTemplateRows: activeFaq === i ? "1fr" : "0fr" }}
-                >
-                  <div>
-                    <p>{a}</p>
+                {activeFaq === i && (
+                  <div className="faq-content">
+                    <p>{faq.a}</p>
                   </div>
-                </div>
+                )}
               </div>
             ))}
           </div>
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="footer">
-        <div className="footer-main section-wrap">
-          <div className="footer-brand">
-            <a className="brand" href="#top">
-              <img src="/pdfix-logo.png" alt="" />
+      {/* Apple-Style Minimalist Footer */}
+      <footer className="apple-footer">
+        <div className="footer-container">
+          <div className="footer-top">
+            <div className="footer-brand-side">
+              <img src="/pdfix-logo.png" alt="" width="22" height="22" />
               <span>PDFix</span>
-            </a>
-            <p>
-              The pure Rust PDF engineering workbench.
-              <br />
-              Fast, private, and built for real work.
-            </p>
-          </div>
-          <div className="footer-links">
-            <div>
-              <span className="footer-label">EXPLORE</span>
-              <a href="#features">Features</a>
-              <a href="#lab">Studio Lab</a>
-              <a href="#compare">Comparison</a>
-              <a href="#cli-mcp">CLI & MCP</a>
-              <a href="#architecture">Architecture</a>
+              <p>The PDF engineering workbench rebuilt in pure Rust.</p>
             </div>
-            <div>
-              <span className="footer-label">GET PDFIX</span>
-              <a href={DOWNLOAD_INSTALLER}>Windows Installer</a>
-              <a href={DOWNLOAD_PORTABLE}>Portable Standalone</a>
-              <a href={RELEASE} target="_blank" rel="noreferrer">
-                Release Notes (v1.0.0)
-              </a>
-              <a href={REPO} target="_blank" rel="noreferrer">
-                GitHub Repository
-              </a>
+            <div className="footer-links-grid">
+              <div>
+                <strong>PRODUCT</strong>
+                <a href="#overview">Overview</a>
+                <a href="#features">Features</a>
+                <a href="#lab">Studio Lab</a>
+                <a href="#compare">Comparison</a>
+              </div>
+              <div>
+                <strong>RESOURCES</strong>
+                <a href={DOWNLOAD_INSTALLER}>Windows Installer</a>
+                <a href={DOWNLOAD_PORTABLE}>Portable Standalone</a>
+                <a href={RELEASE} target="_blank" rel="noreferrer">Release Notes</a>
+                <a href={REPO} target="_blank" rel="noreferrer">GitHub Repo</a>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="footer-bottom section-wrap">
-          <span>
-            © {new Date().getFullYear()} PDFix. Configured by Sarthak Saxena (@SarthAyush).
-          </span>
-          <span className="footer-license">
-            Dual MIT / Apache-2.0 License <span>✳</span>
-          </span>
+          <div className="footer-bottom">
+            <span>Copyright © {new Date().getFullYear()} PDFix. Configured by Sarthak Saxena (@SarthAyush).</span>
+            <span>Dual-licensed under MIT / Apache-2.0</span>
+          </div>
         </div>
       </footer>
-
-      {/* Floating Download Action */}
-      <a
-        className="floating-download"
-        href={DOWNLOAD_INSTALLER}
-        aria-label="Download PDFix for Windows"
-      >
-        <Icon name="download" size={17} />
-        <span>Download v1.0.0</span>
-      </a>
-    </>
+    </div>
   );
 }
 
