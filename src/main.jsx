@@ -110,31 +110,13 @@ function Icon({ name, size = 16, stroke = 1.8, className = "" }) {
     github: (
       <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
     ),
-    spark: (
-      <>
-        <path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z" />
-        <path d="m19 16 .8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8L19 16z" />
-      </>
+    command: (
+      <path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z" />
     ),
-    zap: <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />,
-    x: <line x1="18" y1="6" x2="6" y2="18" />,
-    menu: (
+    tree: (
       <>
-        <line x1="3" y1="12" x2="21" y2="12" />
-        <line x1="3" y1="6" x2="21" y2="6" />
-        <line x1="3" y1="18" x2="21" y2="18" />
-      </>
-    ),
-    file: (
-      <>
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-        <polyline points="14 2 14 8 20 8" />
-      </>
-    ),
-    pen: (
-      <>
-        <path d="m18 2 4 4L8 20l-5 1 1-5L18 2z" />
-        <path d="m14.5 5.5 4 4" />
+        <line x1="12" y1="2" x2="12" y2="22" />
+        <path d="M12 7h5a3 3 0 0 1 0 6H7a3 3 0 0 0 0 6h5" />
       </>
     ),
     ruler: (
@@ -145,17 +127,16 @@ function Icon({ name, size = 16, stroke = 1.8, className = "" }) {
         <line x1="8.5" y1="6.5" x2="10.5" y2="4.5" />
       </>
     ),
-    tree: (
+    x: <line x1="18" y1="6" x2="6" y2="18" />,
+    image: (
       <>
-        <line x1="12" y1="2" x2="12" y2="22" />
-        <path d="M12 7h5a3 3 0 0 1 0 6H7a3 3 0 0 0 0 6h5" />
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+        <circle cx="8.5" cy="8.5" r="1.5" />
+        <polyline points="21 15 16 10 5 21" />
       </>
     ),
-    command: (
-      <path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z" />
-    ),
   };
-  return <svg {...common}>{paths[name] || paths.file}</svg>;
+  return <svg {...common}>{paths[name] || paths.terminal}</svg>;
 }
 
 function formatBytes(bytes) {
@@ -189,13 +170,6 @@ const DEFAULT_RELEASE = {
   name: "PDFcatalyst v1.0.0 — Pure Rust Architecture",
   published_at: "2026-10-16T11:41:07Z",
   html_url: "https://github.com/SarthAyush/PDFcatalyst-App/releases/tag/v1.0.0",
-  body: `### What's New in PDFCatalyst v1.0.0
-- **Pure Rust Core Engine**: Clean-room ISO 32000-2 parser with \`forbid(unsafe_code)\` memory safety guarantees.
-- **Hardware Acceleration**: 60+ FPS vector rendering via \`wgpu\` and OpenGL fallback for smooth pan and zoom.
-- **Deep Structural Redaction**: Irreversible byte-level object stream and font subroutine purging.
-- **Model Context Protocol (MCP)**: Native integration for AI agents (Claude Desktop, Cursor) without uploading files.
-- **Embedded Offline OCR**: Local neural character recognition running 100% on-device.
-- **Atomic File Transactions**: Zero file corruption on system crash or sudden power loss.`,
   assets: [
     {
       name: "PDFcatalyst-Setup-v1.0.0-x64.exe",
@@ -282,9 +256,128 @@ function useGitHubReleases() {
 }
 
 /* ==========================================================================
-   Raycast / Linear Style Command Palette (⌘K)
+   Cute Floating Mascot Component (Moves & Reacts on Scroll, No Emojis)
    ========================================================================== */
-function CommandPalette({ isOpen, onClose, onSelectAction }) {
+function FloatingCuteMascot() {
+  const [scrollY, setScrollY] = useState(0);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [scrollDir, setScrollDir] = useState("down");
+  const [message, setMessage] = useState("Ready to process your PDFs!");
+  const [isWaving, setIsWaving] = useState(false);
+  const [minimized, setMinimized] = useState(false);
+  const lastY = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const cur = window.scrollY;
+      const total = document.documentElement.scrollHeight - window.innerHeight;
+      const pct = total > 0 ? Math.min(100, Math.max(0, (cur / total) * 100)) : 0;
+      setScrollProgress(pct);
+
+      if (cur > lastY.current + 3) {
+        setScrollDir("down");
+      } else if (cur < lastY.current - 3) {
+        setScrollDir("up");
+      }
+      lastY.current = cur;
+      setScrollY(cur);
+
+      // Contextual feedback based on scroll position
+      if (cur < 350) {
+        setMessage("Welcome! 100% offline & memory-safe.");
+      } else if (cur < 950) {
+        setMessage("Check out the real desktop interface below!");
+      } else if (cur < 1700) {
+        setMessage("wgpu hardware acceleration at 60 FPS!");
+      } else if (cur < 2600) {
+        setMessage("Test true byte stream redaction live!");
+      } else if (cur < 3400) {
+        setMessage("Direct MCP connection for Claude & Cursor!");
+      } else {
+        setMessage("Ready to run standalone on your machine!");
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const triggerReaction = () => {
+    setIsWaving(true);
+    setMessage("Fast, private, and zero cloud!");
+    setTimeout(() => setIsWaving(false), 1400);
+  };
+
+  const tiltAngle = scrollDir === "down" ? 8 : -8;
+  const bobbing = Math.sin(scrollY / 35) * 10;
+
+  if (minimized) {
+    return (
+      <div className="mascot-minimized-pill" onClick={() => setMinimized(false)} title="Restore Mascot Assistant">
+        <img src="/cute-mascot.png" alt="Mascot" width="28" height="28" />
+        <span className="min-label">Assistant</span>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="floating-mascot-container"
+      style={{
+        transform: `translateY(${bobbing}px) rotate(${tiltAngle}deg)`,
+      }}
+    >
+      {/* Contextual Speech Bubble */}
+      <div className="mascot-speech-bubble">
+        <span className="speech-text">{message}</span>
+        <button
+          className="btn-bubble-close"
+          onClick={(e) => {
+            e.stopPropagation();
+            setMinimized(true);
+          }}
+          title="Minimize assistant"
+        >
+          <Icon name="x" size={10} />
+        </button>
+      </div>
+
+      {/* Mascot Graphic with Interactive Hover & Click */}
+      <div
+        className={`mascot-avatar-wrap ${isWaving ? "reacting" : ""}`}
+        onClick={triggerReaction}
+        title="Click to interact with the PDFCatalyst Assistant!"
+      >
+        <div className="mascot-thruster-aura" />
+        <img
+          src="/cute-mascot.png"
+          alt="Cute PDFCatalyst Assistant Mascot"
+          className="mascot-img"
+          width="90"
+          height="90"
+        />
+
+        {/* Scroll Progress Ring around Mascot */}
+        <svg className="mascot-progress-ring" viewBox="0 0 100 100">
+          <circle className="progress-bg" cx="50" cy="50" r="45" />
+          <circle
+            className="progress-bar"
+            cx="50"
+            cy="50"
+            r="45"
+            strokeDasharray="283"
+            strokeDashoffset={283 - (283 * scrollProgress) / 100}
+          />
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+/* ==========================================================================
+   Raycast Command Palette (⌘K)
+   ========================================================================== */
+function CommandPalette({ isOpen, onClose }) {
   const [query, setQuery] = useState("");
   const inputRef = useRef(null);
 
@@ -313,9 +406,9 @@ function CommandPalette({ isOpen, onClose, onSelectAction }) {
   const actions = [
     { id: "dl-inst", category: "Download", title: "Download Windows Installer (.exe)", shortcut: "↵", link: DOWNLOAD_INSTALLER },
     { id: "dl-port", category: "Download", title: "Download Standalone Portable (.exe)", shortcut: "P", link: DOWNLOAD_PORTABLE },
+    { id: "feat-screen", category: "Showcase", title: "View Desktop Workbench Screenshot", shortcut: "S", hash: "#app-preview" },
     { id: "feat-mcp", category: "Developer", title: "Configure Claude Desktop MCP Server", shortcut: "M", hash: "#developers" },
     { id: "feat-lab", category: "Interactive", title: "Open True Redaction Test Studio", shortcut: "R", hash: "#lab" },
-    { id: "feat-cos", category: "Interactive", title: "Inspect ISO 32000-2 COS Syntax Tree", shortcut: "C", hash: "#lab" },
     { id: "feat-cmp", category: "Benchmark", title: "Compare vs Adobe Acrobat Pro", shortcut: "B", hash: "#compare" },
     { id: "src-repo", category: "Open Source", title: "View Source on GitHub", shortcut: "G", link: "https://github.com/SarthAyush/PDFcatalyst-App" },
   ];
@@ -381,11 +474,11 @@ function CommandPalette({ isOpen, onClose, onSelectAction }) {
 }
 
 /* ==========================================================================
-   Split Hero Interactive Raycast-Style Workbench Window
+   Split Hero Interactive Workbench (With Live Screenshot Toggle!)
    ========================================================================== */
 function SplitHeroWorkbench() {
+  const [viewMode, setViewMode] = useState("screenshot"); // "screenshot" or "telemetry"
   const [activeTab, setActiveTab] = useState(0);
-  const [copied, setCopied] = useState(false);
 
   const tabs = [
     { name: "Parser", badge: "0.38ms", icon: "cpu" },
@@ -396,129 +489,151 @@ function SplitHeroWorkbench() {
 
   return (
     <div className="linear-workbench-shell">
-      {/* Animated Liquid Silver Border Beam */}
       <div className="border-beam" />
 
       <div className="linear-workbench-card">
         {/* Terminal Header */}
         <div className="bench-header">
           <div className="bench-dots">
-            <span className="dot" />
-            <span className="dot" />
-            <span className="dot" />
+            <span className="dot red" />
+            <span className="dot yellow" />
+            <span className="dot green" />
           </div>
           <div className="bench-title">
-            <span className="mono-label">pdfcraft --engine=wgpu</span>
-            <span className="bench-file-pill">AGREEMENT_2026.pdf</span>
+            <span className="mono-label">PDFCatalyst Desktop</span>
+            <span className="bench-file-pill">Native v1.0.0</span>
           </div>
-          <div className="bench-telemetry">
-            <span className="hud-pill"><span className="pulse-dot green" /> 60 FPS</span>
-            <span className="hud-pill">14.2 MB</span>
-          </div>
-        </div>
-
-        {/* Tab Controls */}
-        <div className="bench-subnav">
-          {tabs.map((t, idx) => (
+          <div className="bench-view-switch">
             <button
-              key={t.name}
-              className={`bench-tab ${activeTab === idx ? "active" : ""}`}
-              onClick={() => setActiveTab(idx)}
+              className={`switch-mode-btn ${viewMode === "screenshot" ? "active" : ""}`}
+              onClick={() => setViewMode("screenshot")}
+              title="Show Actual Desktop Screenshot"
             >
-              <Icon name={t.icon} size={13} />
-              <span>{t.name}</span>
-              <span className="tab-pill">{t.badge}</span>
+              <Icon name="image" size={12} /> App UI
             </button>
-          ))}
+            <button
+              className={`switch-mode-btn ${viewMode === "telemetry" ? "active" : ""}`}
+              onClick={() => setViewMode("telemetry")}
+              title="Show Telemetry Streams"
+            >
+              <Icon name="terminal" size={12} /> Streams
+            </button>
+          </div>
         </div>
 
-        {/* Active Stage Visual */}
-        <div className="bench-canvas-viewport">
-          {activeTab === 0 && (
-            <div className="bench-pane pane-parser">
-              <div className="pane-telemetry-grid">
-                <div className="tele-box">
-                  <span className="tele-label">SPEC CONFORMANCE</span>
-                  <strong className="tele-val silver">ISO 32000-2</strong>
-                  <span className="tele-sub">Strict clean-room AST</span>
-                </div>
-                <div className="tele-box">
-                  <span className="tele-label">FRAME RASTER LATENCY</span>
-                  <strong className="tele-val green">0.38 ms</strong>
-                  <span className="tele-sub">Direct wgpu compute pipeline</span>
-                </div>
-                <div className="tele-box">
-                  <span className="tele-label">MEMORY AUDIT</span>
-                  <strong className="tele-val silver">0 Buffer Flaws</strong>
-                  <span className="tele-sub">forbid(unsafe_code) active</span>
-                </div>
-              </div>
-              <div className="bench-stream-preview">
-                <div className="code-line"><span className="num">01</span><span className="kw">1 0 obj</span> &lt;&lt; /Type /Catalog /Pages 2 0 R &gt;&gt;</div>
-                <div className="code-line"><span className="num">02</span><span className="kw">2 0 obj</span> &lt;&lt; /Type /Pages /Count 3 /Kids [3 0 R] &gt;&gt;</div>
-                <div className="code-line active"><span className="num">03</span><span className="kw">3 0 obj</span> &lt;&lt; /Type /Page /Contents 4 0 R &gt;&gt; <span className="tag-gpu">✓ Hardware GPU Rendered</span></div>
-              </div>
+        {/* View Mode 1: Real Application Screenshot */}
+        {viewMode === "screenshot" ? (
+          <div className="bench-screenshot-viewport">
+            <div className="screenshot-inner-wrap">
+              <img
+                src="/app-screenshot.png"
+                alt="PDFCatalyst Actual Desktop Workbench Screenshot"
+                className="bench-actual-screenshot"
+              />
+              <div className="screenshot-sheen-overlay" />
             </div>
-          )}
-
-          {activeTab === 1 && (
-            <div className="bench-pane pane-redact">
-              <div className="redact-stream-box">
-                <div className="stream-header">
-                  <span>BYTE PURGE VERIFICATION</span>
-                  <span className="status-good">IRREVERSIBLE</span>
-                </div>
-                <div className="stream-diff-line">
-                  <span className="label-del">ORIGINAL:</span>
-                  <code>0x004F: 53 53 4E 3A 20 39 34 38 2D 32 31 2D 30 38 31 34</code>
-                </div>
-                <div className="stream-diff-line active">
-                  <span className="label-add">PDFCATALYST:</span>
-                  <code>0x004F: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</code>
-                </div>
-                <p className="redact-note">
-                  Font subroutines & XREF entries purged. Underlying text is completely unextractable from the raw stream.
-                </p>
-              </div>
+            <div className="screenshot-footer-badge">
+              <span>Clean Room Rust GUI</span>
+              <span className="dot-sep">•</span>
+              <span>All Tools Suite</span>
+              <span className="dot-sep">•</span>
+              <span>Drop Any PDF</span>
             </div>
-          )}
+          </div>
+        ) : (
+          /* View Mode 2: Interactive Telemetry Stages */
+          <>
+            <div className="bench-subnav">
+              {tabs.map((t, idx) => (
+                <button
+                  key={t.name}
+                  className={`bench-tab ${activeTab === idx ? "active" : ""}`}
+                  onClick={() => setActiveTab(idx)}
+                >
+                  <Icon name={t.icon} size={13} />
+                  <span>{t.name}</span>
+                  <span className="tab-pill">{t.badge}</span>
+                </button>
+              ))}
+            </div>
 
-          {activeTab === 2 && (
-            <div className="bench-pane pane-sign">
-              <div className="pki-certificate-card">
-                <div className="cert-top">
-                  <Icon name="shield" size={18} />
-                  <div>
-                    <strong>PKI X.509 Cryptographic Certificate</strong>
-                    <span>SHA-256 with RSA-4096 / Ed25519</span>
+            <div className="bench-canvas-viewport">
+              {activeTab === 0 && (
+                <div className="bench-pane pane-parser">
+                  <div className="pane-telemetry-grid">
+                    <div className="tele-box">
+                      <span className="tele-label">CONFORMANCE</span>
+                      <strong className="tele-val silver">ISO 32000-2</strong>
+                      <span className="tele-sub">Clean-room AST</span>
+                    </div>
+                    <div className="tele-box">
+                      <span className="tele-label">RASTER LATENCY</span>
+                      <strong className="tele-val green">0.38 ms</strong>
+                      <span className="tele-sub">Direct wgpu compute</span>
+                    </div>
+                    <div className="tele-box">
+                      <span className="tele-label">MEMORY AUDIT</span>
+                      <strong className="tele-val silver">0 Buffer Flaws</strong>
+                      <span className="tele-sub">forbid(unsafe_code)</span>
+                    </div>
+                  </div>
+                  <div className="bench-stream-preview">
+                    <div className="code-line"><span className="num">01</span><span className="kw">1 0 obj</span> &lt;&lt; /Type /Catalog /Pages 2 0 R &gt;&gt;</div>
+                    <div className="code-line"><span className="num">02</span><span className="kw">2 0 obj</span> &lt;&lt; /Type /Pages /Count 3 /Kids [3 0 R] &gt;&gt;</div>
+                    <div className="code-line active"><span className="num">03</span><span className="kw">3 0 obj</span> &lt;&lt; /Type /Page /Contents 4 0 R &gt;&gt; <span className="tag-gpu">✓ Hardware GPU</span></div>
                   </div>
                 </div>
-                <div className="cert-meta">
-                  <div className="meta-row"><span>Signer:</span> <strong>Sarthak Saxena (Verified Engineering Core)</strong></div>
-                  <div className="meta-row"><span>RFC 3161 Timestamp:</span> <strong>Verified Trusted UTC Authority</strong></div>
-                  <div className="meta-row"><span>Integrity State:</span> <strong className="green">Valid · 0 Alterations Since Signing</strong></div>
-                </div>
-              </div>
-            </div>
-          )}
+              )}
 
-          {activeTab === 3 && (
-            <div className="bench-pane pane-mcp">
-              <div className="mcp-terminal-snippet">
-                <div className="snippet-head">
-                  <span>claude_desktop_config.json</span>
-                  <button
-                    className="btn-tiny-copy"
-                    onClick={() => {
-                      navigator.clipboard.writeText(`{\n  "mcpServers": {\n    "pdfcatalyst": {\n      "command": "pdfcraft-cli",\n      "args": ["mcp", "--root", "/local/docs"]\n    }\n  }\n}`);
-                      setCopied(true);
-                      setTimeout(() => setCopied(false), 2000);
-                    }}
-                  >
-                    <Icon name="copy" size={11} /> {copied ? "Copied" : "Copy"}
-                  </button>
+              {activeTab === 1 && (
+                <div className="bench-pane pane-redact">
+                  <div className="redact-stream-box">
+                    <div className="stream-header">
+                      <span>BYTE PURGE VERIFICATION</span>
+                      <span className="status-good">IRREVERSIBLE</span>
+                    </div>
+                    <div className="stream-diff-line">
+                      <span className="label-del">ORIGINAL:</span>
+                      <code>0x004F: 53 53 4E 3A 20 39 34 38 2D 32 31 2D 30 38 31 34</code>
+                    </div>
+                    <div className="stream-diff-line active">
+                      <span className="label-add">PDFCATALYST:</span>
+                      <code>0x004F: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</code>
+                    </div>
+                    <p className="redact-note">
+                      Font subroutines & XREF entries purged. Underlying text is completely unextractable from the raw stream.
+                    </p>
+                  </div>
                 </div>
-                <pre>
+              )}
+
+              {activeTab === 2 && (
+                <div className="bench-pane pane-sign">
+                  <div className="pki-certificate-card">
+                    <div className="cert-top">
+                      <Icon name="shield" size={18} />
+                      <div>
+                        <strong>PKI X.509 Cryptographic Certificate</strong>
+                        <span>SHA-256 with RSA-4096 / Ed25519</span>
+                      </div>
+                    </div>
+                    <div className="cert-meta">
+                      <div className="meta-row"><span>Signer:</span> <strong>Sarthak Saxena (Verified Engineering Core)</strong></div>
+                      <div className="meta-row"><span>RFC 3161 Timestamp:</span> <strong>Verified Trusted UTC Authority</strong></div>
+                      <div className="meta-row"><span>Integrity State:</span> <strong className="green">Valid · 0 Alterations Since Signing</strong></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 3 && (
+                <div className="bench-pane pane-mcp">
+                  <div className="mcp-terminal-snippet">
+                    <div className="snippet-head">
+                      <span>claude_desktop_config.json</span>
+                      <span className="status-good">stdio JSON-RPC</span>
+                    </div>
+                    <pre>
 {`{
   "mcpServers": {
     "pdfcatalyst": {
@@ -527,22 +642,23 @@ function SplitHeroWorkbench() {
     }
   }
 }`}
-                </pre>
+                    </pre>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="bench-footer">
+              <div className="foot-left">
+                <span className="dot pulse" />
+                <span>Air-Gapped: Zero network egress sockets open</span>
+              </div>
+              <div className="foot-right">
+                <span>Dual MIT / Apache 2.0</span>
               </div>
             </div>
-          )}
-        </div>
-
-        {/* Console Footing */}
-        <div className="bench-footer">
-          <div className="foot-left">
-            <span className="dot pulse" />
-            <span>Air-Gapped: Zero network egress sockets open</span>
-          </div>
-          <div className="foot-right">
-            <span>Dual MIT / Apache 2.0</span>
-          </div>
-        </div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -619,7 +735,7 @@ function LinearTelemetryGrid() {
 }
 
 /* ==========================================================================
-   Main Application Component (Linear / Raycast Monochrome Design)
+   Main Application Component
    ========================================================================== */
 function App() {
   const { releases, latestRelease, isLoading, lastSynced, syncStatus, refresh } =
@@ -649,9 +765,6 @@ function App() {
   const installerSha = installerAsset?.digest
     ? installerAsset.digest.replace(/^sha256:/i, "")
     : SHA256_INSTALLER;
-  const portableSha = portableAsset?.digest
-    ? portableAsset.digest.replace(/^sha256:/i, "")
-    : SHA256_PORTABLE;
   const currentVersion = latestRelease.tag_name || "v1.0.0";
 
   const [theme, setTheme] = useState(() => {
@@ -713,6 +826,9 @@ function App() {
       <div className="linear-subpixel-grid" aria-hidden="true" />
       <div className="metallic-glow-spotlight" aria-hidden="true" />
 
+      {/* Floating Cute Cartoon Mascot Assistant */}
+      <FloatingCuteMascot />
+
       {/* Raycast Minimalist Header */}
       <header className="linear-nav">
         <div className="linear-nav-inner">
@@ -733,6 +849,7 @@ function App() {
           </div>
 
           <div className="linear-nav-right">
+            <a href="#app-preview" className="nav-link">Screenshot</a>
             <a href="#features" className="nav-link">Capabilities</a>
             <a href="#lab" className="nav-link">Studio Lab</a>
             <a href="#compare" className="nav-link">Benchmark</a>
@@ -769,7 +886,6 @@ function App() {
           <div className="split-hero-container">
             {/* Left Column: Value Proposition & Telemetry */}
             <div className="split-hero-left">
-              {/* Continuous Delivery Pulse Tag */}
               <div className="hero-status-pill">
                 <span className="beacon-dot" />
                 <span className="status-text">OFFICIAL PRODUCTION STREAM</span>
@@ -777,20 +893,17 @@ function App() {
                 <span className="version-highlight">{currentVersion} LIVE</span>
               </div>
 
-              {/* Bold Metallic Headline */}
               <h1 className="hero-headline-metallic">
                 Precision PDF engineering.
                 <br />
                 <span className="shimmer-metallic">Pure Rust. Zero cloud.</span>
               </h1>
 
-              {/* Precise Technical Subtitle */}
               <p className="hero-description-technical">
                 The high-performance PDF workbench built strictly with memory-safe Rust.
                 Hardware-accelerated rendering, deep byte redaction, offline neural OCR, and native AI Model Context Protocol.
               </p>
 
-              {/* Primary Call to Actions */}
               <div className="hero-cta-linear-row">
                 <a href={installerUrl} className="btn-metallic-primary">
                   <Icon name="download" size={16} />
@@ -804,7 +917,6 @@ function App() {
                 </button>
               </div>
 
-              {/* System Detection & Air-Gapped Trust Strip */}
               <div className="hero-telemetry-hud">
                 <div className="hud-metric">
                   <span className="hud-label">ENGINE ARCHITECTURE</span>
@@ -833,6 +945,62 @@ function App() {
         </section>
 
         {/* ==========================================================================
+           Dedicated Desktop App Screenshot Showcase
+           ========================================================================== */}
+        <section className="section-container" id="app-preview">
+          <div className="section-head-minimal">
+            <span className="eyebrow-chip">DESKTOP WORKBENCH INTERFACE</span>
+            <h2 className="title-metallic">The real desktop experience.</h2>
+            <p className="subtitle-subtle">
+              Zero web latency. Full native performance. Every professional tool unified in one clean, distraction-free environment.
+            </p>
+          </div>
+
+          <div className="screenshot-showcase-frame">
+            <div className="screenshot-frame-header">
+              <div className="window-dots">
+                <span className="dot red" />
+                <span className="dot yellow" />
+                <span className="dot green" />
+              </div>
+              <div className="window-center-title">
+                <img src="/pdfix-logo.png" alt="" width="15" height="15" />
+                <span>PDFCatalyst — Configured by Sarthak</span>
+              </div>
+              <span className="window-arch-badge">x86_64 Native GUI</span>
+            </div>
+
+            <div className="screenshot-img-container">
+              <img
+                src="/app-screenshot.png"
+                alt="PDFCatalyst Full Application User Interface"
+                className="showcase-real-screenshot"
+              />
+              <div className="screenshot-vignette-sheen" />
+            </div>
+
+            <div className="screenshot-feature-chips-strip">
+              <div className="chip-item">
+                <Icon name="check" size={13} className="chip-icon" />
+                <span>One-Click Quick Action Tools</span>
+              </div>
+              <div className="chip-item">
+                <Icon name="check" size={13} className="chip-icon" />
+                <span>Interactive Design Templates</span>
+              </div>
+              <div className="chip-item">
+                <Icon name="check" size={13} className="chip-icon" />
+                <span>Batch Studio Processing</span>
+              </div>
+              <div className="chip-item">
+                <Icon name="check" size={13} className="chip-icon" />
+                <span>Drag & Drop File Staging</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ==========================================================================
            Telemetry Capabilities Grid (Linear Style)
            ========================================================================== */}
         <section className="section-container" id="features">
@@ -849,7 +1017,7 @@ function App() {
 
         {/* ==========================================================================
            Interactive Studio Lab (Raycast Technical Console)
-           ========================================================================== */ }
+           ========================================================================== */}
         <section className="section-container" id="lab">
           <div className="section-head-minimal">
             <span className="eyebrow-chip">INTERACTIVE LABORATORY</span>
@@ -860,7 +1028,6 @@ function App() {
           </div>
 
           <div className="raycast-lab-console">
-            {/* Segmented Pill Selector */}
             <div className="lab-selector-bar">
               <button
                 className={`selector-pill ${labTab === "redact" ? "active" : ""}`}
@@ -882,7 +1049,6 @@ function App() {
               </button>
             </div>
 
-            {/* Studio Body */}
             <div className="lab-display-frame">
               {labTab === "redact" && (
                 <div className="lab-module-redact">
@@ -922,10 +1088,10 @@ function App() {
                         className="btn-clipboard-verify"
                         onClick={() => {
                           if (redactedState) {
-                            alert("🛡️ PROTECTED: 0 bytes recovered. Text tokens are physically destroyed from the stream!");
+                            alert("PROTECTED: 0 bytes recovered. Text tokens are physically destroyed from the stream!");
                           } else {
                             copy("382-91-4402", "ssn");
-                            alert("⚠️ LEAK DETECTED: '382-91-4402' copied from underlying stream! Standard viewers only cover text visually.");
+                            alert("LEAK DETECTED: '382-91-4402' copied from underlying stream! Standard viewers only cover text visually.");
                           }
                         }}
                       >
@@ -992,7 +1158,7 @@ endobj`}
         </section>
 
         {/* ==========================================================================
-           Benchmark Comparison Table (Metallic Monospaced Contrast)
+           Benchmark Comparison Table
            ========================================================================== */}
         <section className="section-container" id="compare">
           <div className="section-head-minimal">
@@ -1076,7 +1242,7 @@ endobj`}
                 <Icon name="terminal" size={13} /> Headless CLI
               </button>
               <button className={`term-tab ${cliTab === "json" ? "active" : ""}`} onClick={() => setCliTab("json")}>
-                <Icon name="file" size={13} /> Pipeline JSON
+                <Icon name="layers" size={13} /> Pipeline JSON
               </button>
               <button
                 className="btn-copy-code"
@@ -1138,7 +1304,6 @@ endobj`}
               </a>
             </div>
 
-            {/* SHA-256 Verification Bar */}
             <div className="sha-verify-bar">
               <span className="sha-label">SHA-256 HASH:</span>
               <code>{installerSha}</code>
@@ -1226,6 +1391,7 @@ endobj`}
           <div className="footer-nav-columns">
             <div className="nav-col">
               <strong>PRODUCT</strong>
+              <a href="#app-preview">Screenshot</a>
               <a href="#features">Capabilities</a>
               <a href="#lab">Studio Lab</a>
               <a href="#compare">Benchmark</a>
