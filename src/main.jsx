@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { createRoot } from "react-dom/client";
 import "./styles.css";
 
@@ -11,7 +11,7 @@ const SHA256_INSTALLER =
 const SHA256_PORTABLE =
   "f4c06b245767378391146604bb29e83616374027d0d5de00cc41578e3c9cbc86";
 
-function Icon({ name, size = 18, stroke = 1.8 }) {
+function Icon({ name, size = 18, stroke = 1.8, className = "" }) {
   const common = {
     width: size,
     height: size,
@@ -21,6 +21,7 @@ function Icon({ name, size = 18, stroke = 1.8 }) {
     strokeWidth: stroke,
     strokeLinecap: "round",
     strokeLinejoin: "round",
+    className,
     "aria-hidden": true,
   };
   const paths = {
@@ -31,6 +32,7 @@ function Icon({ name, size = 18, stroke = 1.8 }) {
       </>
     ),
     chevronRight: <path d="m9 18 6-6-6-6" />,
+    chevronDown: <path d="m6 9 6 6 6-6" />,
     sun: (
       <>
         <circle cx="12" cy="12" r="4" />
@@ -170,278 +172,17 @@ function Icon({ name, size = 18, stroke = 1.8 }) {
         <line x1="10" y1="14" x2="21" y2="3" />
       </>
     ),
-    calendar: (
+    activity: <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />,
+    windows: (
       <>
-        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-        <line x1="16" y1="2" x2="16" y2="6" />
-        <line x1="8" y1="2" x2="8" y2="6" />
-        <line x1="3" y1="10" x2="21" y2="10" />
+        <rect x="3" y="3" width="8" height="8" rx="1" />
+        <rect x="13" y="3" width="8" height="8" rx="1" />
+        <rect x="3" y="13" width="8" height="8" rx="1" />
+        <rect x="13" y="13" width="8" height="8" rx="1" />
       </>
     ),
   };
   return <svg {...common}>{paths[name] || paths.file}</svg>;
-}
-
-const bentoFeatures = [
-  {
-    tag: "HARDWARE ENGINE",
-    title: "wgpu Accelerated",
-    desc: "Ultra-fluid vector rendering with OpenGL fallback. Complete support for complex world scripts, vertical text, blend modes, and opacity masks.",
-    badge: "Native 60+ FPS",
-    icon: "zap",
-  },
-  {
-    tag: "PRIVACY",
-    title: "100% Offline & Private",
-    desc: "No accounts. No telemetry. Zero cloud round-trips. Your documents, signatures, and data never leave your local machine.",
-    badge: "Zero Tracking",
-    icon: "shield",
-  },
-  {
-    tag: "SECURITY",
-    title: "Structural Redaction",
-    desc: "True object stream purging. Irreversibly strips text tokens, font subroutines, metadata, and attachments.",
-    badge: "Deep Sanitization",
-    icon: "lock",
-  },
-  {
-    tag: "AUTOMATION",
-    title: "AI Model Context Protocol",
-    desc: "First-class MCP server. Connect Claude Desktop, Cursor, and AI agents to parse, edit, and sign documents programmatically.",
-    badge: "MCP Ready",
-    icon: "bot",
-  },
-  {
-    tag: "PRODUCTIVITY",
-    title: "Batch Workflow Studio",
-    desc: "Process 20+ documents simultaneously. Merge, convert, compress, and apply watermarks across massive file sets.",
-    badge: "High Throughput",
-    icon: "layers",
-  },
-  {
-    tag: "INTELLIGENCE",
-    title: "Offline Machine OCR",
-    desc: "Embedded neural inference. Turn scanned receipts, contracts, and images into fully searchable, selectable PDF text.",
-    badge: "Local ML",
-    icon: "search",
-  },
-];
-
-const cratesList = [
-  { name: "apps/pdfcraft", type: "Native GUI", info: "Multi-tab egui & wgpu shell for Windows, macOS, Linux" },
-  { name: "apps/pdfcraft-cli", type: "Headless CLI & MCP", info: "Command runner and embedded AI agent MCP server" },
-  { name: "crates/cos", type: "PDF Syntax", info: "ISO 32000-2 low-level parser and xref stream decoder" },
-  { name: "crates/render", type: "Hardware Rasterizer", info: "DisplayList vector and font rasterization engine" },
-  { name: "crates/crypt", type: "Security", info: "Standard security handlers & AES-256 decryption" },
-  { name: "crates/sign", type: "PKI Digital Crypto", info: "X.509 certificate signatures & cryptographic timestamps" },
-  { name: "crates/ocr", type: "Embedded ML", info: "Offline optical character recognition neural engine" },
-  { name: "crates/redact", type: "Sanitization", info: "Irreversible deep structural stream destruction" },
-];
-
-const comparisonSpecs = [
-  {
-    item: "License & Cost",
-    pdfix: "100% Free · Dual MIT / Apache 2.0",
-    acrobat: "$239.88/year subscription",
-    cloud: "Usage caps · Monthly fees",
-  },
-  {
-    item: "Data Privacy",
-    pdfix: "100% On-Device · Zero telemetry",
-    acrobat: "Cloud sync · Telemetry tracking",
-    cloud: "Files sent to 3rd-party servers",
-  },
-  {
-    item: "Memory Safety",
-    pdfix: "Pure Rust (forbid(unsafe_code))",
-    acrobat: "Legacy C++ codebase",
-    cloud: "Web sandbox limitations",
-  },
-  {
-    item: "AI Agent MCP Integration",
-    pdfix: "Native Model Context Protocol Server",
-    acrobat: "Enterprise SDK only",
-    cloud: "Not supported",
-  },
-  {
-    item: "Structural Redaction",
-    pdfix: "Irreversible token & stream purge",
-    acrobat: "Manual tool · Risk of oversight",
-    cloud: "Superficial visual mask only",
-  },
-  {
-    item: "Crash Resilience",
-    pdfix: "Atomic verified writes",
-    acrobat: "Can corrupt open files",
-    cloud: "Browser tab timeout loss",
-  },
-  {
-    item: "Offline Operation",
-    pdfix: "Full functionality without internet",
-    acrobat: "Periodic Adobe login checks",
-    cloud: "Requires constant connection",
-  },
-];
-
-function LivePdfEditor() {
-  const [step, setStep] = useState(0);
-  const [paused, setPaused] = useState(false);
-
-  useEffect(() => {
-    if (paused) return;
-    const interval = setInterval(() => {
-      setStep((prev) => (prev + 1) % 4);
-    }, 2500);
-    return () => clearInterval(interval);
-  }, [paused]);
-
-  const stepLabels = [
-    "Highlighting Text",
-    "Digital PKI Signature",
-    "Structural Redaction",
-    "Atomic Verified Save",
-  ];
-
-  return (
-    <div className="live-editor-shell">
-      <div className="live-editor-window">
-        {/* macOS Title Bar */}
-        <div className="live-title-bar">
-          <div className="traffic-lights">
-            <span className="light red" />
-            <span className="light yellow" />
-            <span className="light green" />
-          </div>
-          <div className="live-title-center">
-            <img src="/pdfix-logo.png" alt="" width="15" height="15" />
-            <span>PDFCatalyst Workbench — License_Agreement_2026.pdf</span>
-          </div>
-          <div className="live-rec-pill">
-            <span className="live-rec-dot" />
-            <span>LIVE WORKBENCH</span>
-          </div>
-        </div>
-
-        {/* Editor Main Layout */}
-        <div className="live-editor-body">
-          {/* Left Tool Rail */}
-          <aside className="live-tool-rail">
-            <div className={`rail-icon ${step === 0 ? "active-tool gold" : ""}`} title="Text Highlighter">
-              <Icon name="pen" size={14} />
-            </div>
-            <div className={`rail-icon ${step === 1 ? "active-tool blue" : ""}`} title="Digital Signature">
-              <Icon name="shield" size={14} />
-            </div>
-            <div className={`rail-icon ${step === 2 ? "active-tool red" : ""}`} title="Structural Redaction">
-              <Icon name="lock" size={14} />
-            </div>
-            <div className={`rail-icon ${step === 3 ? "active-tool green" : ""}`} title="Atomic Save">
-              <Icon name="check" size={14} />
-            </div>
-            <div className="rail-divider" />
-            <div className="rail-icon" title="Full-text Search">
-              <Icon name="search" size={14} />
-            </div>
-            <div className="rail-icon" title="Scale Measurement">
-              <Icon name="ruler" size={14} />
-            </div>
-          </aside>
-
-          {/* Document Stage */}
-          <div className="live-canvas-stage">
-            {/* The Document Page */}
-            <div className="live-doc-paper">
-              {/* Virtual Cursor */}
-              <div className={`live-cursor pos-step-${step}`}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M3 3l7 18 3.5-7.5L21 10 3 3z"
-                    fill="#2997ff"
-                    stroke="#ffffff"
-                    strokeWidth="1.8"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <span className="cursor-label">{stepLabels[step]}</span>
-              </div>
-
-              <div className="doc-page-header">
-                <span className="doc-num">ISO 32000-2 COMPLIANT · PAGE 1 OF 3</span>
-                <span className="doc-tag">CONFIDENTIAL</span>
-              </div>
-
-              <h4 className="doc-main-heading">MUTUAL SOFTWARE LICENSE & RIGHTS</h4>
-
-              <p className="doc-paragraph">
-                1. <strong>Document Architecture.</strong> This specification governs the implementation of
-                memory-safe document workflows and atomic multi-file batch operations.
-              </p>
-
-              {/* Step 0: Highlighting Line */}
-              <div className="doc-interactive-line highlight-target">
-                <span className={`highlight-sweep ${step >= 0 ? "active" : ""}`} />
-                <p className="doc-paragraph target-text">
-                  2. <strong>License Grant.</strong> Author grants an irrevocable, perpetual, royalty-free
-                  open-source license under Dual MIT and Apache-2.0 protocols.
-                </p>
-                {step === 0 && <span className="action-tag gold">✓ Highlighted (0ms latency)</span>}
-              </div>
-
-              {/* Step 2: Redaction Line */}
-              <div className="doc-interactive-line redact-target-line">
-                <p className="doc-paragraph">
-                  3. <strong>Identity & SSN ID:</strong>{" "}
-                  <span className={`redact-box-wipe ${step >= 2 ? "purged" : "exposed"}`}>
-                    {step >= 2 ? "█████████████" : "SSN: 948-21-0814"}
-                  </span>
-                  {step >= 2 && <span className="action-tag red">🛡️ Stream Purged: 0x00 token</span>}
-                </p>
-              </div>
-
-              {/* Step 1: Digital Signature Line */}
-              <div className="doc-interactive-line signature-target-line">
-                <div className="sig-label">4. Authorized Cryptographic Signature:</div>
-                <div className={`sig-seal-drop ${step >= 1 ? "stamped" : ""}`}>
-                  <div className="sig-handwriting">Sarthak Saxena</div>
-                  <div className="sig-verified-badge">
-                    <Icon name="check" size={11} /> PKI X.509 Cryptographic Timestamp Verified
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Live Status & Controller Bar */}
-        <div className="live-status-bar">
-          <div className="status-message">
-            <span className="status-pulse" />
-            {step === 0 && <span>Highlighter Tool: Selecting text operator & applying appearance stream</span>}
-            {step === 1 && <span>PKI Crypto Engine: Applying digital signature seal with X.509 cert</span>}
-            {step === 2 && <span>Redact Engine: Purging raw content bytes, font subroutines & XREF entries</span>}
-            {step === 3 && <span>Atomic Save: Written to local disk without cloud round-trip</span>}
-          </div>
-          <div className="live-step-pills">
-            {[0, 1, 2, 3].map((s) => (
-              <button
-                key={s}
-                className={`step-dot ${step === s ? "current" : ""}`}
-                onClick={() => setStep(s)}
-                aria-label={`Jump to step ${s + 1}`}
-              />
-            ))}
-            <button
-              className="pause-btn"
-              onClick={() => setPaused(!paused)}
-              title={paused ? "Resume Animation" : "Pause Animation"}
-            >
-              {paused ? "▶" : "❚❚"}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 function formatBytes(bytes) {
@@ -487,14 +228,16 @@ const DEFAULT_RELEASE = {
       name: "PDFcatalyst-Setup-v1.0.0-x64.exe",
       size: 19875336,
       download_count: 0,
-      browser_download_url: "https://github.com/SarthAyush/PDFcatalyst-App/releases/download/v1.0.0/PDFcatalyst-Setup-v1.0.0-x64.exe",
+      browser_download_url:
+        "https://github.com/SarthAyush/PDFcatalyst-App/releases/download/v1.0.0/PDFcatalyst-Setup-v1.0.0-x64.exe",
       digest: "sha256:04a04855a984b84d9bd6c5afedda611d63f5eb259fd78f42fa2237cb4cf74b79",
     },
     {
       name: "PDFcatalyst.exe",
       size: 67598832,
       download_count: 0,
-      browser_download_url: "https://github.com/SarthAyush/PDFcatalyst-App/releases/download/v1.0.0/PDFcatalyst.exe",
+      browser_download_url:
+        "https://github.com/SarthAyush/PDFcatalyst-App/releases/download/v1.0.0/PDFcatalyst.exe",
       digest: "sha256:f4c06b245767378391146604bb29e83616374027d0d5de00cc41578e3c9cbc86",
     },
   ],
@@ -568,6 +311,445 @@ function useGitHubReleases() {
   };
 }
 
+/* ==========================================================================
+   Live Simulated Desktop Workbench Window (Figma/Zed Quality)
+   ========================================================================== */
+function LivePdfEditor() {
+  const [step, setStep] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [activeThumb, setActiveThumb] = useState(0);
+
+  useEffect(() => {
+    if (paused) return;
+    const interval = setInterval(() => {
+      setStep((prev) => (prev + 1) % 4);
+    }, 2800);
+    return () => clearInterval(interval);
+  }, [paused]);
+
+  const stepLabels = [
+    "Highlighting Text Stream",
+    "Digital PKI Signature",
+    "Structural Byte Redaction",
+    "Atomic Verified Save",
+  ];
+
+  return (
+    <div className="live-editor-shell">
+      <div className="live-editor-glow-aura" />
+      <div className="live-editor-window">
+        {/* Native Desktop Title Bar */}
+        <div className="live-title-bar">
+          <div className="traffic-lights">
+            <span className="light red" title="Close" />
+            <span className="light yellow" title="Minimize" />
+            <span className="light green" title="Maximize" />
+          </div>
+          <div className="live-title-center">
+            <img src="/pdfix-logo.png" alt="" width="16" height="16" className="title-logo" />
+            <span className="title-filename">PDFCatalyst — License_Agreement_2026.pdf</span>
+            <span className="title-badge-clean">ISO 32000-2</span>
+          </div>
+          <div className="live-header-metrics">
+            <span className="metric-tag"><Icon name="activity" size={11} /> 60.0 FPS</span>
+            <span className="metric-tag"><Icon name="cpu" size={11} /> 14.2 MB RAM</span>
+            <span className="live-rec-pill">
+              <span className="live-rec-dot" /> LIVE
+            </span>
+          </div>
+        </div>
+
+        {/* Workbench Application Ribbon */}
+        <div className="live-workbench-ribbon">
+          <div className="ribbon-group">
+            <button className={`ribbon-tool ${step === 0 ? "active" : ""}`} onClick={() => setStep(0)}>
+              <Icon name="pen" size={13} /> <span>Highlight</span>
+            </button>
+            <button className={`ribbon-tool ${step === 1 ? "active" : ""}`} onClick={() => setStep(1)}>
+              <Icon name="shield" size={13} /> <span>Sign PKI</span>
+            </button>
+            <button className={`ribbon-tool ${step === 2 ? "active" : ""}`} onClick={() => setStep(2)}>
+              <Icon name="lock" size={13} /> <span>Redact</span>
+            </button>
+            <button className={`ribbon-tool ${step === 3 ? "active" : ""}`} onClick={() => setStep(3)}>
+              <Icon name="check" size={13} /> <span>Atomic Save</span>
+            </button>
+          </div>
+          <div className="ribbon-divider" />
+          <div className="ribbon-group secondary">
+            <button className="ribbon-tool icon-only" title="Full-text Search"><Icon name="search" size={13} /></button>
+            <button className="ribbon-tool icon-only" title="Measurement Tool"><Icon name="ruler" size={13} /></button>
+            <button className="ribbon-tool icon-only" title="Batch Studio"><Icon name="layers" size={13} /></button>
+            <span className="ribbon-zoom">100%</span>
+          </div>
+        </div>
+
+        {/* Editor Main Layout */}
+        <div className="live-editor-body">
+          {/* Left Thumbnails Rail */}
+          <aside className="live-thumbnails-rail">
+            <div className="thumb-header">PAGES (3)</div>
+            <div
+              className={`thumb-card ${activeThumb === 0 ? "active" : ""}`}
+              onClick={() => setActiveThumb(0)}
+            >
+              <div className="thumb-mini-page">
+                <div className="thumb-skeleton line-title" />
+                <div className="thumb-skeleton line-text" />
+                <div className="thumb-skeleton line-text" />
+                <div className="thumb-skeleton line-short" />
+              </div>
+              <span className="thumb-num">1</span>
+            </div>
+            <div
+              className={`thumb-card ${activeThumb === 1 ? "active" : ""}`}
+              onClick={() => setActiveThumb(1)}
+            >
+              <div className="thumb-mini-page">
+                <div className="thumb-skeleton line-text" />
+                <div className="thumb-skeleton line-text" />
+                <div className="thumb-skeleton line-text" />
+              </div>
+              <span className="thumb-num">2</span>
+            </div>
+            <div
+              className={`thumb-card ${activeThumb === 2 ? "active" : ""}`}
+              onClick={() => setActiveThumb(2)}
+            >
+              <div className="thumb-mini-page">
+                <div className="thumb-skeleton line-text" />
+                <div className="thumb-skeleton line-short" />
+              </div>
+              <span className="thumb-num">3</span>
+            </div>
+          </aside>
+
+          {/* Document Stage */}
+          <div className="live-canvas-stage">
+            <div className="live-doc-paper">
+              {/* Animated Floating Cursor */}
+              <div className={`live-cursor pos-step-${step}`}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M3 3l7 18 3.5-7.5L21 10 3 3z"
+                    fill="#2997ff"
+                    stroke="#ffffff"
+                    strokeWidth="1.8"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <span className="cursor-label">{stepLabels[step]}</span>
+              </div>
+
+              <div className="doc-page-header">
+                <span className="doc-num">ISO 32000-2 COMPLIANT · SPEC v1.0.0</span>
+                <span className="doc-tag">STRICT AIR-GAPPED</span>
+              </div>
+
+              <h4 className="doc-main-heading">MUTUAL SOFTWARE LICENSE & RIGHTS</h4>
+
+              <p className="doc-paragraph">
+                1. <strong>Document Architecture.</strong> This specification governs the implementation of
+                memory-safe document workflows and atomic multi-file batch operations under pure Rust memory guarantees.
+              </p>
+
+              {/* Step 0: Highlighting Line */}
+              <div className="doc-interactive-line highlight-target">
+                <span className={`highlight-sweep ${step >= 0 ? "active" : ""}`} />
+                <p className="doc-paragraph target-text">
+                  2. <strong>License Grant.</strong> Author grants an irrevocable, perpetual, royalty-free
+                  open-source license under Dual MIT and Apache-2.0 protocols.
+                </p>
+                {step === 0 && <span className="action-tag gold">✓ Appearance Stream Generated (0ms)</span>}
+              </div>
+
+              {/* Step 2: Redaction Line */}
+              <div className="doc-interactive-line redact-target-line">
+                <p className="doc-paragraph">
+                  3. <strong>Identity & SSN ID:</strong>{" "}
+                  <span className={`redact-box-wipe ${step >= 2 ? "purged" : "exposed"}`}>
+                    {step >= 2 ? "█████████████" : "SSN: 948-21-0814"}
+                  </span>
+                  {step >= 2 && <span className="action-tag red">🛡️ Stream Purged: 0x00 token (0 bytes remain)</span>}
+                </p>
+              </div>
+
+              {/* Step 1: Digital Signature Line */}
+              <div className="doc-interactive-line signature-target-line">
+                <div className="sig-label">4. Authorized Cryptographic Signature:</div>
+                <div className={`sig-seal-drop ${step >= 1 ? "stamped" : ""}`}>
+                  <div className="sig-handwriting">Sarthak Saxena</div>
+                  <div className="sig-verified-badge">
+                    <Icon name="check" size={11} /> PKI X.509 Cryptographic Timestamp Verified · RSA-4096
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Live Status & Controller Bar */}
+        <div className="live-status-bar">
+          <div className="status-message">
+            <span className="status-pulse" />
+            {step === 0 && <span>Highlighter: Constructing appearance stream & matrix transform with zero latency</span>}
+            {step === 1 && <span>PKI Crypto Engine: Applying digital signature seal with verified X.509 timestamp</span>}
+            {step === 2 && <span>Redact Engine: Deep byte destruction, font subroutine stripping & XREF table repair</span>}
+            {step === 3 && <span>Atomic Save: Written to local SSD in 4ms with CRC32 integrity verification</span>}
+          </div>
+          <div className="live-step-pills">
+            {["Highlight", "Sign", "Redact", "Save"].map((label, s) => (
+              <button
+                key={s}
+                className={`step-pill-btn ${step === s ? "current" : ""}`}
+                onClick={() => setStep(s)}
+                aria-label={`Jump to step: ${label}`}
+              >
+                <span className="dot-mini" /> {label}
+              </button>
+            ))}
+            <button
+              className="pause-btn"
+              onClick={() => setPaused(!paused)}
+              title={paused ? "Resume Animation" : "Pause Animation"}
+            >
+              {paused ? "▶" : "❚❚"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ==========================================================================
+   Bento Grid Feature Visual Components
+   ========================================================================== */
+function BentoVisual({ type }) {
+  if (type === "wgpu") {
+    return (
+      <div className="bento-vis bento-vis-wgpu">
+        <div className="wgpu-meter">
+          <div className="wgpu-metric">
+            <span className="wgpu-num">60.2</span>
+            <span className="wgpu-unit">FPS</span>
+          </div>
+          <div className="wgpu-stats">
+            <span>Latency: <strong>0.38ms</strong></span>
+            <span>Frames: <strong>Zero Drop</strong></span>
+          </div>
+        </div>
+        <div className="wgpu-graph">
+          <div className="wgpu-bar h-80" />
+          <div className="wgpu-bar h-95" />
+          <div className="wgpu-bar h-90" />
+          <div className="wgpu-bar h-100 active" />
+          <div className="wgpu-bar h-95" />
+          <div className="wgpu-bar h-90" />
+          <div className="wgpu-bar h-100" />
+        </div>
+        <span className="bento-vis-caption">Direct GPU Compute & Vector Rasterizer</span>
+      </div>
+    );
+  }
+
+  if (type === "offline") {
+    return (
+      <div className="bento-vis bento-vis-offline">
+        <div className="offline-radar">
+          <div className="radar-circle c1" />
+          <div className="radar-circle c2" />
+          <div className="radar-circle c3" />
+          <div className="radar-core">
+            <Icon name="shield" size={18} />
+          </div>
+        </div>
+        <div className="offline-tags">
+          <span className="tag-safe">✓ LOCAL MEMORY ISOLATION</span>
+          <span className="tag-block">✕ NETWORK EGRESS: 0 KB/s</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (type === "redact") {
+    return (
+      <div className="bento-vis bento-vis-redact">
+        <div className="hex-diff-stream">
+          <div className="hex-row before">
+            <span className="hex-addr">0x04F0:</span>
+            <span className="hex-bytes bad">53 53 4E 3A 39 34 38</span>
+            <span className="hex-ascii">"SSN:948"</span>
+          </div>
+          <div className="hex-arrow">↓ PURGED TO STRUCTURAL NULL ↓</div>
+          <div className="hex-row after">
+            <span className="hex-addr">0x04F0:</span>
+            <span className="hex-bytes good">00 00 00 00 00 00 00</span>
+            <span className="hex-ascii">[PURGED]</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (type === "mcp") {
+    return (
+      <div className="bento-vis bento-vis-mcp">
+        <div className="mcp-nodes">
+          <div className="mcp-node ai">
+            <Icon name="bot" size={15} />
+            <span>Claude / Cursor</span>
+          </div>
+          <div className="mcp-pipe">
+            <div className="packet" />
+            <span className="pipe-label">stdio JSON-RPC</span>
+          </div>
+          <div className="mcp-node rust">
+            <Icon name="terminal" size={15} />
+            <span>PDFCatalyst MCP</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (type === "batch") {
+    return (
+      <div className="bento-vis bento-vis-batch">
+        <div className="batch-micro-queue">
+          <div className="queue-item done"><span>doc_01.pdf</span> <span className="kb">1.4 MB ✓</span></div>
+          <div className="queue-item done"><span>doc_02.pdf</span> <span className="kb">2.8 MB ✓</span></div>
+          <div className="queue-item processing"><span>doc_03.pdf</span> <span className="spin">⚡ 340ms</span></div>
+        </div>
+        <div className="batch-progress-bar">
+          <div className="batch-progress-fill" style={{ width: "88%" }} />
+        </div>
+      </div>
+    );
+  }
+
+  if (type === "ocr") {
+    return (
+      <div className="bento-vis bento-vis-ocr">
+        <div className="ocr-stage">
+          <div className="ocr-laser" />
+          <div className="ocr-text-lines">
+            <span className="line recognized">ACCOUNTS PAYABLE INVOICE</span>
+            <span className="line recognized">SUBTOTAL: $14,250.00 USD</span>
+            <span className="line scanning">TAX (8.25%): $1,175.62</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+}
+
+const bentoFeatures = [
+  {
+    tag: "HARDWARE ENGINE",
+    title: "wgpu Vector Acceleration",
+    desc: "Ultra-fluid vector rendering pipeline with hardware GPU compute and OpenGL fallback. Smooth pan and 800% zoom with zero lag.",
+    badge: "Native 60+ FPS",
+    visType: "wgpu",
+  },
+  {
+    tag: "PRIVACY & SECURITY",
+    title: "100% Offline & Air-Gapped",
+    desc: "No accounts. No telemetry. Zero network egress. Your contracts, medical records, and financial PDFs never leave local RAM.",
+    badge: "Zero Tracking",
+    visType: "offline",
+  },
+  {
+    tag: "SECURITY STANDARDS",
+    title: "Deep Structural Redaction",
+    desc: "True object stream destruction. Unlike basic black box covers, PDFCatalyst purges raw text tokens, font subroutines, and metadata irreversibly.",
+    badge: "0x00 Purge",
+    visType: "redact",
+  },
+  {
+    tag: "AI & AUTOMATION",
+    title: "Native AI MCP Server",
+    desc: "Embedded Model Context Protocol server. Connect Claude Desktop, Cursor, and agent pipelines to inspect, edit, and sign local PDFs programmatically.",
+    badge: "MCP Ready",
+    visType: "mcp",
+  },
+  {
+    tag: "PARALLEL PIPELINES",
+    title: "Batch Workflow Studio",
+    desc: "Process dozens of documents concurrently using Rayon multi-threading. Merge, split, compress, watermark, and convert files in sub-seconds.",
+    badge: "Multi-Threaded",
+    visType: "batch",
+  },
+  {
+    tag: "INTELLIGENCE",
+    title: "Embedded Neural OCR",
+    desc: "Local machine optical character recognition running entirely on your CPU/GPU. Transform image scans into searchable, selectable PDF text.",
+    badge: "100% On-Device",
+    visType: "ocr",
+  },
+];
+
+const cratesList = [
+  { name: "apps/pdfcraft", type: "Native Desktop GUI", info: "Multi-tab egui & wgpu shell for Windows, macOS, Linux" },
+  { name: "apps/pdfcraft-cli", type: "Headless CLI & MCP", info: "Command runner and embedded AI agent Model Context Protocol server" },
+  { name: "crates/cos", type: "PDF Low-Level Syntax", info: "ISO 32000-2 clean-room parser and object xref stream decoder" },
+  { name: "crates/render", type: "Hardware Rasterizer", info: "DisplayList vector and typography font rasterization engine" },
+  { name: "crates/crypt", type: "Security Handler", info: "Standard security handlers, permissions & AES-256 decryption" },
+  { name: "crates/sign", type: "PKI Digital Crypto", info: "X.509 certificate signatures & cryptographic timestamps" },
+  { name: "crates/ocr", type: "Local Neural Engine", info: "Offline optical character recognition without external runtime dependencies" },
+  { name: "crates/redact", type: "Sanitization Engine", info: "Irreversible deep structural stream and font map destruction" },
+];
+
+const comparisonSpecs = [
+  {
+    item: "License & Pricing",
+    pdfix: "100% Free · Dual MIT / Apache 2.0",
+    acrobat: "$239.88 / year subscription",
+    cloud: "Per-file fees & usage limits",
+  },
+  {
+    item: "Data Privacy & Telemetry",
+    pdfix: "100% On-Device · Zero telemetry",
+    acrobat: "Cloud upload sync · User tracking",
+    cloud: "Files uploaded to third-party servers",
+  },
+  {
+    item: "Memory Safety Architecture",
+    pdfix: "Pure Rust (forbid(unsafe_code))",
+    acrobat: "Legacy C++ codebase (buffer risks)",
+    cloud: "WebAssembly sandbox constraints",
+  },
+  {
+    item: "AI Model Context Protocol",
+    pdfix: "Native Built-in MCP Server (Claude & Cursor)",
+    acrobat: "Restricted Enterprise SDK only",
+    cloud: "Not supported",
+  },
+  {
+    item: "Structural Redaction Quality",
+    pdfix: "Irreversible byte-level stream purge",
+    acrobat: "Manual tool · Risk of token leaks",
+    cloud: "Visual black overlay only (extractable)",
+  },
+  {
+    item: "Crash & Power Loss Safety",
+    pdfix: "Atomic verified writes (zero corruption)",
+    acrobat: "Can corrupt open files on crash",
+    cloud: "Browser tab timeout / loss",
+  },
+  {
+    item: "Offline Operation",
+    pdfix: "Full functionality without internet",
+    acrobat: "Periodic Adobe ID login checks",
+    cloud: "Requires continuous internet connection",
+  },
+];
+
+/* ==========================================================================
+   Changelog Modal Component
+   ========================================================================== */
 function ChangelogModal({ release, releases, onClose, onSelectRelease }) {
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -695,6 +877,9 @@ function ChangelogModal({ release, releases, onClose, onSelectRelease }) {
   );
 }
 
+/* ==========================================================================
+   Main Application Root
+   ========================================================================== */
 function App() {
   const { releases, latestRelease, isLoading, lastSynced, syncStatus, refresh } =
     useGitHubReleases();
@@ -712,6 +897,7 @@ function App() {
   const [batchFinished, setBatchFinished] = useState(false);
   const [activeFaq, setActiveFaq] = useState(null);
   const [blueprintScale, setBlueprintScale] = useState("1/4");
+  const [detectedOs, setDetectedOs] = useState("Windows x64");
 
   const installerAsset =
     latestRelease.assets?.find(
@@ -750,6 +936,34 @@ function App() {
     } catch {}
   }, [theme]);
 
+  // OS Detection
+  useEffect(() => {
+    try {
+      const ua = navigator.userAgent;
+      if (ua.includes("Win")) setDetectedOs("Windows x64");
+      else if (ua.includes("Mac")) setDetectedOs("macOS");
+      else if (ua.includes("Linux")) setDetectedOs("Linux");
+    } catch {}
+  }, []);
+
+  // Spotlight mouse effect on cards
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      const cards = document.querySelectorAll(
+        ".bento-card, .crate-glass-card, .glass-updates-hub, .glass-lab-box, .glass-terminal-card, .glass-creator-card"
+      );
+      cards.forEach((card) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        card.style.setProperty("--mouse-x", `${x}px`);
+        card.style.setProperty("--mouse-y", `${y}px`);
+      });
+    };
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
+
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -787,76 +1001,92 @@ function App() {
     setTimeout(() => {
       setBatchActive(false);
       setBatchFinished(true);
-    }, 900);
+    }, 700);
   };
 
   const faqs = [
     {
       q: "Is PDFCatalyst truly open source and free?",
-      a: "Yes. Dual-licensed under MIT and Apache-2.0. Completely free for personal, commercial, and enterprise use with no subscriptions.",
+      a: "Yes. Dual-licensed under MIT and Apache-2.0. Completely free for personal, commercial, and enterprise production with zero subscriptions or hidden tiers.",
     },
     {
       q: "How does PDFCatalyst ensure my data never leaks?",
-      a: "All document parsing, rendering, OCR, signing, and saving occur strictly on your machine. Zero network analytics, zero telemetry.",
+      a: "All document parsing, rendering, OCR, signing, and file saving occur strictly in local RAM and disk. Zero telemetry, zero analytics, zero external network sockets.",
     },
     {
-      q: "What is the built-in MCP server?",
-      a: "PDFCatalyst includes an embedded Model Context Protocol server. AI assistants like Claude Desktop and Cursor can inspect and edit local PDFs without uploading them.",
+      q: "What is the built-in AI Model Context Protocol (MCP) server?",
+      a: "PDFCatalyst includes an embedded MCP server. AI assistants like Claude Desktop and Cursor can inspect and edit local PDFs via JSON-RPC stdio without cloud uploads.",
     },
     {
-      q: "Installer vs Portable?",
-      a: "The Windows Installer (~19 MB) integrates file associations. The Portable .exe (~67 MB) runs standalone from any folder or USB with zero installation.",
+      q: "Installer vs Standalone Portable?",
+      a: "The Windows Installer (~19 MB) sets up file associations and desktop shortcuts. The Portable .exe (~67 MB) runs standalone from any folder or USB without administrator privileges.",
     },
     {
       q: "How does true redaction differ from regular black boxes?",
-      a: "Common viewers draw an overlay rectangle while leaving text tokens in the stream. PDFCatalyst strips the raw bytes, XREF entries, and font maps irreversibly.",
+      a: "Common PDF viewers merely draw an opaque rectangle while keeping the underlying text tokens in the stream. PDFCatalyst purges raw stream bytes, XREF entries, and font maps irreversibly.",
+    },
+    {
+      q: "Can I run PDFCatalyst on macOS and Linux?",
+      a: "Yes! While prebuilt Windows binaries are provided via the CI pipeline, the entire codebase is standard Rust and can be built on macOS and Linux using `cargo build --release`.",
     },
   ];
 
   return (
     <div className="apple-shell">
+      {/* Background Atmosphere Lighting & Engineering Grid */}
+      <div className="bg-grid-overlay" aria-hidden="true" />
+      <div className="ambient-aura aura-hero" aria-hidden="true" />
+      <div className="ambient-aura aura-features" aria-hidden="true" />
+      <div className="ambient-aura aura-lab" aria-hidden="true" />
+      <div className="ambient-aura aura-bottom" aria-hidden="true" />
+
       {/* Sleek Frosted Glass Header */}
       <header className={`apple-nav ${scrolled ? "nav-blur" : ""}`}>
         <div className="nav-container">
           <a className="nav-brand" href="#top" onClick={() => setMenuOpen(false)}>
-            <img src="/pdfix-logo.png" alt="" width="26" height="26" />
-            <span>PDFCatalyst</span>
+            <div className="brand-logo-wrap">
+              <img src="/pdfix-logo.png" alt="PDFCatalyst Logo" width="28" height="28" />
+              <div className="brand-dot-glow" />
+            </div>
+            <span className="brand-title">PDFCatalyst</span>
           </a>
 
           <nav className={`nav-links ${menuOpen ? "open" : ""}`}>
             <a href="#overview" onClick={() => setMenuOpen(false)}>Overview</a>
-            <a href="#features" onClick={() => setMenuOpen(false)}>Features</a>
+            <a href="#features" onClick={() => setMenuOpen(false)}>Capabilities</a>
             <a href="#updates" onClick={() => setMenuOpen(false)} className="nav-link-badge-wrap">
               What's New <span className="nav-badge-new">{currentVersion}</span>
             </a>
             <a href="#lab" onClick={() => setMenuOpen(false)}>Studio Lab</a>
             <a href="#compare" onClick={() => setMenuOpen(false)}>Compare</a>
-            <a href="#developers" onClick={() => setMenuOpen(false)}>Developers</a>
+            <a href="#developers" onClick={() => setMenuOpen(false)}>Developers & AI</a>
             <a href="#download" onClick={() => setMenuOpen(false)}>Download</a>
             <a
               href="https://github.com/SarthAyush/PDFcatalyst-App"
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setMenuOpen(false)}
+              className="nav-github-link"
             >
-              GitHub
+              <Icon name="github" size={14} /> GitHub
             </a>
             <button
               className="theme-button"
               type="button"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              aria-label="Toggle theme"
+              aria-label="Toggle color theme"
+              title={`Switch to ${theme === "dark" ? "Light" : "Dark"} mode`}
             >
-              <Icon name={theme === "dark" ? "sun" : "moon"} size={15} />
+              <Icon name={theme === "dark" ? "sun" : "moon"} size={14} />
             </button>
             <a className="nav-cta" href={installerUrl} onClick={() => setMenuOpen(false)}>
-              Download <Icon name="chevronRight" size={13} />
+              Download <Icon name="chevronRight" size={12} />
             </a>
           </nav>
 
           <button
             className="mobile-btn"
-            aria-label="Toggle navigation"
+            aria-label="Toggle navigation menu"
             onClick={() => setMenuOpen(!menuOpen)}
           >
             <Icon name={menuOpen ? "x" : "menu"} size={20} />
@@ -868,10 +1098,24 @@ function App() {
         {/* Apple-Style Hero with Prominent App Icon & Name */}
         <section className="hero-section" id="overview">
           <div className="hero-content">
+            {/* Top Announcement Pill */}
+            <div className="hero-pill-announcement" data-reveal>
+              <button
+                className="announcement-pill-btn"
+                onClick={() => setShowChangelogModal(true)}
+              >
+                <span className="live-pulse-dot" />
+                <span className="announcement-tag">CONTINUOUS DELIVERY</span>
+                <span className="announcement-sep">•</span>
+                <span className="announcement-text">{currentVersion} is Live</span>
+                <Icon name="chevronRight" size={12} />
+              </button>
+            </div>
+
             {/* Prominent App Name & Icon at the Top of Home Visual */}
             <div className="hero-app-brand-banner" data-reveal>
               <div className="hero-app-icon-ring">
-                <img src="/pdfix-logo.png" alt="PDFCatalyst Icon" width="84" height="84" className="hero-app-logo" />
+                <img src="/pdfix-logo.png" alt="PDFCatalyst Icon" width="88" height="88" className="hero-app-logo" />
                 <div className="icon-pulse-glow" />
               </div>
               <div className="hero-app-text-group">
@@ -904,41 +1148,50 @@ function App() {
             </p>
 
             <div className="hero-cta-group" data-reveal>
-              <a className="btn-apple-primary" href={installerUrl}>
-                <Icon name="download" size={16} /> Download {currentVersion} for Windows
+              <a className="btn-apple-primary hero-main-btn" href={installerUrl}>
+                <Icon name="download" size={17} /> Download for {detectedOs}
               </a>
-              <a className="btn-apple-glass" href="#updates">
-                What's New <Icon name="spark" size={14} />
-              </a>
+              <button className="btn-apple-glass" onClick={() => setShowChangelogModal(true)}>
+                What's New in {currentVersion} <Icon name="spark" size={14} />
+              </button>
               <a className="btn-apple-quiet" href="#features">
                 Explore Capabilities <Icon name="chevronRight" size={13} />
               </a>
             </div>
 
+            {/* System Auto-Detection & Trust Banner */}
+            <div className="hero-system-detect-note" data-reveal>
+              <span>⚡ Detected {detectedOs}</span>
+              <span className="divider">•</span>
+              <span>19.9 MB Installer</span>
+              <span className="divider">•</span>
+              <span>No Admin Required for Portable</span>
+            </div>
+
             <div className="hero-spec-strip" data-reveal>
               <span><Icon name="shield" size={14} /> Local-first Privacy</span>
               <span className="divider">•</span>
-              <span><Icon name="cpu" size={14} /> wgpu Acceleration</span>
+              <span><Icon name="cpu" size={14} /> wgpu Vector Acceleration</span>
               <span className="divider">•</span>
-              <span><Icon name="bot" size={14} /> AI MCP Ready</span>
+              <span><Icon name="bot" size={14} /> Native AI MCP Server</span>
               <span className="divider">•</span>
               <span>Dual MIT / Apache 2.0</span>
             </div>
           </div>
 
-          {/* Live Animation of PDF Editor (Always Running Like a GIF) */}
+          {/* Live Animation of Native PDF Editor Desktop Window */}
           <div className="hero-window-wrap" data-reveal>
             <LivePdfEditor />
           </div>
         </section>
 
-        {/* Apple Bento Grid */}
+        {/* Bento Grid with Live Visual Micro-Demos */}
         <section className="bento-section" id="features">
           <div className="section-header" data-reveal>
             <span className="section-eyebrow">CAPABILITIES</span>
             <h2 className="section-title">Engineered to outperform.</h2>
             <p className="section-desc">
-              Every workflow you need in one unified, memory-safe architecture.
+              Every professional document workflow unified in a single, memory-safe architecture.
             </p>
           </div>
 
@@ -949,11 +1202,11 @@ function App() {
                   <span className="bento-tag">{f.tag}</span>
                   <span className="bento-badge">{f.badge}</span>
                 </div>
-                <div className="bento-icon-wrap">
-                  <Icon name={f.icon} size={22} />
-                </div>
                 <h3 className="bento-title">{f.title}</h3>
                 <p className="bento-desc">{f.desc}</p>
+                <div className="bento-card-visual-slot">
+                  <BentoVisual type={f.visType} />
+                </div>
                 <div className="glass-glare" />
               </div>
             ))}
@@ -997,7 +1250,7 @@ function App() {
                   disabled={isLoading}
                   title="Check for new releases now"
                 >
-                  <Icon name="refresh" size={13} />
+                  <Icon name="refresh" size={13} className={isLoading ? "spin-icon" : ""} />
                   <span>Check for Updates</span>
                 </button>
                 <button
@@ -1098,35 +1351,35 @@ function App() {
             <span className="section-eyebrow">INTERACTIVE LAB</span>
             <h2 className="section-title">Experience the mechanics.</h2>
             <p className="section-desc">
-              Interact with the core capabilities live in your browser.
+              Interact with the core capabilities live directly in your browser.
             </p>
           </div>
 
           <div className="glass-lab-box" data-reveal>
-            <div className="lab-nav">
+            <div className="lab-nav-segmented">
               <button
-                className={`lab-btn ${labTab === "redact" ? "active" : ""}`}
+                className={`lab-segmented-btn ${labTab === "redact" ? "active" : ""}`}
                 onClick={() => setLabTab("redact")}
               >
-                <Icon name="shield" size={15} /> True Redaction
+                <Icon name="shield" size={15} /> <span>True Redaction</span>
               </button>
               <button
-                className={`lab-btn ${labTab === "cos" ? "active" : ""}`}
+                className={`lab-segmented-btn ${labTab === "cos" ? "active" : ""}`}
                 onClick={() => setLabTab("cos")}
               >
-                <Icon name="tree" size={15} /> COS Syntax Tree
+                <Icon name="tree" size={15} /> <span>COS Syntax Tree</span>
               </button>
               <button
-                className={`lab-btn ${labTab === "batch" ? "active" : ""}`}
+                className={`lab-segmented-btn ${labTab === "batch" ? "active" : ""}`}
                 onClick={() => setLabTab("batch")}
               >
-                <Icon name="layers" size={15} /> Batch Studio
+                <Icon name="layers" size={15} /> <span>Batch Studio</span>
               </button>
               <button
-                className={`lab-btn ${labTab === "measure" ? "active" : ""}`}
+                className={`lab-segmented-btn ${labTab === "measure" ? "active" : ""}`}
                 onClick={() => setLabTab("measure")}
               >
-                <Icon name="ruler" size={15} /> Blueprint Scale
+                <Icon name="ruler" size={15} /> <span>Blueprint Scale</span>
               </button>
             </div>
 
@@ -1134,18 +1387,18 @@ function App() {
               {labTab === "redact" && (
                 <div className="lab-pane redact-pane">
                   <div className="pane-switcher">
-                    <span>MODE:</span>
+                    <span className="mode-lbl">MODE:</span>
                     <button
                       className={`switch-btn ${redactedState ? "active" : ""}`}
                       onClick={() => setRedactedState(true)}
                     >
-                      PDFCatalyst Structural Purge
+                      <span className="dot green" /> PDFCatalyst Structural Purge
                     </button>
                     <button
                       className={`switch-btn danger ${!redactedState ? "active" : ""}`}
                       onClick={() => setRedactedState(false)}
                     >
-                      Common Black Box Flaw
+                      <span className="dot red" /> Flawed Black Box Overlay
                     </button>
                   </div>
                   <div className="redact-card-grid">
@@ -1164,12 +1417,28 @@ function App() {
                           {redactedState ? "██████████████████" : "Aortic Insufficiency"}
                         </span>
                       </p>
+                      <div className="doc-test-action">
+                        <button
+                          className="btn-clipboard-test"
+                          onClick={() => {
+                            if (redactedState) {
+                              copy("", "test-redact");
+                              alert("🛡️ PROTECTED: 0 bytes recovered. Text tokens are physically purged from the PDF stream!");
+                            } else {
+                              copy("382-91-4402 - Aortic Insufficiency", "test-redact");
+                              alert("⚠️ LEAK DETECTED: '382-91-4402' copied from underlying stream! Standard viewers only cover text visually.");
+                            }
+                          }}
+                        >
+                          <Icon name="copy" size={13} /> {copiedId === "test-redact" ? "Tested!" : "Test Clipboard Copy"}
+                        </button>
+                      </div>
                     </div>
                     <div className="analysis-view">
-                      <h4>{redactedState ? "✓ Structural Stream Purged" : "⚠️ Raw Text Leaked"}</h4>
+                      <h4>{redactedState ? "✓ Structural Stream Purged" : "⚠️ Raw Text Extractable in Stream"}</h4>
                       <p>
                         {redactedState
-                          ? "Content stream bytes are purged, font subroutines unmapped, and XREF tables updated. Copying text produces nothing."
+                          ? "Content stream bytes are replaced with null tokens, font subroutines unmapped, and XREF tables cleanly rebuilt. Copying text produces nothing."
                           : "Traditional editors draw an opaque rectangle overlay while the underlying stream operators remain in the PDF file."}
                       </p>
                       <div className="byte-indicator">
@@ -1298,6 +1567,7 @@ Q`}
                     <div className="th-brand">
                       <img src="/pdfix-logo.png" alt="" width="20" height="20" />
                       <span>PDFCatalyst</span>
+                      <span className="badge-recommended">RECOMMENDED</span>
                     </div>
                   </th>
                   <th>Adobe Acrobat Pro</th>
@@ -1308,9 +1578,15 @@ Q`}
                 {comparisonSpecs.map((row, i) => (
                   <tr key={i}>
                     <td className="row-title">{row.item}</td>
-                    <td className="highlight-col pdfix-val">{row.pdfix}</td>
-                    <td className="other-val">{row.acrobat}</td>
-                    <td className="other-val">{row.cloud}</td>
+                    <td className="highlight-col pdfix-val">
+                      <span className="val-icon">✓</span> {row.pdfix}
+                    </td>
+                    <td className="other-val">
+                      <span className="val-icon dim">✗</span> {row.acrobat}
+                    </td>
+                    <td className="other-val">
+                      <span className="val-icon dim">✗</span> {row.cloud}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -1321,11 +1597,44 @@ Q`}
         {/* Developer & AI Model Context Protocol Showcase */}
         <section className="dev-section" id="developers">
           <div className="section-header" data-reveal>
-            <span className="section-eyebrow">DEVELOPERS & AI</span>
+            <span className="section-eyebrow">DEVELOPERS & AI AGENTS</span>
             <h2 className="section-title">Programmatic power.</h2>
             <p className="section-desc">
-              Connect AI coding assistants directly through the Model Context Protocol.
+              Connect Claude Desktop, Cursor, and automated workflows natively through the Model Context Protocol.
             </p>
+          </div>
+
+          {/* MCP Architecture Flow Diagram */}
+          <div className="mcp-flow-diagram" data-reveal>
+            <div className="flow-step">
+              <div className="step-box ai-client">
+                <Icon name="bot" size={18} />
+                <span className="box-title">Claude Desktop / Cursor</span>
+                <span className="box-sub">AI Client</span>
+              </div>
+            </div>
+            <div className="flow-connector">
+              <span className="conn-label">stdio JSON-RPC</span>
+              <div className="conn-arrow">➜</div>
+            </div>
+            <div className="flow-step">
+              <div className="step-box mcp-server">
+                <Icon name="terminal" size={18} />
+                <span className="box-title">pdfcraft-cli mcp</span>
+                <span className="box-sub">Native Rust Engine</span>
+              </div>
+            </div>
+            <div className="flow-connector">
+              <span className="conn-label">Zero Egress</span>
+              <div className="conn-arrow">➜</div>
+            </div>
+            <div className="flow-step">
+              <div className="step-box doc-target">
+                <Icon name="lock" size={18} />
+                <span className="box-title">Encrypted Local Document</span>
+                <span className="box-sub">100% On-Device</span>
+              </div>
+            </div>
           </div>
 
           <div className="glass-terminal-card" data-reveal>
@@ -1367,7 +1676,7 @@ Q`}
                     copy(text, cliTab);
                   }}
                 >
-                  <Icon name="copy" size={13} /> {copiedId === cliTab ? "Copied" : "Copy"}
+                  <Icon name="copy" size={13} /> {copiedId === cliTab ? "Copied!" : "Copy"}
                 </button>
               </div>
 
@@ -1422,7 +1731,7 @@ Q`}
                 className={`dl-pill ${downloadTab === "installer" ? "active" : ""}`}
                 onClick={() => setDownloadTab("installer")}
               >
-                Windows Installer (.exe)
+                <Icon name="windows" size={14} /> Windows Installer (.exe)
               </button>
               <button
                 className={`dl-pill ${downloadTab === "portable" ? "active" : ""}`}
@@ -1450,7 +1759,7 @@ Q`}
                     </button>
                   </div>
                   <div className="hash-row">
-                    <span>SHA-256:</span>
+                    <span className="hash-label">SHA-256:</span>
                     <code>{installerSha}</code>
                     <button
                       className="btn-hash"
@@ -1476,7 +1785,7 @@ Q`}
                     <span className="dl-note">Runs immediately without installation or admin privileges.</span>
                   </div>
                   <div className="hash-row">
-                    <span>SHA-256:</span>
+                    <span className="hash-label">SHA-256:</span>
                     <code>{portableSha}</code>
                     <button
                       className="btn-hash"
@@ -1500,9 +1809,17 @@ Q`}
 cd pdfcatalyst
 cargo build --release -p pdfcraft`}
                   </pre>
-                  <span className="dl-note">Requirements: Rust 1.95+ or stable compiler · C/C++ build tools</span>
+                  <span className="dl-note">Requirements: Rust 1.95+ stable compiler · C/C++ build tools</span>
                 </div>
               )}
+            </div>
+
+            {/* Trust Badges */}
+            <div className="download-trust-strip">
+              <span className="trust-item"><Icon name="shield" size={13} /> 100% Air-Gapped Local Privacy</span>
+              <span className="trust-item"><Icon name="cpu" size={13} /> Pure Rust · No Electron Bloat</span>
+              <span className="trust-item"><Icon name="check" size={13} /> Dual MIT / Apache 2.0</span>
+              <span className="trust-item"><Icon name="lock" size={13} /> Cryptographically Verified</span>
             </div>
           </div>
         </section>
@@ -1515,7 +1832,7 @@ cargo build --release -p pdfcraft`}
               <h2 className="creator-title">Built with curiosity.</h2>
               <p className="creator-bio">
                 Created by <strong>Sarthak Saxena</strong>.
-                Dedicated to building high-performance, memory-safe software and giving people powerful document engineering tools without cloud friction.
+                Dedicated to building high-performance, memory-safe software and providing powerful document engineering tools without cloud friction.
               </p>
               <div className="creator-links">
                 <span className="creator-badge-pill">
@@ -1568,15 +1885,21 @@ cargo build --release -p pdfcraft`}
         <div className="footer-container">
           <div className="footer-top">
             <div className="footer-brand-side">
-              <img src="/pdfix-logo.png" alt="" width="22" height="22" />
-              <span>PDFCatalyst</span>
-              <p>The PDF engineering workbench rebuilt in pure Rust.</p>
+              <div className="footer-brand-logo">
+                <img src="/pdfix-logo.png" alt="" width="24" height="24" />
+                <span>PDFCatalyst</span>
+              </div>
+              <p>The pure Rust PDF engineering workbench. Blazing fast, 100% offline, memory-safe.</p>
+              <div className="system-status-indicator">
+                <span className="status-dot-pulse green" />
+                <span>All Systems Operational · 100% Offline</span>
+              </div>
             </div>
             <div className="footer-links-grid">
               <div>
                 <strong>PRODUCT</strong>
                 <a href="#overview">Overview</a>
-                <a href="#features">Features</a>
+                <a href="#features">Capabilities</a>
                 <a href="#lab">Studio Lab</a>
                 <a href="#compare">Comparison</a>
               </div>
@@ -1591,7 +1914,7 @@ cargo build --release -p pdfcraft`}
             </div>
           </div>
           <div className="footer-bottom">
-            <span>Copyright © {new Date().getFullYear()} PDFCatalyst. Configured by Sarthak Saxena.</span>
+            <span>Copyright © {new Date().getFullYear()} PDFCatalyst. Crafted by Sarthak Saxena.</span>
             <span>Dual-licensed under MIT / Apache-2.0</span>
           </div>
         </div>
