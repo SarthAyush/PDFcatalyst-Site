@@ -19,7 +19,7 @@ function playAudioBlip(freq = 520, type = "sine", duration = 0.12) {
     osc.type = type;
     osc.frequency.setValueAtTime(freq, ctx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(freq * 1.15, ctx.currentTime + duration);
-    gain.gain.setValueAtTime(0.04, ctx.currentTime);
+    gain.gain.setValueAtTime(0.035, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
     osc.connect(gain);
     gain.connect(ctx.destination);
@@ -76,12 +76,6 @@ function Icon({ name, size = 16, stroke = 1.8, className = "" }) {
         <line x1="1" y1="14" x2="4" y2="14" />
       </>
     ),
-    terminal: (
-      <>
-        <polyline points="4 17 10 11 4 5" />
-        <line x1="12" y1="19" x2="20" y2="19" />
-      </>
-    ),
     bot: (
       <>
         <rect x="3" y="11" width="18" height="10" rx="2" />
@@ -136,12 +130,6 @@ function Icon({ name, size = 16, stroke = 1.8, className = "" }) {
     command: (
       <path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z" />
     ),
-    tree: (
-      <>
-        <line x1="12" y1="2" x2="12" y2="22" />
-        <path d="M12 7h5a3 3 0 0 1 0 6H7a3 3 0 0 0 0 6h5" />
-      </>
-    ),
     ruler: (
       <>
         <path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.4 2.4 0 0 1 0-3.4l2.6-2.6a2.4 2.4 0 0 1 3.4 0l12.6 12.6z" />
@@ -180,7 +168,11 @@ function Icon({ name, size = 16, stroke = 1.8, className = "" }) {
       </>
     ),
     activity: <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />,
-    star: <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />,
+    sparkleGalaxy: (
+      <>
+        <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" fill="currentColor" />
+      </>
+    ),
     zap: <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />,
     play: <polygon points="5 3 19 12 5 21 5 3" />,
     file: (
@@ -189,28 +181,12 @@ function Icon({ name, size = 16, stroke = 1.8, className = "" }) {
         <polyline points="14 2 14 8 20 8" />
       </>
     ),
-    sparkles: <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z" />,
-    crosshair: (
-      <>
-        <circle cx="12" cy="12" r="10" />
-        <line x1="22" y1="12" x2="18" y2="12" />
-        <line x1="6" y1="12" x2="2" y2="12" />
-        <line x1="12" y1="6" x2="12" y2="2" />
-        <line x1="12" y1="22" x2="12" y2="18" />
-      </>
-    ),
     penTool: (
       <>
         <path d="m12 19 7-7 3 3-7 7-3-3z" />
         <path d="m18 13-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
         <path d="m2 2 7.586 7.586" />
         <circle cx="11" cy="11" r="2" />
-      </>
-    ),
-    eye: (
-      <>
-        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-        <circle cx="12" cy="12" r="3" />
       </>
     ),
     refresh: (
@@ -266,7 +242,7 @@ function useGitHubReleases() {
           } catch {}
         }
       } catch (err) {
-        // Fallback to default
+        // Fallback
       } finally {
         setIsLoading(false);
       }
@@ -302,8 +278,214 @@ const DEFAULT_RELEASE = {
 };
 
 /* ==========================================================================
+   3D Tilt Card (Interactive Mouse Perspective Glass)
+   ========================================================================== */
+function TiltCard({ children, className = "", maxTilt = 12, glare = true, ...props }) {
+  const cardRef = useRef(null);
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [glarePos, setGlarePos] = useState({ x: 50, y: 50, opacity: 0 });
+
+  const handleMouseMove = (e) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    const rotateX = ((y - centerY) / centerY) * -maxTilt;
+    const rotateY = ((x - centerX) / centerX) * maxTilt;
+
+    setTilt({ x: rotateX, y: rotateY });
+    setGlarePos({
+      x: (x / rect.width) * 100,
+      y: (y / rect.height) * 100,
+      opacity: 0.25,
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setTilt({ x: 0, y: 0 });
+    setGlarePos((prev) => ({ ...prev, opacity: 0 }));
+  };
+
+  return (
+    <div
+      ref={cardRef}
+      className={`glass-3d-card ${className}`}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        transform: `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
+      }}
+      {...props}
+    >
+      {glare && (
+        <div
+          className="card-specular-glare"
+          style={{
+            background: `radial-gradient(circle at ${glarePos.x}% ${glarePos.y}%, rgba(255, 255, 255, ${glarePos.opacity}) 0%, transparent 65%)`,
+          }}
+        />
+      )}
+      {children}
+    </div>
+  );
+}
+
+/* ==========================================================================
+   Samsung-Style Hero 3D Stage (Interactive Workbench with Floating 3D Z-Layers)
+   ========================================================================== */
+function Samsung3DHeroStage({ soundEnabled }) {
+  const stageRef = useRef(null);
+  const [rotation, setRotation] = useState({ x: 7, y: -9 });
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseMove = (e) => {
+    if (!stageRef.current) return;
+    const rect = stageRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left - rect.width / 2;
+    const y = e.clientY - rect.top - rect.height / 2;
+    setRotation({
+      x: -(y / (rect.height / 2)) * 14,
+      y: (x / (rect.width / 2)) * 16,
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setRotation({ x: 7, y: -9 });
+    setIsHovered(false);
+  };
+
+  return (
+    <div
+      ref={stageRef}
+      className="samsung-3d-stage-container"
+      onMouseMove={(e) => {
+        setIsHovered(true);
+        handleMouseMove(e);
+      }}
+      onMouseLeave={handleMouseLeave}
+    >
+      <div
+        className="samsung-3d-stage-viewport"
+        style={{
+          transform: `perspective(1400px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
+          transition: isHovered ? "transform 0.08s ease-out" : "transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
+        }}
+      >
+        {/* Base Bezel & Screenshot */}
+        <div className="samsung-device-frame glass-card-3d">
+          <div className="frame-titanium-rim" />
+          <div className="frame-top-notch">
+            <span className="notch-dot red" />
+            <span className="notch-dot yellow" />
+            <span className="notch-dot green" />
+            <span className="notch-title">PDFCatalyst Flagship Desktop</span>
+          </div>
+
+          <div className="frame-screen">
+            <img
+              src="/app-screenshot.png"
+              alt="PDFCatalyst Desktop App on 3D Titanium Frame"
+              className="screen-img"
+            />
+            <div className="screen-glass-sheen" />
+          </div>
+        </div>
+
+        {/* Floating 3D Layer 1: Floating Quick Tools Glass Capsule (+45px Z) */}
+        <div className="layer-floating-capsule z-layer-1">
+          <div className="capsule-inner glass-pill">
+            <span className="pulse-beacon-blue" />
+            <span className="capsule-text">Intelligent Tools Active</span>
+            <div className="capsule-icons">
+              <span title="OCR"><Icon name="search" size={13} /></span>
+              <span title="Redact"><Icon name="lock" size={13} /></span>
+              <span title="Sign"><Icon name="penTool" size={13} /></span>
+              <span title="Measure"><Icon name="ruler" size={13} /></span>
+            </div>
+          </div>
+        </div>
+
+        {/* Floating 3D Layer 2: On-Device Privacy Shield (+65px Z) */}
+        <div className="layer-floating-shield z-layer-2">
+          <div className="shield-card-glass glass-card-3d">
+            <div className="shield-icon-circle">
+              <Icon name="shield" size={18} />
+            </div>
+            <div className="shield-info">
+              <strong>100% On-Device</strong>
+              <span>Zero Cloud Egress</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Floating 3D Layer 3: Ultra Latency Chip (+55px Z) */}
+        <div className="layer-floating-perf z-layer-3">
+          <div className="perf-chip-glass glass-card-3d">
+            <div className="perf-metric">
+              <Icon name="zap" size={14} className="green" />
+              <span>0.18s</span>
+            </div>
+            <span className="perf-label">Instant Start</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="stage-hint-text">
+        <span>Hover or tilt to inspect 3D glass display</span>
+      </div>
+    </div>
+  );
+}
+
+/* ==========================================================================
+   Samsung-Style Sticky Sub-Navigation Bar
+   ========================================================================== */
+function SamsungSubNav({ activeSection, onSelectSection }) {
+  const items = [
+    { id: "overview", label: "Overview" },
+    { id: "intelligence", label: "Intelligence" },
+    { id: "studio", label: "3D Studio" },
+    { id: "showcase", label: "Showcase" },
+    { id: "why-switch", label: "Why Switch" },
+    { id: "performance", label: "Speed" },
+    { id: "faq", label: "FAQ" },
+  ];
+
+  return (
+    <div className="samsung-subnav-sticky glass-nav-sub">
+      <div className="samsung-subnav-inner">
+        <div className="subnav-brand-title">
+          <span>PDFCatalyst</span>
+          <span className="subnav-model-pill">Flagship v1.0</span>
+        </div>
+
+        <nav className="subnav-links-cluster">
+          {items.map((item) => (
+            <a
+              key={item.id}
+              href={`#${item.id}`}
+              className={`subnav-link ${activeSection === item.id ? "active" : ""}`}
+              onClick={() => onSelectSection(item.id)}
+            >
+              {item.label}
+            </a>
+          ))}
+        </nav>
+
+        <a href={DOWNLOAD_INSTALLER} className="subnav-cta-btn">
+          <span>Download Free</span>
+          <Icon name="arrowRight" size={12} />
+        </a>
+      </div>
+    </div>
+  );
+}
+
+/* ==========================================================================
    Quiet, Soothing Floating Mascot Assistant
-   Provides gentle document tips without intrusive popups
    ========================================================================== */
 function FloatingCuteMascot({ soundEnabled, setSoundEnabled }) {
   const [tipIndex, setTipIndex] = useState(0);
@@ -312,10 +494,10 @@ function FloatingCuteMascot({ soundEnabled, setSoundEnabled }) {
 
   const tips = [
     "Your files stay 100% private on your machine.",
-    "Click the glowing pins on the tour below to see features.",
+    "Click and hover on the 3D displays to tilt the glass perspective.",
     "No subscriptions or accounts needed — completely free.",
     "Easily reorder, rotate, or merge pages with one click.",
-    "Scanned paper receipts? OCR converts them into searchable text.",
+    "Scanned a receipt? OCR converts it into clean searchable text.",
     "Press ⌘K or Ctrl+K anytime to quickly search any tool.",
   ];
 
@@ -329,7 +511,7 @@ function FloatingCuteMascot({ soundEnabled, setSoundEnabled }) {
   if (minimized) {
     return (
       <div
-        className="mascot-minimized-pill glass-card"
+        className="mascot-minimized-pill glass-card-3d"
         onClick={() => {
           if (soundEnabled) playAudioBlip(680);
           setMinimized(false);
@@ -344,7 +526,7 @@ function FloatingCuteMascot({ soundEnabled, setSoundEnabled }) {
 
   return (
     <div className="floating-mascot-container">
-      <div className="mascot-speech-bubble glass-card">
+      <div className="mascot-speech-bubble glass-card-3d">
         <span className="speech-text">{tips[tipIndex]}</span>
         <div className="bubble-actions">
           <button
@@ -382,8 +564,8 @@ function FloatingCuteMascot({ soundEnabled, setSoundEnabled }) {
           src="/cute-mascot.png"
           alt="PDFCatalyst Friendly Mascot"
           className="mascot-img"
-          width="76"
-          height="76"
+          width="74"
+          height="74"
         />
       </div>
     </div>
@@ -391,15 +573,592 @@ function FloatingCuteMascot({ soundEnabled, setSoundEnabled }) {
 }
 
 /* ==========================================================================
-   "Why Switch?" Comparison Cards
-   Directly contrasts real frustrations with Adobe Acrobat & web converters
+   Samsung Galaxy-Style Intelligence Bento Grid (3D Glass Tiles)
    ========================================================================== */
-function WhySwitchSection() {
-  const comparisons = [
+function SamsungIntelligenceSection() {
+  const features = [
+    {
+      title: "Smart Optical Scan",
+      subtitle: "On-Device Neural OCR",
+      desc: "Turn photographs and faded paper documents into crisp, selectable, and searchable text without ever uploading files to cloud servers.",
+      icon: "search",
+      badge: "Vision",
+      gradient: "blue-cyan",
+      tag: "100% Offline",
+    },
+    {
+      title: "True Zero-Trace Redact",
+      subtitle: "Irreversible Privacy",
+      desc: "Standard viewers only draw a surface-level black box that anyone can copy. PDFCatalyst permanently removes confidential words from the document.",
+      icon: "lock",
+      badge: "Security",
+      gradient: "violet-pink",
+      tag: "Zero Leaks",
+    },
+    {
+      title: "Silky 60 FPS Zoom",
+      subtitle: "Hardware GPU Engine",
+      desc: "Pan and zoom effortlessly up to 800% on massive 500-page architectural drawings with zero stuttering or frozen screens.",
+      icon: "cpu",
+      badge: "Performance",
+      gradient: "emerald-teal",
+      tag: "60 FPS Fluid",
+    },
+    {
+      title: "Precision Blueprint Caliper",
+      subtitle: "Architectural CAD Measure",
+      desc: "Calibrate drawings to Imperial and Metric scale ratios. Calculate room dimensions, corridor runs, and square footage in real time.",
+      icon: "ruler",
+      badge: "Precision",
+      gradient: "amber-orange",
+      tag: "Calibrated Scale",
+    },
+    {
+      title: "1-Click Digital Sign",
+      subtitle: "Verified Approvals",
+      desc: "Add your personal signature, date stamps, and verified digital approval seals directly to agreements without printing or scanning.",
+      icon: "penTool",
+      badge: "Signatures",
+      gradient: "cyan-blue",
+      tag: "Print-Free",
+    },
+    {
+      title: "Instant Batch Studio",
+      subtitle: "Multi-File Organizing",
+      desc: "Combine, split, compress, and rotate entire folders of documents with smooth drag-and-drop ease in sub-second bursts.",
+      icon: "layers",
+      badge: "Productivity",
+      gradient: "purple-indigo",
+      tag: "Sub-Second",
+    },
+  ];
+
+  return (
+    <section className="section-container" id="intelligence">
+      <div className="section-head-minimal">
+        <div className="samsung-sparkle-pill">
+          <Icon name="sparkleGalaxy" size={13} className="sparkle-icon" />
+          <span>INTELLIGENCE & PRECISION</span>
+        </div>
+        <h2 className="title-samsung-flagship">Crafted for your everyday workflow.</h2>
+        <p className="subtitle-samsung">
+          Powerful document capabilities delivered inside a pristine 3D glass environment.
+        </p>
+      </div>
+
+      <div className="samsung-bento-grid">
+        {features.map((f, i) => (
+          <TiltCard key={i} className="samsung-bento-tile" maxTilt={10}>
+            <div className={`tile-glow-orb ${f.gradient}`} />
+            <div className="tile-top-row">
+              <div className="tile-icon-capsule">
+                <Icon name={f.icon} size={18} />
+              </div>
+              <span className="tile-tag">{f.tag}</span>
+            </div>
+            <div className="tile-content">
+              <span className="tile-sub">{f.subtitle}</span>
+              <h3 className="tile-title">{f.title}</h3>
+              <p className="tile-desc">{f.desc}</p>
+            </div>
+            <div className="tile-bottom-sheen" />
+          </TiltCard>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ==========================================================================
+   Samsung-Style 3D Interactive Workflow Studio
+   ========================================================================== */
+function Samsung3DWorkflowStudio({ soundEnabled }) {
+  const [activeTab, setActiveTab] = useState(0);
+
+  // Tab 0: Redact Demo
+  const [redacted, setRedacted] = useState(true);
+  const [copyFeedback, setCopyFeedback] = useState("");
+
+  // Tab 1: OCR Scan Demo
+  const [scanning, setScanning] = useState(false);
+  const [scanProgress, setScanProgress] = useState(100);
+
+  // Tab 2: Page Reorder Demo
+  const [pageList, setPageList] = useState([1, 2, 3, 4]);
+
+  // Tab 3: Sign Demo
+  const [signed, setSigned] = useState(false);
+
+  // Tab 4: Caliper Demo
+  const [measurePoint, setMeasurePoint] = useState("room");
+
+  const tabs = [
+    { id: "redact", title: "One-Click Redact", icon: "lock", badge: "Zero Leaks" },
+    { id: "ocr", title: "Smart Scan (OCR)", icon: "search", badge: "Neural Text" },
+    { id: "pages", title: "Merge & Organize", icon: "layers", badge: "Drag & Reorder" },
+    { id: "sign", title: "Instant E-Sign", icon: "penTool", badge: "Digital Seal" },
+    { id: "measure", title: "Blueprint Caliper", icon: "ruler", badge: "CAD Scale" },
+  ];
+
+  const handleTestCopy = () => {
+    if (redacted) {
+      if (soundEnabled) playAudioBlip(760);
+      setCopyFeedback("Protected: 0 characters copied. The confidential data is completely erased.");
+    } else {
+      if (soundEnabled) playAudioBlip(440);
+      navigator.clipboard?.writeText("984-21-0814");
+      setCopyFeedback("Warning: '984-21-0814' was copied. Standard black box overlays can still be read.");
+    }
+    setTimeout(() => setCopyFeedback(""), 3500);
+  };
+
+  const handleRunOcr = () => {
+    if (scanning) return;
+    if (soundEnabled) playAudioBlip(540, "sine", 0.2);
+    setScanning(true);
+    setScanProgress(0);
+
+    let cur = 0;
+    const interval = setInterval(() => {
+      cur += 10;
+      if (cur >= 100) {
+        clearInterval(interval);
+        setScanProgress(100);
+        setScanning(false);
+        if (soundEnabled) playAudioBlip(720, "sine", 0.2);
+      } else {
+        setScanProgress(cur);
+      }
+    }, 110);
+  };
+
+  const handleReorder = () => {
+    if (soundEnabled) playAudioBlip(640);
+    setPageList((prev) => [...prev.slice(1), prev[0]]);
+  };
+
+  return (
+    <section className="section-container" id="studio">
+      <div className="section-head-minimal">
+        <div className="samsung-sparkle-pill">
+          <Icon name="sparkleGalaxy" size={13} className="sparkle-icon" />
+          <span>3D INTERACTIVE STUDIO</span>
+        </div>
+        <h2 className="title-samsung-flagship">Test drive the flagship features.</h2>
+        <p className="subtitle-samsung">
+          Interact with live document tools rendered in multi-depth glass panels.
+        </p>
+      </div>
+
+      <div className="samsung-studio-shell glass-card-3d">
+        {/* Navigation Tabs */}
+        <div className="studio-tabs-bar">
+          {tabs.map((t, idx) => (
+            <button
+              key={t.id}
+              className={`studio-tab-btn ${activeTab === idx ? "active" : ""}`}
+              onClick={() => {
+                if (soundEnabled) playAudioBlip(560 + idx * 40);
+                setActiveTab(idx);
+              }}
+            >
+              <Icon name={t.icon} size={15} />
+              <span>{t.title}</span>
+              <span className="tab-glass-badge">{t.badge}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Tab Content Display */}
+        <div className="studio-content-layout">
+          {/* TAB 0: REDACTION */}
+          {activeTab === 0 && (
+            <div className="studio-tab-pane">
+              <div className="pane-info">
+                <span className="pane-eyebrow">CONFIDENTIALITY AUDIT</span>
+                <h3 className="pane-heading">True Redaction: Erased Forever</h3>
+                <p className="pane-desc">
+                  Standard viewers merely paint a black rectangle over sensitive text, leaving the underlying words intact so anyone can copy-paste them. PDFCatalyst permanently destroys confidential data from the document.
+                </p>
+                <div className="pane-toggles">
+                  <span className="toggle-label">Engine Mode:</span>
+                  <button
+                    className={`glass-toggle-btn ${redacted ? "active-safe" : ""}`}
+                    onClick={() => setRedacted(true)}
+                  >
+                    PDFCatalyst True Erase
+                  </button>
+                  <button
+                    className={`glass-toggle-btn ${!redacted ? "active-danger" : ""}`}
+                    onClick={() => setRedacted(false)}
+                  >
+                    Standard Black Box
+                  </button>
+                </div>
+              </div>
+
+              <TiltCard className="pane-interactive-card glass-panel-3d" maxTilt={8}>
+                <div className="doc-mockup-sheet">
+                  <div className="doc-mockup-header">
+                    <span>NON-DISCLOSURE AGREEMENT</span>
+                    <span className="status-badge">{redacted ? "PROTECTED" : "VULNERABLE"}</span>
+                  </div>
+                  <p className="doc-row">Signer: <strong>Elena Rostova</strong></p>
+                  <p className="doc-row">
+                    Social Security Number:{" "}
+                    <span className={`redact-chip ${redacted ? "safe" : "leaky"}`}>
+                      {redacted ? "[Permanently Erased]" : "984-21-0814"}
+                    </span>
+                  </p>
+                  <p className="doc-row">
+                    Bank Account Number:{" "}
+                    <span className={`redact-chip ${redacted ? "safe" : "leaky"}`}>
+                      {redacted ? "[Permanently Erased]" : "4421-8890-1200"}
+                    </span>
+                  </p>
+                </div>
+
+                <div className="interactive-btn-cluster">
+                  <button className="btn-samsung-glass-action" onClick={handleTestCopy}>
+                    <Icon name="copy" size={13} />
+                    <span>Test Copy-Paste Vulnerability</span>
+                  </button>
+                </div>
+
+                {copyFeedback && (
+                  <div className={`feedback-alert-pill ${redacted ? "safe" : "danger"}`}>
+                    <Icon name={redacted ? "shield" : "lock"} size={13} />
+                    <span>{copyFeedback}</span>
+                  </div>
+                )}
+              </TiltCard>
+            </div>
+          )}
+
+          {/* TAB 1: OCR */}
+          {activeTab === 1 && (
+            <div className="studio-tab-pane">
+              <div className="pane-info">
+                <span className="pane-eyebrow">NEURAL RECOGNITION</span>
+                <h3 className="pane-heading">Turn Photos & Scans into Selectable Text</h3>
+                <p className="pane-desc">
+                  Convert scanned paper receipts, legal filings, and phone photographs into clean, searchable documents. Run smart character extraction directly on your local hardware.
+                </p>
+                <div className="interactive-btn-cluster">
+                  <button
+                    className="btn-samsung-glass-action primary"
+                    onClick={handleRunOcr}
+                    disabled={scanning}
+                  >
+                    <Icon name="search" size={13} />
+                    <span>{scanning ? `Scanning Document (${scanProgress}%)...` : "Run Smart OCR Scan"}</span>
+                  </button>
+                </div>
+              </div>
+
+              <TiltCard className="pane-interactive-card glass-panel-3d" maxTilt={8}>
+                <div className="ocr-stage-box">
+                  <img src="/media/document_audit.jpg" alt="Scanned Document" className="ocr-image" />
+                  {scanning && (
+                    <div className="samsung-laser-beam" style={{ top: `${scanProgress}%` }} />
+                  )}
+                  <div className="ocr-tags-row">
+                    <span className="ocr-tag-pill">INVOICE #9421</span>
+                    <span className="ocr-tag-pill">TOTAL: $1,420.00</span>
+                    <span className="ocr-tag-pill">STATUS: PAID</span>
+                  </div>
+                </div>
+              </TiltCard>
+            </div>
+          )}
+
+          {/* TAB 2: PAGE REORDER */}
+          {activeTab === 2 && (
+            <div className="studio-tab-pane">
+              <div className="pane-info">
+                <span className="pane-eyebrow">DOCUMENT ARCHITECTURE</span>
+                <h3 className="pane-heading">Reorder, Split, and Merge Pages</h3>
+                <p className="pane-desc">
+                  Rearrange proposals, delete blank pages, rotate upside-down camera scans, and merge multiple PDFs together in seconds.
+                </p>
+                <div className="interactive-btn-cluster">
+                  <button className="btn-samsung-glass-action" onClick={handleReorder}>
+                    <Icon name="layers" size={13} />
+                    <span>Reorder Pages in 3D</span>
+                  </button>
+                </div>
+              </div>
+
+              <TiltCard className="pane-interactive-card glass-panel-3d" maxTilt={8}>
+                <div className="pages-3d-shelf">
+                  {pageList.map((num, i) => (
+                    <div className="page-3d-item glass-card-3d" key={num}>
+                      <span className="page-label">Page {num}</span>
+                      <div className="page-lines">
+                        <div className="p-line wide" />
+                        <div className="p-line" />
+                        <div className="p-line short" />
+                      </div>
+                      <span className="page-order-num">#{i + 1}</span>
+                    </div>
+                  ))}
+                </div>
+              </TiltCard>
+            </div>
+          )}
+
+          {/* TAB 3: SIGN */}
+          {activeTab === 3 && (
+            <div className="studio-tab-pane">
+              <div className="pane-info">
+                <span className="pane-eyebrow">VERIFIED SIGNATURES</span>
+                <h3 className="pane-heading">Sign Agreements Without Printing</h3>
+                <p className="pane-desc">
+                  Place verified digital signatures, approval dates, and custom stamps with one click. Eliminates the need to print on paper or scan documents again.
+                </p>
+                <div className="interactive-btn-cluster">
+                  <button
+                    className="btn-samsung-glass-action primary"
+                    onClick={() => {
+                      if (soundEnabled) playAudioBlip(signed ? 520 : 760);
+                      setSigned(!signed);
+                    }}
+                  >
+                    <Icon name={signed ? "x" : "penTool"} size={13} />
+                    <span>{signed ? "Clear Signature" : "Apply Verified Signature"}</span>
+                  </button>
+                </div>
+              </div>
+
+              <TiltCard className="pane-interactive-card glass-panel-3d" maxTilt={8}>
+                <div className="doc-mockup-sheet signing">
+                  <div className="doc-mockup-header">
+                    <span>CONSULTING SERVICES AGREEMENT</span>
+                  </div>
+                  <p className="doc-row">
+                    By signing below, all milestones and deliverable terms are formally approved.
+                  </p>
+                  <div className="signature-box-glass">
+                    <span className="sig-label">Authorized Signature:</span>
+                    {signed ? (
+                      <div className="signature-placed-wrap">
+                        <span className="sig-calligraphy">Katherine Vance</span>
+                        <span className="sig-stamp-pill">Verified Seal • {new Date().toLocaleDateString()}</span>
+                      </div>
+                    ) : (
+                      <span className="sig-placeholder">Click button to stamp digital signature</span>
+                    )}
+                  </div>
+                </div>
+              </TiltCard>
+            </div>
+          )}
+
+          {/* TAB 4: CALIPER */}
+          {activeTab === 4 && (
+            <div className="studio-tab-pane">
+              <div className="pane-info">
+                <span className="pane-eyebrow">ARCHITECTURAL CALIPER</span>
+                <h3 className="pane-heading">Measure Drawings with True Scale</h3>
+                <p className="pane-desc">
+                  Calibrate CAD drawings and blueprints against known title blocks. Measure distances, perimeters, and area square footage with sub-millimeter precision.
+                </p>
+                <div className="pane-toggles">
+                  <button
+                    className={`glass-toggle-btn ${measurePoint === "room" ? "active-safe" : ""}`}
+                    onClick={() => setMeasurePoint("room")}
+                  >
+                    Main Suite
+                  </button>
+                  <button
+                    className={`glass-toggle-btn ${measurePoint === "hallway" ? "active-safe" : ""}`}
+                    onClick={() => setMeasurePoint("hallway")}
+                  >
+                    Corridor
+                  </button>
+                </div>
+              </div>
+
+              <TiltCard className="pane-interactive-card glass-panel-3d" maxTilt={8}>
+                <div className="caliper-visual-box">
+                  <img src="/media/blueprint_cad.jpg" alt="Blueprint" className="blueprint-img" />
+                  <div className={`caliper-pin-cluster ${measurePoint}`}>
+                    <div className="caliper-glowing-beacon" />
+                    <div className="caliper-data-card glass-card-3d">
+                      {measurePoint === "room" ? (
+                        <>
+                          <strong>Area: 480 sq ft (44.6 m²)</strong>
+                          <span>Scale: 1/4" = 1'-0"</span>
+                        </>
+                      ) : (
+                        <>
+                          <strong>Distance: 24.5 ft (7.47 m)</strong>
+                          <span>Scale: 1/4" = 1'-0"</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </TiltCard>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ==========================================================================
+   Samsung-Style Media Showcase Gallery (High-Res Visuals + Animated GIFs)
+   ========================================================================== */
+function SamsungMediaShowcase({ soundEnabled }) {
+  const [activeIdx, setActiveIdx] = useState(0);
+
+  const pillars = [
+    {
+      id: "privacy",
+      title: "100% On-Device Privacy",
+      subtitle: "AIR-GAPPED CONFIDENTIALITY",
+      desc: "Unlike online PDF converters that send your personal records to remote servers, PDFCatalyst processes every document right in your computer memory. Your contracts, bank statements, and tax files remain entirely your own.",
+      mainImage: "/media/security_airgap.jpg",
+      gifInset: "/media/crypto_aes.gif",
+      gifBadge: "LOCAL MEMORY ENCRYPTION",
+      benefits: [
+        "Zero document uploads to remote servers",
+        "Zero behavioral analytics or user tracking",
+        "Works smoothly without an internet connection",
+      ],
+    },
+    {
+      id: "speed",
+      title: "Silky 60 FPS Performance",
+      subtitle: "INSTANT DOCUMENT OPENING",
+      desc: "Experience butter-smooth scrolling across 500-page dense manuals and multi-layer blueprints. Launches in under 200 milliseconds and consumes a fraction of the memory used by legacy viewers.",
+      mainImage: "/media/silicon_hardware.jpg",
+      gifInset: "/media/matrix_transform.gif",
+      gifBadge: "60 FPS SMOOTH NAVIGATION",
+      benefits: [
+        "Opens heavy documents in under 200 ms",
+        "Silky 60 FPS panning even at 800% zoom",
+        "Uses 96% less active RAM than legacy suites",
+      ],
+    },
+    {
+      id: "ocr",
+      title: "Smart Text from Scans",
+      subtitle: "NEURAL EXTRACTION",
+      desc: "Turn phone photos, paper receipts, and archived records into crisp, selectable text. Search for keywords instantly, copy quotes, and preserve original document layouts.",
+      mainImage: "/media/document_audit.jpg",
+      gifInset: "/media/laser_scan.gif",
+      gifBadge: "SMART CHARACTER EXTRACTION",
+      benefits: [
+        "Accurate character and table recognition",
+        "Preserves your original fonts and geometry",
+        "100% on-device conversion without fees",
+      ],
+    },
+    {
+      id: "cad",
+      title: "Architectural Precision",
+      subtitle: "CALIBRATED BLUEPRINT CALIPER",
+      desc: "Engineered for architects, builders, and designers who need real-world dimensions. Calibrate drawings against title block scales and compute area and distances instantly.",
+      mainImage: "/media/blueprint_cad.jpg",
+      gifInset: "/media/radar_scan.gif",
+      gifBadge: "CAD MEASUREMENT ENGINE",
+      benefits: [
+        "Supports Imperial (1/4\", 1/8\") and Metric scales",
+        "Instant square footage and perimeter calculation",
+        "Vector-sharp display ensures lines remain crystal clear",
+      ],
+    },
+    {
+      id: "batch",
+      title: "Batch Productivity",
+      subtitle: "MULTI-FILE PROCESSING",
+      desc: "Organize dozens of PDF files simultaneously. Combine folders of receipts, shrink files for email attachments, and split multi-page bundles with one click.",
+      mainImage: "/media/terminal_code.jpg",
+      gifInset: "/media/sorting_parallel.gif",
+      gifBadge: "PARALLEL BATCH PROCESSING",
+      benefits: [
+        "Combine dozens of PDF files with one click",
+        "Shrink large files for email attachments",
+        "Split multi-page bundles cleanly",
+      ],
+    },
+  ];
+
+  const cur = pillars[activeIdx];
+
+  return (
+    <section className="section-container" id="showcase">
+      <div className="section-head-minimal">
+        <div className="samsung-sparkle-pill">
+          <Icon name="sparkleGalaxy" size={13} className="sparkle-icon" />
+          <span>FLAGSHIP VISUAL SHOWCASE</span>
+        </div>
+        <h2 className="title-samsung-flagship">Precision tools in high definition.</h2>
+        <p className="subtitle-samsung">
+          Explore high-resolution imagery and animated workflows in an expansive glass frame.
+        </p>
+      </div>
+
+      <div className="samsung-showcase-shell glass-card-3d">
+        <div className="showcase-nav-pills">
+          {pillars.map((p, idx) => (
+            <button
+              key={p.id}
+              className={`showcase-nav-btn ${activeIdx === idx ? "active" : ""}`}
+              onClick={() => {
+                if (soundEnabled) playAudioBlip(580 + idx * 40);
+                setActiveIdx(idx);
+              }}
+            >
+              <span>{p.title}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="showcase-stage-grid">
+          <div className="showcase-visual-frame glass-panel-3d">
+            <img src={cur.mainImage} alt={cur.title} className="showcase-main-img" />
+            <div className="showcase-gif-capsule glass-pill">
+              <img src={cur.gifInset} alt={cur.gifBadge} />
+              <div className="gif-badge-text">
+                <span className="pulse-beacon-blue" />
+                <span>{cur.gifBadge}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="showcase-info-panel">
+            <span className="showcase-eyebrow">{cur.subtitle}</span>
+            <h3 className="showcase-title">{cur.title}</h3>
+            <p className="showcase-desc">{cur.desc}</p>
+
+            <ul className="showcase-benefits-list">
+              {cur.benefits.map((b, i) => (
+                <li key={i}>
+                  <Icon name="checkCircle" size={15} className="green-check" />
+                  <span>{b}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ==========================================================================
+   "Why Switch?" Comparison Cards (Samsung-Style Glass Grid)
+   ========================================================================== */
+function SamsungComparisonSection() {
+  const cards = [
     {
       title: "Cost & Subscriptions",
       badge: "Zero Cost",
-      pdfcatalyst: "100% Free Forever",
+      pdfcatalyst: "$0 Free Forever",
       pdfcatalystDetail: "No monthly charges, no enterprise upgrades, and no hidden payment walls.",
       competitor: "Adobe Acrobat Pro",
       competitorDetail: "Costs $239.88 every single year per seat, adding up to thousands over time.",
@@ -449,46 +1208,49 @@ function WhySwitchSection() {
   return (
     <section className="section-container" id="why-switch">
       <div className="section-head-minimal">
-        <span className="eyebrow-chip">WHY SWITCH TO PDFCATALYST</span>
-        <h2 className="title-metallic">Everything you need without the headaches.</h2>
-        <p className="subtitle-subtle">
-          Enjoy a fast, private document editor built to solve the frustrations of expensive subscriptions and slow cloud converters.
+        <div className="samsung-sparkle-pill">
+          <Icon name="sparkleGalaxy" size={13} className="sparkle-icon" />
+          <span>THE FLAGSHIP ADVANTAGE</span>
+        </div>
+        <h2 className="title-samsung-flagship">Why people switch to PDFCatalyst.</h2>
+        <p className="subtitle-samsung">
+          Escape monthly subscription lock-ins and slow cloud uploads with a clean local workbench.
         </p>
       </div>
 
-      <div className="why-switch-grid">
-        {comparisons.map((c, i) => (
-          <div className="switch-card glass-card" key={i}>
-            <div className="switch-card-top">
-              <span className="switch-category">{c.title}</span>
-              <span className="switch-badge">{c.badge}</span>
+      <div className="samsung-comparison-grid">
+        {cards.map((c, i) => (
+          <TiltCard key={i} className="samsung-comp-card glass-card-3d" maxTilt={8}>
+            <div className="comp-card-top">
+              <span className="comp-category">{c.title}</span>
+              <span className="comp-badge-pill">{c.badge}</span>
             </div>
 
-            <div className="switch-comparison-rows">
-              <div className="comp-item win">
-                <div className="comp-item-header">
-                  <div className="comp-icon-box green">
+            <div className="comp-split-box">
+              <div className="comp-side winner">
+                <div className="side-head">
+                  <div className="side-icon-box green">
                     <Icon name="check" size={13} />
                   </div>
                   <strong>PDFCatalyst</strong>
                 </div>
-                <div className="comp-item-val">{c.pdfcatalyst}</div>
-                <p className="comp-item-detail">{c.pdfcatalystDetail}</p>
+                <div className="side-val green">{c.pdfcatalyst}</div>
+                <p className="side-detail">{c.pdfcatalystDetail}</p>
               </div>
 
-              <div className="comp-divider" />
+              <div className="side-divider" />
 
-              <div className="comp-item lose">
-                <div className="comp-item-header">
-                  <div className="comp-icon-box red">
+              <div className="comp-side competitor">
+                <div className="side-head">
+                  <div className="side-icon-box red">
                     <Icon name="x" size={12} />
                   </div>
-                  <span className="competitor-name">{c.competitor}</span>
+                  <span className="comp-name">{c.competitor}</span>
                 </div>
-                <p className="comp-item-detail competitor-detail">{c.competitorDetail}</p>
+                <p className="side-detail dim">{c.competitorDetail}</p>
               </div>
             </div>
-          </div>
+          </TiltCard>
         ))}
       </div>
     </section>
@@ -496,679 +1258,9 @@ function WhySwitchSection() {
 }
 
 /* ==========================================================================
-   Interactive Workflow Tour (The Wow Factor)
-   Step-by-step interactive cards for everyday high-value workflows
+   Speed & Performance Benchmark Simulator
    ========================================================================== */
-function InteractiveWorkflowTour({ soundEnabled }) {
-  const [activeWorkflow, setActiveWorkflow] = useState(0);
-
-  // Card 1: Live Redaction Testing
-  const [redacted, setRedacted] = useState(true);
-  const [copiedNotice, setCopiedNotice] = useState("");
-
-  // Card 2: OCR Scanning
-  const [isScanning, setIsScanning] = useState(false);
-  const [scanProgress, setScanProgress] = useState(100);
-
-  // Card 3: E-Sign Stamp
-  const [signed, setSigned] = useState(false);
-
-  // Card 4: Page Reorder Simulation
-  const [pageOrder, setPageOrder] = useState([1, 2, 3, 4]);
-
-  // Card 5: Precision Measure Points
-  const [measurePoint, setMeasurePoint] = useState("hallway");
-
-  const workflows = [
-    {
-      id: "redact",
-      tabTitle: "One-Click Redact",
-      icon: "lock",
-      badge: "Privacy Guarantee",
-      headline: "True Redaction: Never Leak Confidential Details",
-      description:
-        "Standard viewers just place a black box over text, leaving the words underneath vulnerable to copy-pasting. PDFCatalyst permanently removes sensitive data from the document so it can never be extracted.",
-    },
-    {
-      id: "ocr",
-      tabTitle: "Scan to Text (OCR)",
-      icon: "search",
-      badge: "Smart Recognition",
-      headline: "Turn Scanned Papers and Photos into Searchable Text",
-      description:
-        "Easily convert receipts, contracts, and printed documents into clean, selectable text right on your computer without sending your documents to the cloud.",
-    },
-    {
-      id: "pages",
-      tabTitle: "Merge & Organize",
-      icon: "layers",
-      badge: "Easy Layout",
-      headline: "Reorder, Rotate, and Combine Pages Effortlessly",
-      description:
-        "Rearrange multi-page proposals, delete unwanted pages, rotate upside-down scans, and merge multiple PDF documents in seconds.",
-    },
-    {
-      id: "sign",
-      tabTitle: "Instant E-Sign",
-      icon: "penTool",
-      badge: "Quick Approvals",
-      headline: "Fill Forms and Sign Agreements Without Printing",
-      description:
-        "Add a verified digital signature, fill text boxes, and insert approval dates with a single click. No need to print out paper, sign with a pen, or scan again.",
-    },
-    {
-      id: "measure",
-      tabTitle: "Precision Measure",
-      icon: "ruler",
-      badge: "Design Caliper",
-      headline: "Measure Blueprints, Dimensions, and Floor Plans",
-      description:
-        "Calibrate to any scale (inches, feet, millimeters) and measure distances or floor area directly on construction blueprints, schematics, and design plans.",
-    },
-  ];
-
-  const handleRunOcr = () => {
-    if (isScanning) return;
-    if (soundEnabled) playAudioBlip(540, "sine", 0.2);
-    setIsScanning(true);
-    setScanProgress(0);
-
-    let current = 0;
-    const interval = setInterval(() => {
-      current += 10;
-      if (current >= 100) {
-        clearInterval(interval);
-        setScanProgress(100);
-        setIsScanning(false);
-        if (soundEnabled) playAudioBlip(720, "sine", 0.2);
-      } else {
-        setScanProgress(current);
-      }
-    }, 120);
-  };
-
-  const handleTestCopy = () => {
-    if (redacted) {
-      if (soundEnabled) playAudioBlip(760);
-      setCopiedNotice("Protected: 0 characters copied. The sensitive data does not exist in the file.");
-    } else {
-      if (soundEnabled) playAudioBlip(440);
-      navigator.clipboard?.writeText("984-21-0814");
-      setCopiedNotice("Vulnerable: '984-21-0814' was copied. Standard black box overlays can still be read.");
-    }
-    setTimeout(() => setCopiedNotice(""), 3500);
-  };
-
-  const handleReorderPages = () => {
-    if (soundEnabled) playAudioBlip(640);
-    setPageOrder((prev) => [...prev.slice(1), prev[0]]);
-  };
-
-  const currentWf = workflows[activeWorkflow];
-
-  return (
-    <section className="section-container" id="interactive-tour">
-      <div className="section-head-minimal">
-        <span className="eyebrow-chip">INTERACTIVE WORKFLOW TOUR</span>
-        <h2 className="title-metallic">Experience the tools in action.</h2>
-        <p className="subtitle-subtle">
-          Click between the workflows below to try out everyday features directly in your browser.
-        </p>
-      </div>
-
-      <div className="workflow-tour-shell glass-card">
-        {/* Navigation Tabs */}
-        <div className="workflow-tour-tabs">
-          {workflows.map((wf, idx) => (
-            <button
-              key={wf.id}
-              className={`tour-tab-btn ${activeWorkflow === idx ? "active" : ""}`}
-              onClick={() => {
-                if (soundEnabled) playAudioBlip(580 + idx * 40);
-                setActiveWorkflow(idx);
-              }}
-            >
-              <Icon name={wf.icon} size={15} />
-              <span>{wf.tabTitle}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Content Box */}
-        <div className="workflow-tour-body">
-          <div className="workflow-info-col">
-            <span className="workflow-badge">{currentWf.badge}</span>
-            <h3 className="workflow-title">{currentWf.headline}</h3>
-            <p className="workflow-desc">{currentWf.description}</p>
-
-            <div className="workflow-key-benefits">
-              <div className="benefit-row">
-                <Icon name="checkCircle" size={14} className="green" />
-                <span>Runs smoothly and quietly on your computer</span>
-              </div>
-              <div className="benefit-row">
-                <Icon name="checkCircle" size={14} className="green" />
-                <span>Zero cloud uploads for total confidentiality</span>
-              </div>
-              <div className="benefit-row">
-                <Icon name="checkCircle" size={14} className="green" />
-                <span>Clean, modern interface designed for focus</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="workflow-interactive-col">
-            {/* WORKFLOW 0: REDACTION DEMO */}
-            {activeWorkflow === 0 && (
-              <div className="interactive-sandbox-frame glass-panel">
-                <div className="sandbox-panel-top">
-                  <span className="panel-title">Redaction Protection Simulator</span>
-                  <div className="toggle-mode-pills">
-                    <button
-                      className={`pill-btn ${redacted ? "active" : ""}`}
-                      onClick={() => setRedacted(true)}
-                    >
-                      PDFCatalyst Erase
-                    </button>
-                    <button
-                      className={`pill-btn danger ${!redacted ? "active" : ""}`}
-                      onClick={() => setRedacted(false)}
-                    >
-                      Standard Black Box
-                    </button>
-                  </div>
-                </div>
-
-                <div className="sample-document-sheet">
-                  <div className="sheet-badge">NON-DISCLOSURE AGREEMENT</div>
-                  <p className="doc-text">
-                    Client Name: <strong>Katherine Vance</strong>
-                  </p>
-                  <p className="doc-text">
-                    Identification SSN:{" "}
-                    <span className={`redaction-target ${redacted ? "safely-erased" : "superficial-box"}`}>
-                      {redacted ? "[Permanently Erased]" : "984-21-0814"}
-                    </span>
-                  </p>
-                  <p className="doc-text">
-                    Bank Account Number:{" "}
-                    <span className={`redaction-target ${redacted ? "safely-erased" : "superficial-box"}`}>
-                      {redacted ? "[Permanently Erased]" : "4421-8890-1200"}
-                    </span>
-                  </p>
-                </div>
-
-                <div className="sandbox-action-row">
-                  <button className="btn-try-copy" onClick={handleTestCopy}>
-                    <Icon name="copy" size={13} />
-                    <span>Test Copy-Paste Vulnerability</span>
-                  </button>
-                </div>
-
-                {copiedNotice && (
-                  <div className={`copy-feedback-banner ${redacted ? "safe" : "danger"}`}>
-                    <Icon name={redacted ? "shield" : "lock"} size={13} />
-                    <span>{copiedNotice}</span>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* WORKFLOW 1: OCR SCAN DEMO */}
-            {activeWorkflow === 1 && (
-              <div className="interactive-sandbox-frame glass-panel">
-                <div className="sandbox-panel-top">
-                  <span className="panel-title">Optical Character Recognition</span>
-                  <span className="panel-indicator">{isScanning ? "Scanning Document..." : "Ready to Scan"}</span>
-                </div>
-
-                <div className="ocr-preview-box">
-                  <img
-                    src="/media/document_audit.jpg"
-                    alt="Sample Document"
-                    className="ocr-sample-img"
-                  />
-                  {isScanning && (
-                    <div
-                      className="ocr-laser-beam"
-                      style={{ top: `${scanProgress}%` }}
-                    />
-                  )}
-                  <div className="ocr-text-overlay">
-                    <span className="ocr-word">INVOICE #9421</span>
-                    <span className="ocr-word">TOTAL: $1,420.00</span>
-                    <span className="ocr-word">STATUS: PAID</span>
-                  </div>
-                </div>
-
-                <div className="sandbox-action-row">
-                  <button
-                    className="btn-try-copy"
-                    onClick={handleRunOcr}
-                    disabled={isScanning}
-                  >
-                    <Icon name="search" size={13} />
-                    <span>{isScanning ? `Scanning (${scanProgress}%)...` : "Run Smart Scan"}</span>
-                  </button>
-                  <span className="ocr-note">Extracts text clearly from photos and paper scans.</span>
-                </div>
-              </div>
-            )}
-
-            {/* WORKFLOW 2: PAGE REORDER DEMO */}
-            {activeWorkflow === 2 && (
-              <div className="interactive-sandbox-frame glass-panel">
-                <div className="sandbox-panel-top">
-                  <span className="panel-title">Page Arrangement Preview</span>
-                  <button className="btn-small-refresh" onClick={handleReorderPages}>
-                    <Icon name="refresh" size={12} />
-                    <span>Cycle Order</span>
-                  </button>
-                </div>
-
-                <div className="pages-visual-row">
-                  {pageOrder.map((page, idx) => (
-                    <div className="page-thumbnail-card" key={page}>
-                      <div className="thumb-header">
-                        <span>Page {page}</span>
-                        <span className="thumb-idx">#{idx + 1}</span>
-                      </div>
-                      <div className="thumb-mock-content">
-                        <div className="mock-line wide" />
-                        <div className="mock-line" />
-                        <div className="mock-line short" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="sandbox-action-row">
-                  <button className="btn-try-copy" onClick={handleReorderPages}>
-                    <Icon name="layers" size={13} />
-                    <span>Reorder Pages</span>
-                  </button>
-                  <span className="ocr-note">Drag and drop pages or combine multiple documents.</span>
-                </div>
-              </div>
-            )}
-
-            {/* WORKFLOW 3: E-SIGN DEMO */}
-            {activeWorkflow === 3 && (
-              <div className="interactive-sandbox-frame glass-panel">
-                <div className="sandbox-panel-top">
-                  <span className="panel-title">Digital Signature Stamp</span>
-                  <span className="panel-indicator">{signed ? "Document Signed" : "Pending Signature"}</span>
-                </div>
-
-                <div className="sample-document-sheet signing-sheet">
-                  <div className="sheet-badge">CONSULTING SERVICES AGREEMENT</div>
-                  <p className="doc-text">
-                    By signing below, the terms and deliverable dates are formally accepted.
-                  </p>
-                  <div className="sign-box-area">
-                    <span className="sign-line-label">Authorized Signature:</span>
-                    {signed ? (
-                      <div className="placed-signature">
-                        <span className="sig-cursive">Katherine Vance</span>
-                        <span className="sig-meta">Verified Digital Seal • {new Date().toLocaleDateString()}</span>
-                      </div>
-                    ) : (
-                      <div className="empty-sig-prompt">Click below to place signature</div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="sandbox-action-row">
-                  <button
-                    className="btn-try-copy"
-                    onClick={() => {
-                      if (soundEnabled) playAudioBlip(signed ? 520 : 780);
-                      setSigned(!signed);
-                    }}
-                  >
-                    <Icon name={signed ? "x" : "penTool"} size={13} />
-                    <span>{signed ? "Clear Signature" : "Add Signature Stamp"}</span>
-                  </button>
-                  <span className="ocr-note">Sign legal agreements without printing or scanning.</span>
-                </div>
-              </div>
-            )}
-
-            {/* WORKFLOW 4: PRECISION MEASURE DEMO */}
-            {activeWorkflow === 4 && (
-              <div className="interactive-sandbox-frame glass-panel">
-                <div className="sandbox-panel-top">
-                  <span className="panel-title">Blueprint Caliper</span>
-                  <div className="toggle-mode-pills">
-                    <button
-                      className={`pill-btn ${measurePoint === "hallway" ? "active" : ""}`}
-                      onClick={() => setMeasurePoint("hallway")}
-                    >
-                      Corridor
-                    </button>
-                    <button
-                      className={`pill-btn ${measurePoint === "room" ? "active" : ""}`}
-                      onClick={() => setMeasurePoint("room")}
-                    >
-                      Main Studio
-                    </button>
-                  </div>
-                </div>
-
-                <div className="blueprint-caliper-box">
-                  <img
-                    src="/media/blueprint_cad.jpg"
-                    alt="Blueprint"
-                    className="blueprint-img"
-                  />
-                  <div className={`caliper-callout ${measurePoint}`}>
-                    <div className="caliper-dot" />
-                    <div className="caliper-tag">
-                      {measurePoint === "hallway" ? (
-                        <>
-                          <strong>Distance: 24.5 ft (7.47 m)</strong>
-                          <span>Scale: 1/4" = 1'-0"</span>
-                        </>
-                      ) : (
-                        <>
-                          <strong>Area: 480 sq ft (44.6 m²)</strong>
-                          <span>Scale: 1/4" = 1'-0"</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="sandbox-action-row">
-                  <span className="ocr-note">
-                    Accurate architectural measurements directly on engineering drawings.
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ==========================================================================
-   Visual Media Showcase Gallery
-   High-resolution photos & animated GIFs demonstrating clear user outcomes
-   ========================================================================== */
-function VisualMediaShowcase({ soundEnabled }) {
-  const [activePillar, setActivePillar] = useState(0);
-
-  const pillars = [
-    {
-      id: "privacy",
-      badge: "100% Offline",
-      category: "PROTECT YOUR WORK",
-      title: "Total Privacy: Files Never Leave Your Device",
-      desc: "Unlike online PDF converters that transmit confidential files to remote servers, PDFCatalyst handles every document entirely in your local computer memory. Your contracts, bank statements, and sensitive client papers remain completely private.",
-      mainImage: "/media/security_airgap.jpg",
-      gifInset: "/media/crypto_aes.gif",
-      gifLabel: "LOCAL MEMORY ENCRYPTION",
-      benefits: [
-        "No file uploads to remote cloud servers",
-        "Zero tracking, analytics, or behavioral telemetry",
-        "Works smoothly without an internet connection",
-      ],
-    },
-    {
-      id: "speed",
-      badge: "Instant Loading",
-      category: "LIGHTNING PERFORMANCE",
-      title: "Instant Opening & Smooth Scrolling",
-      desc: "Say goodbye to annoying spinning wheels and frozen screens. Open 500-page manuals or heavy architectural blueprints in the blink of an eye, and enjoy silky-smooth zooming without lag.",
-      mainImage: "/media/silicon_hardware.jpg",
-      gifInset: "/media/matrix_transform.gif",
-      gifLabel: "60 FPS SMOOTH NAVIGATION",
-      benefits: [
-        "Opens dense documents in under 200 milliseconds",
-        "Fluid 60 FPS scrolling even at 800% zoom",
-        "Uses 96% less computer memory than legacy PDF suites",
-      ],
-    },
-    {
-      id: "ocr",
-      badge: "Smart Recognition",
-      category: "DOCUMENT CONVERSION",
-      title: "Convert Paper Scans into Searchable Text",
-      desc: "Turn phone photos, scanned receipts, and old paper records into crisp, selectable text. Search for keywords instantly, copy quotes with ease, and organize past records cleanly.",
-      mainImage: "/media/document_audit.jpg",
-      gifInset: "/media/laser_scan.gif",
-      gifLabel: "SMART TEXT EXTRACTION",
-      benefits: [
-        "Recognizes text from scans and photographs accurately",
-        "Preserves your original fonts, tables, and page layout",
-        "Converts documents on your device without subscription fees",
-      ],
-    },
-    {
-      id: "blueprints",
-      badge: "Design Caliper",
-      category: "CONSTRUCTION & DESIGN",
-      title: "Measure Blueprints with True Precision",
-      desc: "Engineered for architects, builders, and designers who need real-world measurements. Calibrate drawings against title block scales and calculate square footage, room dimensions, and perimeters instantly.",
-      mainImage: "/media/blueprint_cad.jpg",
-      gifInset: "/media/radar_scan.gif",
-      gifLabel: "CALIBRATED CAD MEASUREMENT",
-      benefits: [
-        "Supports standard Imperial (1/4\", 1/8\") and Metric scales",
-        "Instant square footage and perimeter calculation",
-        "Sharp vector display ensures lines remain crystal-clear",
-      ],
-    },
-    {
-      id: "batch",
-      badge: "Batch Productivity",
-      category: "EVERYDAY SPEED",
-      title: "Batch Merge, Split, and Compress in Seconds",
-      desc: "Process multiple documents at once. Combine whole folders of receipts into one organized file, shrink large files for email attachments, and extract selected pages without hassle.",
-      mainImage: "/media/terminal_code.jpg",
-      gifInset: "/media/sorting_parallel.gif",
-      gifLabel: "PARALLEL FILE PROCESSING",
-      benefits: [
-        "Combine dozens of PDF files with a single click",
-        "Shrink large files for email attachments without losing quality",
-        "Split multi-page bundles into individual documents",
-      ],
-    },
-  ];
-
-  const cur = pillars[activePillar];
-
-  return (
-    <section className="section-container" id="visual-showcase">
-      <div className="section-head-minimal">
-        <span className="eyebrow-chip">CAPABILITIES SHOWCASE</span>
-        <h2 className="title-metallic">Every document task made simple.</h2>
-        <p className="subtitle-subtle">
-          Explore how PDFCatalyst provides the tools you need for reading, editing, signing, and securing documents.
-        </p>
-      </div>
-
-      <div className="media-showcase-shell glass-card">
-        {/* Category Pills */}
-        <div className="showcase-tab-pills">
-          {pillars.map((p, idx) => (
-            <button
-              key={p.id}
-              className={`showcase-pill-btn ${activePillar === idx ? "active" : ""}`}
-              onClick={() => {
-                if (soundEnabled) playAudioBlip(560 + idx * 40);
-                setActivePillar(idx);
-              }}
-            >
-              <span>{p.title.split(":")[0]}</span>
-              <span className="showcase-pill-badge">{p.badge}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Visual Content Grid */}
-        <div className="showcase-content-grid">
-          {/* Left: High-Res Visual Frame with Inset Animated GIF */}
-          <div className="showcase-visual-frame">
-            <img
-              src={cur.mainImage}
-              alt={cur.title}
-              className="showcase-img-main"
-            />
-            <div className="showcase-gif-inset">
-              <img src={cur.gifInset} alt={cur.gifLabel} />
-              <div className="showcase-gif-label">
-                <span className="beacon-dot" />
-                {cur.gifLabel}
-              </div>
-            </div>
-          </div>
-
-          {/* Right: Explanation & User Benefits */}
-          <div className="showcase-text-details">
-            <span className="showcase-eyebrow">{cur.category}</span>
-            <h3 className="showcase-title">{cur.title}</h3>
-            <p className="showcase-desc">{cur.desc}</p>
-
-            <ul className="showcase-highlights-list">
-              {cur.benefits.map((b, i) => (
-                <li key={i}>
-                  <Icon name="checkCircle" size={15} className="highlight-icon green" />
-                  <span>{b}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ==========================================================================
-   Desktop Tour: Screenshot with Glowing Hotspot Pins
-   ========================================================================== */
-function ScreenshotInteractiveTour({ soundEnabled }) {
-  const [activePin, setActivePin] = useState(0);
-
-  const pins = [
-    {
-      id: 0,
-      title: "One-Click Quick Action Tools",
-      badge: "Instant Shortcuts",
-      desc: "Merge PDFs, compress file size for email, rotate upside-down pages, or split documents with one simple click.",
-      x: 35,
-      y: 67,
-    },
-    {
-      id: 1,
-      title: "Complete Editing & Signing Sidebar",
-      badge: "All Tools Included",
-      desc: "Fill form fields, sign agreements, add text stamps, extract text with OCR, and permanently erase private data.",
-      x: 8,
-      y: 45,
-    },
-    {
-      id: 2,
-      title: "Document Templates",
-      badge: "Ready-to-Use",
-      desc: "Quickly start invoices, contracts, proposals, and clean blank pages with pre-set professional layouts.",
-      x: 35,
-      y: 88,
-    },
-    {
-      id: 3,
-      title: "Quick Search & Command Menu",
-      badge: "Shortcut (Ctrl+K)",
-      desc: "Quickly search for any tool, document section, or feature using keyboard shortcuts without hunting through menus.",
-      x: 80,
-      y: 7,
-    },
-  ];
-
-  return (
-    <div className="screenshot-tour-wrapper glass-card">
-      <div className="screenshot-frame-header">
-        <div className="window-dots">
-          <span className="dot red" />
-          <span className="dot yellow" />
-          <span className="dot green" />
-        </div>
-        <div className="window-center-title">
-          <img src="/pdfix-logo.png" alt="" width="15" height="15" />
-          <span>PDFCatalyst Desktop App</span>
-        </div>
-        <span className="window-arch-badge">Interactive Tour (Click Pins)</span>
-      </div>
-
-      <div className="screenshot-viewport-relative">
-        <img
-          src="/app-screenshot.png"
-          alt="PDFCatalyst Desktop App Screenshot"
-          className="tour-main-screenshot"
-        />
-
-        {pins.map((pin) => (
-          <button
-            key={pin.id}
-            className={`hotspot-pin ${activePin === pin.id ? "active" : ""}`}
-            style={{ left: `${pin.x}%`, top: `${pin.y}%` }}
-            onClick={() => {
-              if (soundEnabled) playAudioBlip(680);
-              setActivePin(pin.id);
-            }}
-            aria-label={`Inspect hotspot: ${pin.title}`}
-          >
-            <span className="pin-pulse-ring" />
-            <span className="pin-core-num">{pin.id + 1}</span>
-          </button>
-        ))}
-      </div>
-
-      <div className="screenshot-tour-active-card">
-        <div className="tour-badge-row">
-          <span className="tour-step-pill">FEATURE {activePin + 1} OF 4</span>
-          <span className="tour-feature-badge">{pins[activePin].badge}</span>
-        </div>
-        <h4 className="tour-title">{pins[activePin].title}</h4>
-        <p className="tour-desc">{pins[activePin].desc}</p>
-        <div className="tour-controls-row">
-          <div className="tour-dots-pills">
-            {pins.map((p) => (
-              <button
-                key={p.id}
-                className={`tour-dot-btn ${activePin === p.id ? "current" : ""}`}
-                onClick={() => {
-                  if (soundEnabled) playAudioBlip(640);
-                  setActivePin(p.id);
-                }}
-              >
-                {p.id + 1}
-              </button>
-            ))}
-          </div>
-          <button
-            className="btn-tour-next"
-            onClick={() => {
-              if (soundEnabled) playAudioBlip(720);
-              setActivePin((prev) => (prev + 1) % pins.length);
-            }}
-          >
-            <span>Next Feature</span>
-            <Icon name="arrowRight" size={12} />
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ==========================================================================
-   Speed & Efficiency Comparison Simulator
-   ========================================================================== */
-function LiveBenchmarkVisualizer({ soundEnabled }) {
+function SamsungBenchmarksSection({ soundEnabled }) {
   const [isRunning, setIsRunning] = useState(false);
   const [progress, setProgress] = useState(100);
 
@@ -1198,7 +1290,7 @@ function LiveBenchmarkVisualizer({ soundEnabled }) {
       pdfcatalyst: "0.18 seconds",
       acrobat: "3.40 seconds",
       cloud: "7.20 seconds",
-      winner: "18x Faster",
+      winner: "18.8x Faster",
       pctPdfix: 100,
       pctAcrobat: 25,
       pctCloud: 10,
@@ -1226,79 +1318,92 @@ function LiveBenchmarkVisualizer({ soundEnabled }) {
   ];
 
   return (
-    <div className="benchmark-console-card glass-card">
-      <div className="bench-top-actions">
-        <div>
-          <span className="eyebrow-chip">SPEED & RESOURCE USAGE</span>
-          <h3 className="bench-section-title">Tested side-by-side on real hardware.</h3>
+    <section className="section-container" id="performance">
+      <div className="section-head-minimal">
+        <div className="samsung-sparkle-pill">
+          <Icon name="sparkleGalaxy" size={13} className="sparkle-icon" />
+          <span>PERFORMANCE METRICS</span>
         </div>
-        <button
-          className="btn-run-benchmark"
-          onClick={runSimulation}
-          disabled={isRunning}
-        >
-          <Icon name="activity" size={13} className={isRunning ? "pulse-anim" : ""} />
-          <span>{isRunning ? `Testing (${progress}%)...` : "Run Speed Test"}</span>
-        </button>
+        <h2 className="title-samsung-flagship">Lightweight. Blazingly fast.</h2>
+        <p className="subtitle-samsung">
+          Tested side-by-side against bloated legacy software suites on everyday hardware.
+        </p>
       </div>
 
-      <div className="bench-rows-grid">
-        {metrics.map((m, idx) => (
-          <div className="bench-metric-row" key={idx}>
-            <div className="metric-header-row">
-              <strong className="m-title">{m.title}</strong>
-              <span className="m-winner-badge">{m.winner}</span>
-            </div>
-
-            <div className="metric-bars-stack">
-              <div className="comp-bar-item">
-                <div className="comp-label">
-                  <span className="brand-bold">PDFCatalyst</span>
-                  <span className="val-text green">{m.pdfcatalyst}</span>
-                </div>
-                <div className="bar-track">
-                  <div
-                    className="bar-fill green-gradient"
-                    style={{ width: `${(m.pctPdfix * progress) / 100}%` }}
-                  />
-                </div>
-              </div>
-
-              <div className="comp-bar-item">
-                <div className="comp-label">
-                  <span className="brand-dim">Adobe Acrobat Pro</span>
-                  <span className="val-text dim">{m.acrobat}</span>
-                </div>
-                <div className="bar-track">
-                  <div
-                    className="bar-fill dim"
-                    style={{ width: `${(m.pctAcrobat * progress) / 100}%` }}
-                  />
-                </div>
-              </div>
-
-              <div className="comp-bar-item">
-                <div className="comp-label">
-                  <span className="brand-dim">Web & Cloud Converters</span>
-                  <span className="val-text dim">{m.cloud}</span>
-                </div>
-                <div className="bar-track">
-                  <div
-                    className="bar-fill red-dim"
-                    style={{ width: `${(m.pctCloud * progress) / 100}%` }}
-                  />
-                </div>
-              </div>
-            </div>
+      <div className="samsung-bench-card glass-card-3d">
+        <div className="bench-header-bar">
+          <div>
+            <span className="bench-eyebrow">SYSTEM LATENCY AUDIT</span>
+            <h3 className="bench-title">Sub-millisecond responsiveness on dense files.</h3>
           </div>
-        ))}
+          <button
+            className="btn-samsung-glass-action primary"
+            onClick={runSimulation}
+            disabled={isRunning}
+          >
+            <Icon name="activity" size={14} className={isRunning ? "pulse-anim" : ""} />
+            <span>{isRunning ? `Running Test (${progress}%)...` : "Run Speed Simulation"}</span>
+          </button>
+        </div>
+
+        <div className="bench-grid-stack">
+          {metrics.map((m, idx) => (
+            <div className="bench-row-card glass-panel-3d" key={idx}>
+              <div className="bench-row-top">
+                <strong className="bench-row-title">{m.title}</strong>
+                <span className="bench-winner-tag">{m.winner}</span>
+              </div>
+
+              <div className="bench-bars-container">
+                <div className="bar-entry">
+                  <div className="bar-legend">
+                    <span className="brand-bold">PDFCatalyst</span>
+                    <span className="val-text green">{m.pdfcatalyst}</span>
+                  </div>
+                  <div className="bar-track-glass">
+                    <div
+                      className="bar-fill-gradient cyan"
+                      style={{ width: `${(m.pctPdfix * progress) / 100}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="bar-entry">
+                  <div className="bar-legend">
+                    <span className="brand-dim">Adobe Acrobat Pro</span>
+                    <span className="val-text dim">{m.acrobat}</span>
+                  </div>
+                  <div className="bar-track-glass">
+                    <div
+                      className="bar-fill-gradient dim"
+                      style={{ width: `${(m.pctAcrobat * progress) / 100}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="bar-entry">
+                  <div className="bar-legend">
+                    <span className="brand-dim">Web & Cloud Converters</span>
+                    <span className="val-text dim">{m.cloud}</span>
+                  </div>
+                  <div className="bar-track-glass">
+                    <div
+                      className="bar-fill-gradient red-dim"
+                      style={{ width: `${(m.pctCloud * progress) / 100}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
+    </section>
   );
 }
 
 /* ==========================================================================
-   Fast Command Menu (⌘K / Ctrl+K)
+   Command Menu (⌘K / Ctrl+K)
    ========================================================================== */
 function CommandPalette({ isOpen, onClose }) {
   const [query, setQuery] = useState("");
@@ -1329,11 +1434,11 @@ function CommandPalette({ isOpen, onClose }) {
   const actions = [
     { id: "dl-inst", category: "Download", title: "Download Windows Installer (.exe)", shortcut: "↵", link: DOWNLOAD_INSTALLER },
     { id: "dl-port", category: "Download", title: "Download Standalone Portable (.exe)", shortcut: "P", link: DOWNLOAD_PORTABLE },
+    { id: "feat-intel", category: "Intelligence", title: "Explore Smart Tools & OCR", shortcut: "I", hash: "#intelligence" },
+    { id: "feat-studio", category: "3D Studio", title: "Open 3D Interactive Studio", shortcut: "S", hash: "#studio" },
+    { id: "feat-show", category: "Showcase", title: "Explore Flagship Media Showcase", shortcut: "M", hash: "#showcase" },
     { id: "feat-switch", category: "Why Switch", title: "Compare vs. Adobe Acrobat & Web Tools", shortcut: "W", hash: "#why-switch" },
-    { id: "feat-tour", category: "Interactive Tour", title: "Try Redaction, OCR & Page Tools Live", shortcut: "T", hash: "#interactive-tour" },
-    { id: "feat-show", category: "Showcase", title: "Explore Full Media Showcase", shortcut: "S", hash: "#visual-showcase" },
-    { id: "feat-desk", category: "Screenshot", title: "View Desktop Workbench Screenshot", shortcut: "D", hash: "#app-preview" },
-    { id: "feat-bench", category: "Speed", title: "Run Speed & Performance Test", shortcut: "B", hash: "#benchmarks" },
+    { id: "feat-perf", category: "Performance", title: "View Speed & RAM Benchmarks", shortcut: "B", hash: "#performance" },
     { id: "feat-faq", category: "Help", title: "Frequently Asked Questions", shortcut: "F", hash: "#faq" },
     { id: "src-repo", category: "Source", title: "View Open Source Repository on GitHub", shortcut: "G", link: "https://github.com/SarthAyush/PDFcatalyst-App" },
   ];
@@ -1345,7 +1450,7 @@ function CommandPalette({ isOpen, onClose }) {
 
   return (
     <div className="raycast-overlay" onClick={() => onClose(false)}>
-      <div className="raycast-modal glass-card" onClick={(e) => e.stopPropagation()}>
+      <div className="raycast-modal glass-card-3d" onClick={(e) => e.stopPropagation()}>
         <div className="raycast-input-bar">
           <Icon name="search" size={16} className="raycast-search-icon" />
           <input
@@ -1401,47 +1506,6 @@ function CommandPalette({ isOpen, onClose }) {
 }
 
 /* ==========================================================================
-   Hero Desktop Preview Frame
-   Clean visual showing the desktop application
-   ========================================================================== */
-function HeroPreviewCard() {
-  return (
-    <div className="hero-preview-wrapper glass-card">
-      <div className="preview-top-bar">
-        <div className="window-dots">
-          <span className="dot red" />
-          <span className="dot yellow" />
-          <span className="dot green" />
-        </div>
-        <div className="preview-window-title">PDFCatalyst Desktop</div>
-        <span className="badge-offline">100% Offline</span>
-      </div>
-      <div className="preview-image-container">
-        <img
-          src="/app-screenshot.png"
-          alt="PDFCatalyst Desktop App Interface"
-          className="preview-app-image"
-        />
-      </div>
-      <div className="preview-bottom-stats">
-        <div className="stat-pill">
-          <Icon name="checkCircle" size={13} className="green" />
-          <span>No Subscriptions</span>
-        </div>
-        <div className="stat-pill">
-          <Icon name="shield" size={13} className="green" />
-          <span>Private & Safe</span>
-        </div>
-        <div className="stat-pill">
-          <Icon name="zap" size={13} className="green" />
-          <span>Instant Launch</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ==========================================================================
    Main Application
    ========================================================================== */
 function App() {
@@ -1452,6 +1516,7 @@ function App() {
   const [copiedId, setCopiedId] = useState(null);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [detectedOs, setDetectedOs] = useState("Windows x64");
+  const [activeSection, setActiveSection] = useState("overview");
 
   const installerAsset =
     latestRelease.assets?.find(
@@ -1527,53 +1592,54 @@ function App() {
   ];
 
   return (
-    <div className="raycast-theme-shell">
-      {/* Background Ambience */}
-      <div className="linear-subpixel-grid" aria-hidden="true" />
-      <div className="metallic-glow-spotlight" aria-hidden="true" />
+    <div className="samsung-flagship-canvas">
+      {/* Animated Ethereal Aurora Light Orbs */}
+      <div className="aurora-orb orb-1" aria-hidden="true" />
+      <div className="aurora-orb orb-2" aria-hidden="true" />
+      <div className="aurora-orb orb-3" aria-hidden="true" />
 
       {/* Floating Gentle Mascot Assistant */}
       <FloatingCuteMascot soundEnabled={soundEnabled} setSoundEnabled={setSoundEnabled} />
 
-      {/* Modern Frosted-Glass Navbar */}
-      <header className="linear-nav glass-nav">
-        <div className="linear-nav-inner">
-          <a href="#top" className="linear-brand">
-            <div className="brand-gem">
-              <img src="/pdfix-logo.png" alt="PDFCatalyst Logo" width="20" height="20" />
+      {/* Flagship Top Navigation Bar */}
+      <header className="samsung-top-nav glass-nav-3d">
+        <div className="top-nav-inner">
+          <a href="#top" className="samsung-brand">
+            <div className="brand-logo-gem">
+              <img src="/pdfix-logo.png" alt="PDFCatalyst" width="22" height="22" />
             </div>
-            <span className="brand-name">PDFCatalyst</span>
-            <span className="version-pill">{currentVersion}</span>
+            <span className="brand-text">PDFCatalyst</span>
+            <span className="brand-version-badge">{currentVersion}</span>
           </a>
 
-          <nav className="nav-center-links">
+          <div className="top-nav-center">
+            <a href="#overview" className="nav-link">Overview</a>
+            <a href="#intelligence" className="nav-link">Intelligence</a>
+            <a href="#studio" className="nav-link">3D Studio</a>
+            <a href="#showcase" className="nav-link">Showcase</a>
             <a href="#why-switch" className="nav-link">Why Switch</a>
-            <a href="#interactive-tour" className="nav-link">Workflow Tour</a>
-            <a href="#visual-showcase" className="nav-link">Showcase</a>
-            <a href="#app-preview" className="nav-link">App Preview</a>
-            <a href="#benchmarks" className="nav-link">Speed</a>
-            <a href="#faq" className="nav-link">FAQ</a>
-          </nav>
+            <a href="#performance" className="nav-link">Speed</a>
+          </div>
 
-          <div className="linear-nav-right">
+          <div className="top-nav-actions">
             <button
-              className="command-palette-trigger"
+              className="btn-glass-search"
               onClick={() => setCommandOpen(true)}
               title="Search tools & shortcuts (⌘K)"
             >
               <Icon name="search" size={13} />
               <span>Search</span>
-              <kbd className="kbd-shortcut">⌘K</kbd>
+              <kbd className="kbd-pill">⌘K</kbd>
             </button>
 
-            <div className="nav-divider" />
+            <div className="nav-v-divider" />
 
-            <div className="nav-utility-icons">
+            <div className="nav-icon-cluster">
               <a
                 href="https://github.com/SarthAyush/PDFcatalyst-App"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="nav-icon-btn"
+                className="nav-action-icon"
                 title="GitHub Repository"
                 aria-label="GitHub Repository"
               >
@@ -1581,7 +1647,7 @@ function App() {
               </a>
 
               <button
-                className={`nav-icon-btn ${soundEnabled ? "active" : ""}`}
+                className={`nav-action-icon ${soundEnabled ? "active" : ""}`}
                 onClick={() => {
                   setSoundEnabled(!soundEnabled);
                   if (!soundEnabled) playAudioBlip(720);
@@ -1593,7 +1659,7 @@ function App() {
               </button>
 
               <button
-                className="nav-icon-btn"
+                className="nav-action-icon"
                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                 title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
                 aria-label="Toggle Theme"
@@ -1602,7 +1668,7 @@ function App() {
               </button>
             </div>
 
-            <a href={installerUrl} className="btn-metallic-header">
+            <a href={installerUrl} className="btn-samsung-primary">
               <span>Download Free</span>
               <Icon name="arrowRight" size={12} />
             </a>
@@ -1618,15 +1684,16 @@ function App() {
         </div>
 
         {mobileMenuOpen && (
-          <div className="mobile-nav-drawer glass-card">
+          <div className="mobile-samsung-drawer glass-card-3d">
+            <a href="#overview" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>Overview</a>
+            <a href="#intelligence" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>Intelligence</a>
+            <a href="#studio" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>3D Studio</a>
+            <a href="#showcase" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>Showcase</a>
             <a href="#why-switch" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>Why Switch</a>
-            <a href="#interactive-tour" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>Workflow Tour</a>
-            <a href="#visual-showcase" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>Showcase</a>
-            <a href="#app-preview" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>App Preview</a>
-            <a href="#benchmarks" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>Speed Comparison</a>
+            <a href="#performance" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>Speed</a>
             <a href="#faq" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>FAQ</a>
-            <div className="mobile-drawer-actions">
-              <a href={installerUrl} className="btn-metallic-primary" style={{ width: "100%", justifyContent: "center" }}>
+            <div className="mobile-cta-row">
+              <a href={installerUrl} className="btn-samsung-primary" style={{ width: "100%", justifyContent: "center" }}>
                 <Icon name="download" size={14} />
                 <span>Download Free Installer</span>
               </a>
@@ -1635,140 +1702,134 @@ function App() {
         )}
       </header>
 
+      {/* Samsung Sticky Product Sub-Bar */}
+      <SamsungSubNav activeSection={activeSection} onSelectSection={setActiveSection} />
+
       <main id="top">
         {/* ==========================================================================
-           Hero Section: Clear, Benefit-Driven Value Proposition
+           Samsung Flagship Cinematic Hero
            ========================================================================== */}
-        <section className="linear-split-hero">
-          <div className="split-hero-container">
-            <div className="split-hero-left">
-              <div className="hero-status-pill glass-card">
-                <span className="beacon-dot" />
-                <span className="status-text">OFFLINE DOCUMENT WORKBENCH</span>
-                <span className="dot-sep">•</span>
-                <span className="version-highlight">100% FREE</span>
-              </div>
+        <section className="samsung-hero-section" id="overview">
+          <div className="hero-atmosphere-glow" />
 
-              <h1 className="hero-headline-metallic">
-                The private PDF editor
-                <br />
-                <span className="shimmer-metallic">that just works.</span>
-              </h1>
-
-              <p className="hero-description-technical">
-                Open, edit, organize, and sign your PDF documents with zero subscriptions, zero account logins, and complete on-device privacy.
-              </p>
-
-              <div className="hero-cta-linear-row">
-                <a href={installerUrl} className="btn-metallic-primary">
-                  <Icon name="download" size={16} />
-                  <span>Download Free for {detectedOs}</span>
-                  <span className="cta-meta">({installerSize})</span>
-                </a>
-                <a href={portableUrl} className="btn-metallic-secondary" title="No installation needed">
-                  <Icon name="file" size={14} />
-                  <span>Portable (.exe)</span>
-                </a>
-                <button className="btn-metallic-secondary" onClick={() => setCommandOpen(true)}>
-                  <Icon name="command" size={14} />
-                  <span>Quick Search</span>
-                  <kbd>⌘K</kbd>
-                </button>
-              </div>
-
-              <div className="hero-telemetry-hud glass-card">
-                <div className="hud-metric">
-                  <span className="hud-label">PRICING</span>
-                  <strong className="hud-val green">$0 Free Forever</strong>
-                </div>
-                <div className="hud-metric">
-                  <span className="hud-label">PRIVACY</span>
-                  <strong className="hud-val">100% On-Device</strong>
-                </div>
-                <div className="hud-metric">
-                  <span className="hud-label">STARTUP SPEED</span>
-                  <strong className="hud-val green">&lt; 200 ms</strong>
-                </div>
-                <div className="hud-metric">
-                  <span className="hud-label">ACCOUNT</span>
-                  <strong className="hud-val">None Needed</strong>
-                </div>
-              </div>
+          <div className="hero-text-center">
+            <div className="samsung-sparkle-pill hero-badge">
+              <Icon name="sparkleGalaxy" size={14} className="sparkle-icon" />
+              <span>THE NEXT ERA OF PDF EDITING</span>
             </div>
 
-            <div className="split-hero-right">
-              <HeroPreviewCard />
-            </div>
-          </div>
-        </section>
+            <h1 className="hero-headline-samsung">
+              Meet PDFCatalyst.
+              <br />
+              <span className="shimmer-titanium">Intelligence meets pure privacy.</span>
+            </h1>
 
-        {/* Why Switch Section: Everyday Frustrations Solved */}
-        <WhySwitchSection />
-
-        {/* Interactive Workflow Tour: The Wow Factor */}
-        <InteractiveWorkflowTour soundEnabled={soundEnabled} />
-
-        {/* Visual Media Showcase: High-Res Photos & GIFs */}
-        <VisualMediaShowcase soundEnabled={soundEnabled} />
-
-        {/* Desktop Tour: Screenshot with Hotspot Pins */}
-        <section className="section-container" id="app-preview">
-          <div className="section-head-minimal">
-            <span className="eyebrow-chip">DESKTOP WORKBENCH TOUR</span>
-            <h2 className="title-metallic">A clean workspace built for productivity.</h2>
-            <p className="subtitle-subtle">
-              Click the glowing interactive pins on the screenshot below to see the tools in action.
+            <p className="hero-subtext-samsung">
+              Designed from the ground up to eliminate expensive subscriptions, slow cloud conversions, and privacy risks. Everything happens natively on your desktop.
             </p>
+
+            <div className="hero-cta-cluster">
+              <a href={installerUrl} className="btn-samsung-hero-primary">
+                <Icon name="download" size={16} />
+                <span>Download for {detectedOs}</span>
+                <span className="cta-filesize">({installerSize})</span>
+              </a>
+              <a href={portableUrl} className="btn-samsung-hero-secondary" title="No installation needed">
+                <Icon name="file" size={14} />
+                <span>Portable (.exe)</span>
+              </a>
+              <button className="btn-samsung-hero-secondary" onClick={() => setCommandOpen(true)}>
+                <Icon name="command" size={14} />
+                <span>Quick Menu</span>
+                <kbd className="kbd-pill">⌘K</kbd>
+              </button>
+            </div>
+
+            <div className="hero-highlights-strip">
+              <div className="highlight-item">
+                <strong>$0 Free Forever</strong>
+                <span>Zero Subscriptions</span>
+              </div>
+              <div className="highlight-sep" />
+              <div className="highlight-item">
+                <strong>100% On-Device</strong>
+                <span>Air-Gapped Privacy</span>
+              </div>
+              <div className="highlight-sep" />
+              <div className="highlight-item">
+                <strong>Sub-200ms</strong>
+                <span>Instant Launch</span>
+              </div>
+              <div className="highlight-sep" />
+              <div className="highlight-item">
+                <strong>No Account</strong>
+                <span>Zero Sign-Up Friction</span>
+              </div>
+            </div>
           </div>
 
-          <ScreenshotInteractiveTour soundEnabled={soundEnabled} />
+          {/* Interactive 3D Flagship Device Stage */}
+          <Samsung3DHeroStage soundEnabled={soundEnabled} />
         </section>
+
+        {/* Samsung Galaxy-Style Intelligence Bento Grid */}
+        <SamsungIntelligenceSection />
+
+        {/* 3D Interactive Workflow Studio */}
+        <Samsung3DWorkflowStudio soundEnabled={soundEnabled} />
+
+        {/* Flagship Media Showcase */}
+        <SamsungMediaShowcase soundEnabled={soundEnabled} />
+
+        {/* Why Switch: The Flagship Advantage */}
+        <SamsungComparisonSection />
 
         {/* Speed & Benchmarks */}
-        <section className="section-container" id="benchmarks">
-          <div className="section-head-minimal">
-            <span className="eyebrow-chip">PERFORMANCE COMPARISON</span>
-            <h2 className="title-metallic">Fast, light, and responsive.</h2>
-            <p className="subtitle-subtle">
-              See how PDFCatalyst performs on everyday documents compared to bloated legacy suites.
-            </p>
-          </div>
-
-          <LiveBenchmarkVisualizer soundEnabled={soundEnabled} />
-        </section>
+        <SamsungBenchmarksSection soundEnabled={soundEnabled} />
 
         {/* Download Hub */}
         <section className="section-container" id="download">
-          <div className="download-console-card glass-card">
-            <span className="eyebrow-chip">GET STARTED TODAY</span>
-            <h2 className="title-metallic">Download PDFCatalyst {currentVersion}</h2>
-            <p className="subtitle-subtle">
+          <div className="samsung-download-card glass-card-3d">
+            <div className="samsung-sparkle-pill">
+              <Icon name="sparkleGalaxy" size={13} className="sparkle-icon" />
+              <span>OFFICIAL FLAGSHIP RELEASE</span>
+            </div>
+            <h2 className="title-samsung-flagship">Get PDFCatalyst {currentVersion}</h2>
+            <p className="subtitle-samsung">
               Free forever for personal, academic, and business use. No registration required.
             </p>
 
-            <div className="download-actions-grid">
-              <a href={installerUrl} className="download-action-card primary glass-card">
-                <div className="card-info">
-                  <div className="action-tag">RECOMMENDED</div>
-                  <strong className="card-title">Windows Installer</strong>
-                  <span className="card-meta">v1.0.0 • x64 • {installerSize}</span>
+            <div className="download-grid-twin">
+              <TiltCard className="dl-card primary glass-panel-3d" maxTilt={8}>
+                <div className="dl-card-content">
+                  <div className="dl-card-tag">RECOMMENDED</div>
+                  <strong className="dl-card-title">Windows Installer</strong>
+                  <span className="dl-card-meta">v1.0.0 • x64 • {installerSize}</span>
+                  <p className="dl-card-desc">Automatic shortcuts, start menu integration, and file associations.</p>
                 </div>
-                <Icon name="download" size={18} />
-              </a>
+                <a href={installerUrl} className="btn-dl-action">
+                  <span>Download Installer</span>
+                  <Icon name="download" size={15} />
+                </a>
+              </TiltCard>
 
-              <a href={portableUrl} className="download-action-card glass-card">
-                <div className="card-info">
-                  <div className="action-tag">PORTABLE</div>
-                  <strong className="card-title">Standalone Executable</strong>
-                  <span className="card-meta">Run directly from any folder or USB • {portableSize}</span>
+              <TiltCard className="dl-card glass-panel-3d" maxTilt={8}>
+                <div className="dl-card-content">
+                  <div className="dl-card-tag">PORTABLE</div>
+                  <strong className="dl-card-title">Standalone Portable</strong>
+                  <span className="dl-card-meta">Run anywhere • {portableSize}</span>
+                  <p className="dl-card-desc">Run directly from any folder or USB drive with zero admin permissions required.</p>
                 </div>
-                <Icon name="download" size={18} />
-              </a>
+                <a href={portableUrl} className="btn-dl-action secondary">
+                  <span>Download Portable</span>
+                  <Icon name="download" size={15} />
+                </a>
+              </TiltCard>
             </div>
 
-            <div className="winget-box">
+            <div className="samsung-winget-bar glass-panel-3d">
               <span className="winget-label">Or install via Windows Package Manager:</span>
-              <div className="winget-cmd-row">
+              <div className="winget-command-row">
                 <code>winget install SarthAyush.PDFcatalyst</code>
                 <button
                   className="btn-winget-copy"
@@ -1780,8 +1841,8 @@ function App() {
               </div>
             </div>
 
-            <div className="sha-verify-bar">
-              <span className="sha-label">SHA-256 Checksum:</span>
+            <div className="sha-checksum-row">
+              <span className="sha-title">SHA-256 Checksum:</span>
               <code>{installerSha}</code>
             </div>
           </div>
@@ -1789,40 +1850,46 @@ function App() {
 
         {/* Creator Profile */}
         <section className="section-container">
-          <div className="creator-linear-card glass-card">
-            <div className="creator-details">
-              <span className="eyebrow-chip">CREATOR & MAINTAINER</span>
-              <h3 className="creator-name">Sarthak Saxena</h3>
+          <TiltCard className="samsung-creator-card glass-card-3d" maxTilt={6}>
+            <div className="creator-text-col">
+              <div className="samsung-sparkle-pill">
+                <Icon name="sparkleGalaxy" size={12} className="sparkle-icon" />
+                <span>CREATOR & MAINTAINER</span>
+              </div>
+              <h3 className="creator-title">Sarthak Saxena</h3>
               <p className="creator-bio">
-                Passionate about crafting fast, private, and dependable software that respects your time and keeps your personal data safe.
+                Building fast, private, and dependable desktop software that respects your personal data and gives you back full control over your documents.
               </p>
-              <div className="creator-badges-row">
-                <span className="badge-pill"><Icon name="shield" size={13} /> 100% On-Device Privacy</span>
-                <span className="badge-pill"><Icon name="check" size={13} /> Open Source</span>
+              <div className="creator-pill-row">
+                <span className="glass-pill"><Icon name="shield" size={13} /> 100% On-Device Privacy</span>
+                <span className="glass-pill"><Icon name="check" size={13} /> Open Source (MIT / Apache-2.0)</span>
               </div>
             </div>
             <div className="creator-avatar-wrap">
-              <img src="/pdfix-logo.png" alt="PDFCatalyst Logo" width="72" height="72" />
+              <img src="/pdfix-logo.png" alt="PDFCatalyst Logo" width="80" height="80" />
             </div>
-          </div>
+          </TiltCard>
         </section>
 
         {/* Frequently Asked Questions */}
         <section className="section-container" id="faq">
           <div className="section-head-minimal">
-            <span className="eyebrow-chip">FAQ</span>
-            <h2 className="title-metallic">Common questions, answered simply.</h2>
+            <div className="samsung-sparkle-pill">
+              <Icon name="sparkleGalaxy" size={13} className="sparkle-icon" />
+              <span>FREQUENTLY ASKED QUESTIONS</span>
+            </div>
+            <h2 className="title-samsung-flagship">Common questions, answered simply.</h2>
           </div>
 
-          <div className="faq-linear-list">
+          <div className="faq-glass-stack">
             {faqs.map((faq, i) => (
-              <div className={`faq-row glass-card ${activeFaq === i ? "open" : ""}`} key={i}>
-                <button className="faq-q-btn" onClick={() => setActiveFaq(activeFaq === i ? null : i)}>
+              <div className={`faq-glass-card glass-card-3d ${activeFaq === i ? "open" : ""}`} key={i}>
+                <button className="faq-glass-btn" onClick={() => setActiveFaq(activeFaq === i ? null : i)}>
                   <span>{faq.q}</span>
-                  <span className="faq-icon">{activeFaq === i ? "−" : "+"}</span>
+                  <span className="faq-glass-icon">{activeFaq === i ? "−" : "+"}</span>
                 </button>
                 {activeFaq === i && (
-                  <div className="faq-ans">
+                  <div className="faq-glass-answer">
                     <p>{faq.a}</p>
                   </div>
                 )}
@@ -1832,41 +1899,44 @@ function App() {
         </section>
       </main>
 
-      {/* Modern Frosted-Glass Footer */}
-      <footer className="linear-footer glass-footer">
-        <div className="footer-inner">
-          <div className="footer-left">
-            <div className="footer-brand">
-              <img src="/pdfix-logo.png" alt="PDFCatalyst" width="20" height="20" />
-              <span>PDFCatalyst</span>
+      {/* Samsung-Style Ultra-Premium Footer */}
+      <footer className="samsung-footer glass-footer-3d">
+        <div className="footer-content-wrap">
+          <div className="footer-main-brand">
+            <div className="brand-logo-gem">
+              <img src="/pdfix-logo.png" alt="PDFCatalyst" width="22" height="22" />
             </div>
-            <p>The fast, private PDF editor that respects your privacy. 100% offline.</p>
-            <div className="footer-hud-status">
-              <span className="beacon-dot" />
-              <span>Private & Safe · No Remote File Tracking</span>
+            <span className="brand-text">PDFCatalyst</span>
+            <p className="brand-motto">
+              The fast, private PDF editor that respects your privacy. 100% on-device.
+            </p>
+            <div className="footer-status-pill glass-pill">
+              <span className="pulse-beacon-blue" />
+              <span>Air-Gapped & Offline Architecture</span>
             </div>
           </div>
 
-          <div className="footer-nav-columns">
-            <div className="nav-col">
+          <div className="footer-column-links">
+            <div className="f-col">
               <strong>EXPLORE</strong>
+              <a href="#overview">Overview</a>
+              <a href="#intelligence">Intelligence</a>
+              <a href="#studio">3D Studio</a>
+              <a href="#showcase">Showcase</a>
               <a href="#why-switch">Why Switch</a>
-              <a href="#interactive-tour">Workflow Tour</a>
-              <a href="#visual-showcase">Showcase</a>
-              <a href="#app-preview">Desktop Preview</a>
-              <a href="#benchmarks">Speed Tests</a>
+              <a href="#performance">Speed Metrics</a>
             </div>
-            <div className="nav-col">
-              <strong>DOWNLOADS</strong>
+            <div className="f-col">
+              <strong>DOWNLOAD</strong>
               <a href={installerUrl}>Windows Installer</a>
               <a href={portableUrl}>Portable Executable</a>
               <a href="https://github.com/SarthAyush/PDFcatalyst-App" target="_blank" rel="noopener noreferrer">GitHub Repository</a>
-              <button className="link-btn-clean" onClick={() => setCommandOpen(true)}>Search Menu (⌘K)</button>
+              <button className="link-clean-btn" onClick={() => setCommandOpen(true)}>Search Menu (⌘K)</button>
             </div>
           </div>
         </div>
 
-        <div className="footer-bottom-bar">
+        <div className="footer-bottom-copyright">
           <span>Copyright © {new Date().getFullYear()} PDFCatalyst. Created by Sarthak Saxena.</span>
           <span>Open Source under MIT / Apache-2.0</span>
         </div>
