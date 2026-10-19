@@ -2092,26 +2092,40 @@ function App() {
       {/* Floating Cute Cartoon Mascot Assistant */}
       <FloatingCuteMascot soundEnabled={soundEnabled} setSoundEnabled={setSoundEnabled} />
 
-      {/* Raycast Minimalist Header */}
+      {/* Precision Engineered Clean Minimalist Header */}
       <header className="linear-nav">
         <div className="linear-nav-inner">
+          {/* Brand Anchor */}
           <a href="#top" className="linear-brand">
             <div className="brand-gem">
-              <img src="/pdfix-logo.png" alt="PDFCatalyst" width="22" height="22" />
+              <img src="/pdfix-logo.png" alt="PDFCatalyst" width="20" height="20" />
             </div>
             <span className="brand-name">PDFCatalyst</span>
             <span className="version-pill">{currentVersion}</span>
           </a>
 
-          <div className="nav-center-actions">
-            <button className="command-palette-trigger" onClick={() => setCommandOpen(true)}>
+          {/* Clean Center Navigation Links */}
+          <nav className="nav-center-links">
+            <a href="#visual-showcase" className="nav-link">Showcase</a>
+            <a href="#app-preview" className="nav-link">Tour</a>
+            <a href="#benchmarks" className="nav-link">Benchmarks</a>
+            <a href="#sandbox" className="nav-link">Sandbox</a>
+            <a href="#features" className="nav-link">Capabilities</a>
+            <a href="#developers" className="nav-link">Developers</a>
+          </nav>
+
+          {/* Right Action Cluster */}
+          <div className="linear-nav-right">
+            <button
+              className="command-palette-trigger"
+              onClick={() => setCommandOpen(true)}
+              title="Search commands (⌘K)"
+            >
               <Icon name="search" size={13} />
-              <span>Search commands...</span>
+              <span>Search</span>
               <kbd className="kbd-shortcut">⌘K</kbd>
             </button>
-          </div>
 
-          <div className={`linear-nav-right ${mobileMenuOpen ? "mobile-drawer-open" : ""}`}>
             <button
               className="btn-turbo-hud"
               onClick={() => {
@@ -2123,45 +2137,49 @@ function App() {
               <span className="turbo-pulse-dot" />
               <span>Turbo HUD</span>
             </button>
-            <a href="#visual-showcase" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Visual Studio</a>
-            <a href="#app-preview" className="nav-link" onClick={() => setMobileMenuOpen(false)}>App Tour</a>
-            <a href="#benchmarks" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Benchmarks</a>
-            <a href="#sandbox" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Sandbox</a>
-            <a href="#features" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Capabilities</a>
-            <a href="#developers" className="nav-link" onClick={() => setMobileMenuOpen(false)}>AI & MCP</a>
-            <a href="#download" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Downloads</a>
-            <a
-              href="https://github.com/SarthAyush/PDFcatalyst-App"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="nav-icon-link"
-              title="GitHub Repository"
-            >
-              <Icon name="github" size={15} />
-            </a>
-            <button
-              className={`btn-sound-toggle ${soundEnabled ? "active" : ""}`}
-              onClick={() => {
-                setSoundEnabled(!soundEnabled);
-                if (!soundEnabled) playAudioBlip(880);
-              }}
-              title={soundEnabled ? "Audio Cues Enabled" : "Audio Muted"}
-              aria-label="Toggle Audio Cues"
-            >
-              <Icon name={soundEnabled ? "volume" : "volumeMute"} size={14} />
-            </button>
-            <button
-              className="theme-toggle-btn"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              aria-label="Toggle Theme"
-            >
-              <Icon name={theme === "dark" ? "sun" : "moon"} size={14} />
-            </button>
+
+            <div className="nav-divider" />
+
+            <div className="nav-utility-icons">
+              <a
+                href="https://github.com/SarthAyush/PDFcatalyst-App"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="nav-icon-btn"
+                title="GitHub Repository"
+              >
+                <Icon name="github" size={15} />
+              </a>
+
+              <button
+                className={`nav-icon-btn ${soundEnabled ? "active" : ""}`}
+                onClick={() => {
+                  setSoundEnabled(!soundEnabled);
+                  if (!soundEnabled) playAudioBlip(880);
+                }}
+                title={soundEnabled ? "Audio Cues Enabled" : "Audio Muted"}
+                aria-label="Toggle Audio Cues"
+              >
+                <Icon name={soundEnabled ? "volume" : "volumeMute"} size={14} />
+              </button>
+
+              <button
+                className="nav-icon-btn"
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+                aria-label="Toggle Theme"
+              >
+                <Icon name={theme === "dark" ? "sun" : "moon"} size={14} />
+              </button>
+            </div>
+
             <a href={installerUrl} className="btn-metallic-header">
-              Download <Icon name="arrowRight" size={12} />
+              <span>Download</span>
+              <Icon name="arrowRight" size={12} />
             </a>
           </div>
 
+          {/* Mobile Hamburger Button */}
           <button
             className="mobile-hamburger-btn"
             aria-label="Toggle Navigation Menu"
@@ -2170,6 +2188,34 @@ function App() {
             <Icon name={mobileMenuOpen ? "x" : "menu"} size={18} />
           </button>
         </div>
+
+        {/* Mobile Dropdown Drawer */}
+        {mobileMenuOpen && (
+          <div className="mobile-nav-drawer">
+            <a href="#visual-showcase" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>Showcase</a>
+            <a href="#app-preview" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>Desktop Tour</a>
+            <a href="#benchmarks" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>Benchmarks</a>
+            <a href="#sandbox" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>Sandbox</a>
+            <a href="#features" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>Capabilities</a>
+            <a href="#developers" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>Developers & AI</a>
+            <div className="mobile-drawer-actions">
+              <button
+                className="btn-turbo-hud"
+                style={{ width: "100%", justifyContent: "center" }}
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  setTurboOpen(true);
+                }}
+              >
+                <span className="turbo-pulse-dot" />
+                <span>Turbo HUD (~ Mode)</span>
+              </button>
+              <a href={installerUrl} className="btn-metallic-header" style={{ width: "100%", justifyContent: "center" }}>
+                <span>Download Installer</span> <Icon name="arrowRight" size={12} />
+              </a>
+            </div>
+          </div>
+        )}
       </header>
 
       <main id="top">
