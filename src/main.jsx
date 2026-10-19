@@ -11,20 +11,24 @@ const SHA256_INSTALLER =
 const SHA256_PORTABLE =
   "f4c06b245767378391146604bb29e83616374027d0d5de00cc41578e3c9cbc86";
 
-function playAudioBlip(freq = 640) {
+function playAudioBlip(freq = 640, type = "sine", duration = 0.15) {
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-    osc.type = "sine";
+    osc.type = type;
     osc.frequency.setValueAtTime(freq, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(freq * 1.4, ctx.currentTime + 0.12);
-    gain.gain.setValueAtTime(0.06, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+    if (type === "sawtooth") {
+      osc.frequency.exponentialRampToValueAtTime(freq * 0.4, ctx.currentTime + duration);
+    } else {
+      osc.frequency.exponentialRampToValueAtTime(freq * 1.35, ctx.currentTime + duration);
+    }
+    gain.gain.setValueAtTime(0.07, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
     osc.connect(gain);
     gain.connect(ctx.destination);
     osc.start();
-    osc.stop(ctx.currentTime + 0.2);
+    osc.stop(ctx.currentTime + duration);
   } catch {}
 }
 
@@ -175,6 +179,24 @@ function Icon({ name, size = 16, stroke = 1.8, className = "" }) {
     ),
     activity: <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />,
     star: <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />,
+    zap: <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />,
+    play: <polygon points="5 3 19 12 5 21 5 3" />,
+    file: (
+      <>
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+      </>
+    ),
+    sparkles: <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z" />,
+    crosshair: (
+      <>
+        <circle cx="12" cy="12" r="10" />
+        <line x1="22" y1="12" x2="18" y2="12" />
+        <line x1="6" y1="12" x2="2" y2="12" />
+        <line x1="12" y1="6" x2="12" y2="2" />
+        <line x1="12" y1="22" x2="12" y2="18" />
+      </>
+    ),
   };
   return <svg {...common}>{paths[name] || paths.terminal}</svg>;
 }
@@ -995,7 +1017,7 @@ function PackageManagerTerminal({ soundEnabled, onCopy, copiedId }) {
 /* ==========================================================================
    Raycast Command Palette (⌘K)
    ========================================================================== */
-function CommandPalette({ isOpen, onClose }) {
+function CommandPalette({ isOpen, onClose, onOpenTurbo }) {
   const [query, setQuery] = useState("");
   const inputRef = useRef(null);
 
@@ -1024,6 +1046,8 @@ function CommandPalette({ isOpen, onClose }) {
   const actions = [
     { id: "dl-inst", category: "Download", title: "Download Windows Installer (.exe)", shortcut: "↵", link: DOWNLOAD_INSTALLER },
     { id: "dl-port", category: "Download", title: "Download Standalone Portable (.exe)", shortcut: "P", link: DOWNLOAD_PORTABLE },
+    { id: "feat-turbo", category: "Surprise", title: "Launch Cyber Turbo Mode (Matrix HUD & Byte Slasher)", shortcut: "~", action: "turbo" },
+    { id: "feat-media", category: "Showcase", title: "Open Engineering Media Showcase (High-Res Photos & GIFs)", shortcut: "V", hash: "#visual-showcase" },
     { id: "feat-screen", category: "Showcase", title: "View Desktop Workbench Screenshot", shortcut: "S", hash: "#app-preview" },
     { id: "feat-bench", category: "Benchmark", title: "Run Hardware Latency Benchmark", shortcut: "B", hash: "#benchmarks" },
     { id: "feat-sand", category: "Sandbox", title: "Open In-Browser Sample Sandbox", shortcut: "D", hash: "#sandbox" },
@@ -1062,8 +1086,13 @@ function CommandPalette({ isOpen, onClose }) {
                 key={item.id}
                 className={`raycast-row ${idx === 0 ? "selected" : ""}`}
                 onClick={() => {
-                  if (item.link) window.open(item.link, item.link.startsWith("http") ? "_blank" : "_self");
-                  else if (item.hash) window.location.hash = item.hash;
+                  if (item.action === "turbo") {
+                    onOpenTurbo();
+                  } else if (item.link) {
+                    window.open(item.link, item.link.startsWith("http") ? "_blank" : "_self");
+                  } else if (item.hash) {
+                    window.location.hash = item.hash;
+                  }
                   onClose(false);
                 }}
               >
@@ -1093,11 +1122,39 @@ function CommandPalette({ isOpen, onClose }) {
 }
 
 /* ==========================================================================
-   Split Hero Interactive Workbench
+   Split Hero Interactive Workbench with Screenshot, Workflow GIFs, and Telemetry
    ========================================================================== */
 function SplitHeroWorkbench() {
   const [viewMode, setViewMode] = useState("screenshot");
   const [activeTab, setActiveTab] = useState(0);
+  const [activeGifIdx, setActiveGifIdx] = useState(0);
+
+  const workflowGifs = [
+    {
+      id: "redact",
+      title: "Stream Purge",
+      gif: "/media/crypto_aes.gif",
+      metric: "0x00 Null Stream Byte Purge",
+      fps: "60.0 FPS",
+      desc: "Physical token annihilation & XREF table sanitization without cloud round-trips.",
+    },
+    {
+      id: "laser",
+      title: "Neural OCR Scan",
+      gif: "/media/laser_scan.gif",
+      metric: "0.24ms Character Extraction",
+      fps: "120 FPS Sensor",
+      desc: "100% on-device OCR inference running directly on local GPU silicon.",
+    },
+    {
+      id: "rayon",
+      title: "Rayon Batch Concurrency",
+      gif: "/media/sorting_parallel.gif",
+      metric: "16-Core Rayon Concurrency",
+      fps: "Sub-Second Merge",
+      desc: "Work-stealing concurrency merging and compressing thousands of pages in parallel.",
+    },
+  ];
 
   const tabs = [
     { name: "Parser", badge: "0.38ms", icon: "cpu" },
@@ -1130,6 +1187,13 @@ function SplitHeroWorkbench() {
               <Icon name="image" size={12} /> App UI
             </button>
             <button
+              className={`switch-mode-btn ${viewMode === "gifs" ? "active" : ""}`}
+              onClick={() => setViewMode("gifs")}
+              title="Show Live Workflow GIFs"
+            >
+              <Icon name="play" size={12} /> Workflow GIFs
+            </button>
+            <button
               className={`switch-mode-btn ${viewMode === "telemetry" ? "active" : ""}`}
               onClick={() => setViewMode("telemetry")}
               title="Show Telemetry Streams"
@@ -1156,6 +1220,37 @@ function SplitHeroWorkbench() {
               <span className="dot-sep">•</span>
               <span>Drop Any PDF</span>
             </div>
+          </div>
+        ) : viewMode === "gifs" ? (
+          <div className="bench-gif-player-viewport">
+            <div className="gif-player-header">
+              <div className="gif-switch-buttons">
+                {workflowGifs.map((g, i) => (
+                  <button
+                    key={g.id}
+                    className={`gif-switch-btn ${activeGifIdx === i ? "active" : ""}`}
+                    onClick={() => setActiveGifIdx(i)}
+                  >
+                    {g.title}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="gif-display-box">
+              <img src={workflowGifs[activeGifIdx].gif} alt={workflowGifs[activeGifIdx].title} />
+              <div className="gif-overlay-hud">
+                <span className="gif-hud-metric">
+                  <span className="beacon-dot" style={{ display: 'inline-block', width: 6, height: 6, marginRight: 6 }} />
+                  {workflowGifs[activeGifIdx].metric}
+                </span>
+                <span>{workflowGifs[activeGifIdx].fps}</span>
+              </div>
+            </div>
+
+            <p className="redact-note" style={{ margin: 0 }}>
+              {workflowGifs[activeGifIdx].desc}
+            </p>
           </div>
         ) : (
           <>
@@ -1281,6 +1376,542 @@ function SplitHeroWorkbench() {
 }
 
 /* ==========================================================================
+   Visual Media Showcase Gallery (High-Res Photos & Animated GIFs)
+   ========================================================================== */
+function VisualMediaShowcase({ soundEnabled }) {
+  const [activePillar, setActivePillar] = useState(0);
+  const [laserActive, setLaserActive] = useState(false);
+
+  const pillars = [
+    {
+      id: "airgap",
+      badge: "Zero Network Egress",
+      eyebrow: "01 // AIR-GAPPED CRYPTOGRAPHY",
+      title: "Deep Byte Redaction & Memory Isolation.",
+      desc: "Traditional PDF editors apply a cosmetic black rectangle while leaving extractable text in the file stream. PDFCatalyst zeros out raw token bytes, unmaps font subroutines, and guarantees 100% HIPAA and GDPR compliance on air-gapped hardware.",
+      mainImage: "/media/security_airgap.jpg",
+      gifInset: "/media/crypto_aes.gif",
+      gifLabel: "AES CRYPTO STREAM",
+      highlights: [
+        "Irreversible 0x00 byte zeroing in raw stream operators",
+        "Clean-room rebuild of Cross-Reference (XREF) object table",
+        "Zero network sockets open · 100% RAM air-gapped",
+      ],
+      actionText: "Verify Cryptographic Stream",
+      actionIcon: "lock",
+      onAction: () => {
+        if (soundEnabled) playAudioBlip(880, "sine", 0.2);
+        alert("STREAM VERIFIED: 0 bytes leaked. Text tokens physically destroyed from stream.");
+      },
+    },
+    {
+      id: "wgpu",
+      badge: "60+ FPS wgpu Compute",
+      eyebrow: "02 // HARDWARE ACCELERATION",
+      title: "Direct Silicon GPU Vector Pipeline.",
+      desc: "Built directly on top of the wgpu rendering engine. Experience butter-smooth 800% vector zooming, zero-frame-drop panning across complex CAD drawings, and sub-millisecond page rasterization without heavy Electron or Chromium bloat.",
+      mainImage: "/media/silicon_hardware.jpg",
+      gifInset: "/media/matrix_transform.gif",
+      gifLabel: "GPU MATRIX COMPUTE",
+      highlights: [
+        "Direct DirectX 12 / Vulkan / Metal GPU shaders",
+        "0.38 ms sub-millisecond page rasterization latency",
+        "96% lower RAM consumption than Adobe Acrobat Pro",
+      ],
+      actionText: "Run GPU Latency Test",
+      actionIcon: "zap",
+      onAction: () => {
+        if (soundEnabled) playAudioBlip(920, "sine", 0.18);
+        alert("wgpu SHADER TEST: 60.0 FPS maintained across 500 dense vector nodes.");
+      },
+    },
+    {
+      id: "ocr",
+      badge: "On-Device Neural OCR",
+      eyebrow: "03 // OPTICAL RECOGNITION",
+      title: "Neural Document Scanning On Local Silicon.",
+      desc: "Transform scanned receipts, historical records, and photographed agreements into searchable, selectable text. Runs lightweight neural models directly on CPU AVX2/NEON instructions without transmitting files to remote APIs.",
+      mainImage: "/media/document_audit.jpg",
+      gifInset: "/media/laser_scan.gif",
+      gifLabel: "NEURAL OPTICAL SCAN",
+      highlights: [
+        "100% local neural inference with zero cloud latency",
+        "Multilingual character extraction & automatic table parsing",
+        "Preserves original document layout and font geometry",
+      ],
+      actionText: "Trigger Optical Laser Scan",
+      actionIcon: "crosshair",
+      onAction: () => {
+        if (soundEnabled) playAudioBlip(780, "sawtooth", 0.25);
+        setLaserActive(true);
+        setTimeout(() => setLaserActive(false), 3000);
+      },
+    },
+    {
+      id: "cad",
+      badge: "Architectural Precision",
+      eyebrow: "04 // BLUEPRINT SCALE",
+      title: "Calibrated Architectural CAD Measurement.",
+      desc: "Engineered specifically for architects, surveyors, and general contractors. Calibrate drawing scale against known title blocks, compute square footage instantly, and annotate blueprints without converting to raster images.",
+      mainImage: "/media/blueprint_cad.jpg",
+      gifInset: "/media/radar_scan.gif",
+      gifLabel: "RADAR CALIPER",
+      highlights: [
+        "Imperial (1/4\", 1/8\") and Metric (1:50, 1:100) scale calibration",
+        "Real-time perimeter, linear distance, and polygon area readouts",
+        "Vector-true measurement with snap-to-endpoint precision",
+      ],
+      actionText: "Calibrate Caliper (1/4\" = 1'-0\")",
+      actionIcon: "ruler",
+      onAction: () => {
+        if (soundEnabled) playAudioBlip(720, "sine", 0.15);
+        alert("CALIPER CALIBRATED: Scale locked to 1/4\" = 1'-0\". Area readouts verified.");
+      },
+    },
+    {
+      id: "mcp",
+      badge: "Claude & Cursor Native",
+      eyebrow: "05 // AI MODEL CONTEXT PROTOCOL",
+      title: "Autonomous AI Agent Workflows via MCP.",
+      desc: "Connect modern AI developer tools like Claude Desktop, Cursor, and automated background agents directly to your local PDF files using the open Model Context Protocol standard over stdio JSON-RPC.",
+      mainImage: "/media/terminal_code.jpg",
+      gifInset: "/media/matrix_transform.gif",
+      gifLabel: "JSON-RPC stdio",
+      highlights: [
+        "Headless CLI (pdfcraft-cli) with MCP server mode",
+        "Inspect ISO 32000 AST structure and extract tables programmatically",
+        "Eliminates per-page API pricing and vendor data retention",
+      ],
+      actionText: "Copy Claude MCP Config",
+      actionIcon: "copy",
+      onAction: () => {
+        if (soundEnabled) playAudioBlip(840, "sine", 0.15);
+        navigator.clipboard.writeText(`{\n  "mcpServers": {\n    "pdfcatalyst": {\n      "command": "pdfcraft-cli",\n      "args": ["mcp", "--root", "./documents"]\n    }\n  }\n}`);
+        alert("Copied Claude Desktop MCP JSON configuration to clipboard!");
+      },
+    },
+  ];
+
+  const cur = pillars[activePillar];
+
+  return (
+    <section className="section-container" id="visual-showcase">
+      <div className="section-head-minimal">
+        <span className="eyebrow-chip">ENGINEERING MEDIA SHOWCASE</span>
+        <h2 className="title-metallic">Precision tools in high definition.</h2>
+        <p className="subtitle-subtle">
+          Explore real high-resolution architectural blueprints, hardware pipelines, neural OCR, and cryptographic privacy streams.
+        </p>
+      </div>
+
+      <div className="media-showcase-shell">
+        <div className="showcase-tab-pills">
+          {pillars.map((p, idx) => (
+            <button
+              key={p.id}
+              className={`showcase-pill-btn ${activePillar === idx ? "active" : ""}`}
+              onClick={() => {
+                if (soundEnabled) playAudioBlip(680 + idx * 40, "sine", 0.12);
+                setActivePillar(idx);
+              }}
+            >
+              <span>{p.title.split(" ")[0]} {p.title.split(" ")[1]}</span>
+              <span className="showcase-pill-badge">{p.badge}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="showcase-content-grid">
+          {/* Left: High-Res Visual Frame with Inset Animated GIF */}
+          <div className="showcase-visual-frame">
+            <img
+              src={cur.mainImage}
+              alt={cur.title}
+              className="showcase-img-main"
+            />
+            {laserActive && <div className="scanning-laser-line" />}
+
+            <div className="showcase-gif-inset">
+              <img src={cur.gifInset} alt={cur.gifLabel} />
+              <div className="showcase-gif-label">
+                <span className="beacon-dot" style={{ display: 'inline-block', width: 6, height: 6, marginRight: 4 }} />
+                {cur.gifLabel}
+              </div>
+            </div>
+          </div>
+
+          {/* Right: Technical Specifications & Interactive Actions */}
+          <div className="showcase-text-details">
+            <span className="showcase-eyebrow">{cur.eyebrow}</span>
+            <h3 className="showcase-title">{cur.title}</h3>
+            <p className="showcase-desc">{cur.desc}</p>
+
+            <ul className="showcase-highlights-list">
+              {cur.highlights.map((h, i) => (
+                <li key={i}>
+                  <Icon name="check" size={14} className="highlight-icon" />
+                  <span>{h}</span>
+                </li>
+              ))}
+            </ul>
+
+            <div className="showcase-action-row">
+              <button className="btn-showcase-action" onClick={cur.onAction}>
+                <Icon name={cur.actionIcon} size={13} />
+                <span>{cur.actionText}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ==========================================================================
+   THE SURPRISE FACTOR: Cyber Turbo / Matrix Mode HUD & Byte Slasher Mini-Game
+   ========================================================================== */
+function CyberTurboModal({ isOpen, onClose, soundEnabled }) {
+  const [activeTab, setActiveTab] = useState("terminal"); // "terminal" or "game"
+  const [cliInput, setCliInput] = useState("");
+  const [logs, setLogs] = useState([
+    "PDFCatalyst Pure Rust v1.0.0 [Air-Gapped Edition]",
+    "Initializing hardware wgpu shaders... [OK 60 FPS]",
+    "Air-gapped firewall: 0 egress sockets open. [SECURE]",
+    "Type 'help' for command reference or 'play' for Byte Slasher challenge!",
+  ]);
+  const canvasRef = useRef(null);
+
+  // Byte Slasher Minigame State
+  const [gameState, setGameState] = useState("idle"); // "idle", "playing", "won"
+  const [score, setScore] = useState(0);
+  const [purgedCount, setPurgedCount] = useState(0);
+  const [tokens, setTokens] = useState([]);
+  const targetPurges = 5;
+
+  // Matrix Rain Canvas Effect
+  useEffect(() => {
+    if (!isOpen) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    canvas.width = canvas.parentElement.clientWidth;
+    canvas.height = canvas.parentElement.clientHeight;
+
+    const chars = "PDFCATALYSTRUST0123456789XREF0x00BYTEPURGE§±µ¶·";
+    const fontSize = 14;
+    const columns = Math.floor(canvas.width / fontSize);
+    const drops = Array(columns).fill(1);
+
+    const interval = setInterval(() => {
+      ctx.fillStyle = "rgba(4, 8, 12, 0.08)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#34d399";
+      ctx.font = `${fontSize}px monospace`;
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = chars[Math.floor(Math.random() * chars.length)];
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+    }, 45);
+
+    return () => clearInterval(interval);
+  }, [isOpen]);
+
+  // Byte Slasher Game Loop
+  useEffect(() => {
+    if (gameState !== "playing") return;
+
+    const tokenPool = [
+      "SSN: 382-91-4402",
+      "API_KEY: sk-secret-99",
+      "CREDIT_CARD: 4532-****",
+      "DIAGNOSIS: Aortic Insufficiency",
+      "CONFIDENTIAL_CEO_SALARY",
+      "X.509 PRIVATE KEY PEM",
+      "PATIENT_HEALTH_RECORD_ID",
+    ];
+
+    const spawner = setInterval(() => {
+      setTokens((prev) => {
+        if (prev.length >= 4) return prev;
+        const text = tokenPool[Math.floor(Math.random() * tokenPool.length)];
+        const newToken = {
+          id: Math.random().toString(36).substring(7),
+          text,
+          left: Math.random() * 65 + 5,
+          top: -20,
+          speed: 1.5 + Math.random() * 1.6,
+          purged: false,
+        };
+        return [...prev, newToken];
+      });
+    }, 1100);
+
+    const mover = setInterval(() => {
+      setTokens((prev) =>
+        prev
+          .map((t) => ({ ...t, top: t.top + t.speed }))
+          .filter((t) => {
+            if (t.top > 280 && !t.purged) {
+              if (soundEnabled) playAudioBlip(240, "sawtooth", 0.2);
+              return false;
+            }
+            return t.top <= 300;
+          })
+      );
+    }, 40);
+
+    return () => {
+      clearInterval(spawner);
+      clearInterval(mover);
+    };
+  }, [gameState, soundEnabled]);
+
+  const handleSlashToken = (id) => {
+    if (soundEnabled) playAudioBlip(980, "square", 0.1);
+    setTokens((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, purged: true, text: "PURGED 0x00" } : t))
+    );
+    setScore((s) => s + 100);
+    setPurgedCount((c) => {
+      const next = c + 1;
+      if (next >= targetPurges) {
+        setGameState("won");
+        if (soundEnabled) playAudioBlip(1100, "sine", 0.4);
+      }
+      return next;
+    });
+  };
+
+  const startMinigame = () => {
+    if (soundEnabled) playAudioBlip(800, "sine", 0.2);
+    setScore(0);
+    setPurgedCount(0);
+    setTokens([]);
+    setGameState("playing");
+  };
+
+  const handleCommand = (e) => {
+    if (e.key !== "Enter") return;
+    const cmd = cliInput.trim().toLowerCase();
+    setCliInput("");
+    if (!cmd) return;
+
+    if (soundEnabled) playAudioBlip(720, "sine", 0.1);
+
+    if (cmd === "clear") {
+      setLogs([]);
+      return;
+    }
+    if (cmd === "exit") {
+      onClose();
+      return;
+    }
+    if (cmd === "play") {
+      setActiveTab("game");
+      startMinigame();
+      return;
+    }
+
+    const newLogs = [...logs, `$ ${cmd}`];
+    switch (cmd) {
+      case "help":
+        newLogs.push(
+          "Available Cyber Terminal commands:",
+          "  help       - Show command dictionary",
+          "  play       - Launch the Byte Slasher Redaction challenge",
+          "  benchmark  - Execute instant hardware latency simulation",
+          "  redact     - Verify 0x00 byte sanitization engine",
+          "  ocr        - Check neural optical recognition pipeline",
+          "  hexview    - Dump raw ISO 32000-2 catalog bytes",
+          "  clear      - Clear terminal screen",
+          "  exit       - Return to standard workbench"
+        );
+        break;
+      case "benchmark":
+        newLogs.push(
+          "LATENCY AUDIT: Pure Rust 180ms | Adobe 3,400ms | Cloud 7,200ms",
+          "Result: PDFCatalyst is 18.8x faster with 96% lower RAM footprint."
+        );
+        break;
+      case "redact":
+        newLogs.push(
+          "BYTE SANITIZATION AUDIT:",
+          "  [0x012C] SSN stream operator identified.",
+          "  [PURGED] Overwritten with 0x00 null bytes.",
+          "  [XREF] Cross-reference table regenerated with clean byte offsets.",
+          "Zero residual tokens extractable."
+        );
+        break;
+      case "ocr":
+        newLogs.push(
+          "NEURAL OCR ENGINE:",
+          "  Hardware instructions: AVX2 + FMA enabled.",
+          "  Status: 100% offline. Zero remote network packets sent."
+        );
+        break;
+      case "hexview":
+        newLogs.push(
+          "00000000: 25 50 44 46 2d 32 2e 30 0a 25 e2 e3 cf d3 0a 31  %PDF-2.0.%.....1",
+          "00000010: 20 30 20 6f 62 6a 0a 3c 3c 2f 54 79 70 65 2f 43   0 obj.<</Type/C",
+          "00000020: 61 74 61 6c 6f 67 2f 50 61 67 65 73 20 32 20 30  atalog/Pages 2 0",
+          "ISO 32000-2 AST verified."
+        );
+        break;
+      default:
+        newLogs.push(`Command not recognized: '${cmd}'. Type 'help' or 'play'.`);
+        break;
+    }
+    setLogs(newLogs);
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="cyber-hud-overlay" onClick={onClose}>
+      <div className="cyber-hud-window" onClick={(e) => e.stopPropagation()}>
+        <canvas ref={canvasRef} className="cyber-matrix-canvas" />
+
+        <div className="cyber-hud-header">
+          <div className="cyber-header-left">
+            <span className="beacon-dot" style={{ width: 8, height: 8 }} />
+            <span className="cyber-hud-title">PDFCATALYST // CYBER TURBO HUD</span>
+            <div className="cyber-mode-tabs">
+              <button
+                className={`cyber-tab-btn ${activeTab === "terminal" ? "active" : ""}`}
+                onClick={() => {
+                  if (soundEnabled) playAudioBlip(680, "sine", 0.1);
+                  setActiveTab("terminal");
+                }}
+              >
+                <Icon name="terminal" size={12} /> Terminal CLI
+              </button>
+              <button
+                className={`cyber-tab-btn ${activeTab === "game" ? "active" : ""}`}
+                onClick={() => {
+                  if (soundEnabled) playAudioBlip(740, "sine", 0.1);
+                  setActiveTab("game");
+                  if (gameState === "idle") startMinigame();
+                }}
+              >
+                <Icon name="target" size={12} /> Byte Slasher Challenge
+              </button>
+            </div>
+          </div>
+          <button className="btn-close-cyber" onClick={onClose} aria-label="Close Cyber HUD">
+            <Icon name="x" size={14} />
+          </button>
+        </div>
+
+        {activeTab === "terminal" ? (
+          <div className="cyber-terminal-body">
+            <div className="cyber-welcome-banner">
+{`██████╗ ██████╗ ███████╗ ██████╗ █████╗ ████████╗██╗   ██╗██╗     ██╗   ██╗███████╗████████╗
+██╔══██╗██╔══██╗██╔════╝██╔════╝██╔══██╗╚══██╔══╝╚██╗ ██╔╝██║     ╚██╗ ██╔╝██╔════╝╚══██╔══╝
+██████╔╝██║  ██║█████╗  ██║     ███████║   ██║    ╚████╔╝ ██║      ╚████╔╝ ███████╗   ██║   
+██╔═══╝ ██║  ██║██╔══╝  ██║     ██╔══██║   ██║     ╚██╔╝  ██║       ╚██╔╝  ╚════██║   ██║   
+██║     ██████╔╝██║     ╚██████╗██║  ██║   ██║      ██║   ███████╗   ██║   ███████║   ██║   
+╚═╝     ╚═════╝ ╚═╝      ╚═════╝╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚══════╝   ╚═╝   ╚══════╝   ╚═╝   `}
+            </div>
+            {logs.map((line, idx) => (
+              <div key={idx} className="cyber-log-line">
+                <span>{line}</span>
+              </div>
+            ))}
+            <div className="cyber-input-row">
+              <span className="prompt">pdfcatalyst-cli&gt;</span>
+              <input
+                type="text"
+                className="cyber-cli-input"
+                autoFocus
+                placeholder="Type command ('help', 'play', 'benchmark')..."
+                value={cliInput}
+                onChange={(e) => setCliInput(e.target.value)}
+                onKeyDown={handleCommand}
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="byte-slasher-arena">
+            <div className="slasher-hud-bar">
+              <div className="slasher-stat">
+                <span className="stat-label">TOKENS PURGED:</span>
+                <span className="stat-val">{purgedCount} / {targetPurges}</span>
+              </div>
+              <div className="slasher-stat">
+                <span className="stat-label">SECURITY SCORE:</span>
+                <span className="stat-val">{score} PTS</span>
+              </div>
+              <div className="slasher-stat">
+                <span className="stat-label">AIR-GAP STATUS:</span>
+                <span className="stat-val" style={{ color: '#38bdf8' }}>ENFORCED</span>
+              </div>
+            </div>
+
+            <div className="slasher-play-zone">
+              {gameState === "idle" && (
+                <div className="slasher-win-banner">
+                  <div className="slasher-badge-graphic">
+                    <Icon name="shield" size={32} />
+                  </div>
+                  <h3 className="slasher-win-title">Byte Slasher Redaction Challenge</h3>
+                  <p className="slasher-win-desc">
+                    Confidential tokens are dropping toward the unencrypted network boundary! Click them to execute irreversible 0x00 byte purges before they leak.
+                  </p>
+                  <button className="btn-restart-game" onClick={startMinigame}>
+                    <Icon name="play" size={14} /> Start Security Audit
+                  </button>
+                </div>
+              )}
+
+              {gameState === "playing" && (
+                <>
+                  {tokens.map((t) => (
+                    <div
+                      key={t.id}
+                      className={`falling-token-card ${t.purged ? "purged" : ""}`}
+                      style={{ left: `${t.left}%`, top: `${t.top}px` }}
+                      onClick={() => !t.purged && handleSlashToken(t.id)}
+                    >
+                      <Icon name={t.purged ? "check" : "lock"} size={12} />
+                      <span>{t.text}</span>
+                    </div>
+                  ))}
+                  <div className="slasher-danger-line" />
+                  <span className="slasher-danger-label">UNENCRYPTED NETWORK BOUNDARY</span>
+                </>
+              )}
+
+              {gameState === "won" && (
+                <div className="slasher-win-banner">
+                  <div className="slasher-badge-graphic">
+                    <Icon name="sparkles" size={36} />
+                  </div>
+                  <h3 className="slasher-win-title">SECURITY AUDIT PASSED!</h3>
+                  <p className="slasher-win-desc">
+                    All confidential data tokens permanently purged with 0x00 null bytes. Zero network egress detected. You have earned the Certified Air-Gapped Security Auditor distinction!
+                  </p>
+                  <button className="btn-restart-game" onClick={startMinigame}>
+                    <Icon name="play" size={14} /> Play Again
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ==========================================================================
    Linear-Style Telemetry Bento Grid
    ========================================================================== */
 function LinearTelemetryGrid() {
@@ -1356,6 +1987,7 @@ function LinearTelemetryGrid() {
 function App() {
   const { releases, latestRelease, isLoading } = useGitHubReleases();
   const [commandOpen, setCommandOpen] = useState(false);
+  const [turboOpen, setTurboOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeFaq, setActiveFaq] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
@@ -1364,6 +1996,19 @@ function App() {
   const [cliTab, setCliTab] = useState("mcp");
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [detectedOs, setDetectedOs] = useState("Windows x64");
+
+  // Global Keyboard Shortcut for Surprise Cyber Turbo HUD (` or ~)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "`" || e.key === "~") {
+        e.preventDefault();
+        setTurboOpen((prev) => !prev);
+        if (soundEnabled) playAudioBlip(950, "sine", 0.15);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [soundEnabled]);
 
   const installerAsset =
     latestRelease.assets?.find(
@@ -1467,6 +2112,18 @@ function App() {
           </div>
 
           <div className={`linear-nav-right ${mobileMenuOpen ? "mobile-drawer-open" : ""}`}>
+            <button
+              className="btn-turbo-hud"
+              onClick={() => {
+                if (soundEnabled) playAudioBlip(950, "sine", 0.18);
+                setTurboOpen(true);
+              }}
+              title="Open Secret Cyber Turbo Matrix Mode (Key: ~)"
+            >
+              <span className="turbo-pulse-dot" />
+              <span>Turbo HUD</span>
+            </button>
+            <a href="#visual-showcase" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Visual Studio</a>
             <a href="#app-preview" className="nav-link" onClick={() => setMobileMenuOpen(false)}>App Tour</a>
             <a href="#benchmarks" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Benchmarks</a>
             <a href="#sandbox" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Sandbox</a>
@@ -1482,6 +2139,17 @@ function App() {
             >
               <Icon name="github" size={15} />
             </a>
+            <button
+              className={`btn-sound-toggle ${soundEnabled ? "active" : ""}`}
+              onClick={() => {
+                setSoundEnabled(!soundEnabled);
+                if (!soundEnabled) playAudioBlip(880);
+              }}
+              title={soundEnabled ? "Audio Cues Enabled" : "Audio Muted"}
+              aria-label="Toggle Audio Cues"
+            >
+              <Icon name={soundEnabled ? "volume" : "volumeMute"} size={14} />
+            </button>
             <button
               className="theme-toggle-btn"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
@@ -1536,6 +2204,18 @@ function App() {
                   <span>Download for {detectedOs}</span>
                   <span className="cta-meta">({installerSize})</span>
                 </a>
+                <button
+                  className="btn-metallic-secondary"
+                  onClick={() => {
+                    if (soundEnabled) playAudioBlip(950, "sine", 0.15);
+                    setTurboOpen(true);
+                  }}
+                  title="Launch Cyber Turbo Mode"
+                >
+                  <Icon name="zap" size={14} />
+                  <span>Cyber Turbo Mode</span>
+                  <kbd>~</kbd>
+                </button>
                 <button className="btn-metallic-secondary" onClick={() => setCommandOpen(true)}>
                   <Icon name="command" size={14} />
                   <span>Command Menu</span>
@@ -1569,6 +2249,11 @@ function App() {
             </div>
           </div>
         </section>
+
+        {/* ==========================================================================
+           Visual Media Showcase Gallery (High-Res Images & Animated GIFs)
+           ========================================================================== */}
+        <VisualMediaShowcase soundEnabled={soundEnabled} />
 
         {/* ==========================================================================
            Interactive Screenshot Tour with Hotspot Pins
@@ -1983,7 +2668,18 @@ endobj`}
       </footer>
 
       {/* Command Palette Modal */}
-      <CommandPalette isOpen={commandOpen} onClose={setCommandOpen} />
+      <CommandPalette
+        isOpen={commandOpen}
+        onClose={setCommandOpen}
+        onOpenTurbo={() => setTurboOpen(true)}
+      />
+
+      {/* Surprise Factor: Cyber Turbo Matrix HUD & Byte Slasher Minigame */}
+      <CyberTurboModal
+        isOpen={turboOpen}
+        onClose={() => setTurboOpen(false)}
+        soundEnabled={soundEnabled}
+      />
     </div>
   );
 }
