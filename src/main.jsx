@@ -3,13 +3,14 @@ import { createRoot } from "react-dom/client";
 import "./styles.css";
 
 const DOWNLOAD_INSTALLER =
-  "https://github.com/SarthAyush/PDFcatalyst-App/releases/download/v1.0.0/PDFcatalyst-Setup-v1.0.0-x64.exe";
+  "https://github.com/SarthAyush/PDFcatalyst-App/releases/download/v1.0.2/PDFCatalyst-Setup-v1.0.2-x64.exe";
 const DOWNLOAD_PORTABLE =
-  "https://github.com/SarthAyush/PDFcatalyst-App/releases/download/v1.0.0/PDFcatalyst.exe";
+  "https://github.com/SarthAyush/PDFcatalyst-App/releases/download/v1.0.2/PDFCatalyst.exe";
 const SHA256_INSTALLER =
-  "04a04855a984b84d9bd6c5afedda611d63f5eb259fd78f42fa2237cb4cf74b79";
+  "eaea6576725659ea9cfb82c69af508f171ac356357d35286dab947ccd841d3a0";
 const SHA256_PORTABLE =
-  "f4c06b245767378391146604bb29e83616374027d0d5de00cc41578e3c9cbc86";
+  "28d8721512b04cd711d5db4a957335dec5a8741a13f240bc9c0028bbc907614c";
+
 
 function playAudioBlip(freq = 520, type = "sine", duration = 0.12) {
   try {
@@ -214,35 +215,36 @@ function useGitHubReleases() {
   useEffect(() => {
     const fetchReleases = async () => {
       setIsLoading(true);
-      const cacheKey = "pdfcatalyst_github_releases";
-      const cacheTimeKey = "pdfcatalyst_github_releases_time";
+      const cacheKey = "pdfcatalyst_github_releases_v102";
+      const cacheTimeKey = "pdfcatalyst_github_releases_v102_time";
 
       try {
         const cached = localStorage.getItem(cacheKey);
         const cachedTime = localStorage.getItem(cacheTimeKey);
         if (cached && cachedTime && Date.now() - parseInt(cachedTime, 10) < 5 * 60 * 1000) {
           const parsed = JSON.parse(cached);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            setReleases(parsed);
-            setLatestRelease(parsed[0]);
+          if (parsed && (Array.isArray(parsed) ? parsed.length > 0 : parsed.tag_name)) {
+            const rel = Array.isArray(parsed) ? parsed[0] : parsed;
+            setReleases(Array.isArray(parsed) ? parsed : [parsed]);
+            setLatestRelease(rel);
             setIsLoading(false);
             return;
           }
         }
 
-        const res = await fetch("https://api.github.com/repos/SarthAyush/PDFcatalyst-App/releases");
+        const res = await fetch("https://api.github.com/repos/SarthAyush/PDFcatalyst-App/releases/latest");
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
-          setReleases(data);
-          setLatestRelease(data[0]);
+        if (data && data.tag_name) {
+          setReleases([data]);
+          setLatestRelease(data);
           try {
             localStorage.setItem(cacheKey, JSON.stringify(data));
             localStorage.setItem(cacheTimeKey, Date.now().toString());
           } catch {}
         }
       } catch (err) {
-        // Fallback
+        // Fallback to verified DEFAULT_RELEASE
       } finally {
         setIsLoading(false);
       }
@@ -255,24 +257,31 @@ function useGitHubReleases() {
 }
 
 const DEFAULT_RELEASE = {
-  tag_name: "v1.0.0",
-  name: "PDFcatalyst v1.0.0",
-  published_at: "2026-10-16T11:41:07Z",
-  html_url: "https://github.com/SarthAyush/PDFcatalyst-App/releases/tag/v1.0.0",
+  tag_name: "v1.0.2",
+  name: "PDFCatalyst v1.0.2",
+  published_at: "2026-10-19T11:41:07Z",
+  html_url: "https://github.com/SarthAyush/PDFcatalyst-App/releases/tag/v1.0.2",
   assets: [
     {
-      name: "PDFcatalyst-Setup-v1.0.0-x64.exe",
-      size: 19875336,
+      name: "PDFCatalyst-Setup-v1.0.2-x64.exe",
+      size: 19875848,
       browser_download_url:
-        "https://github.com/SarthAyush/PDFcatalyst-App/releases/download/v1.0.0/PDFcatalyst-Setup-v1.0.0-x64.exe",
-      digest: "sha256:04a04855a984b84d9bd6c5afedda611d63f5eb259fd78f42fa2237cb4cf74b79",
+        "https://github.com/SarthAyush/PDFcatalyst-App/releases/download/v1.0.2/PDFCatalyst-Setup-v1.0.2-x64.exe",
+      digest: "sha256:eaea6576725659ea9cfb82c69af508f171ac356357d35286dab947ccd841d3a0",
     },
     {
-      name: "PDFcatalyst.exe",
-      size: 67598832,
+      name: "PDFCatalyst-Setup.exe",
+      size: 19875848,
       browser_download_url:
-        "https://github.com/SarthAyush/PDFcatalyst-App/releases/download/v1.0.0/PDFcatalyst.exe",
-      digest: "sha256:f4c06b245767378391146604bb29e83616374027d0d5de00cc41578e3c9cbc86",
+        "https://github.com/SarthAyush/PDFcatalyst-App/releases/download/v1.0.2/PDFCatalyst-Setup.exe",
+      digest: "sha256:eaea6576725659ea9cfb82c69af508f171ac356357d35286dab947ccd841d3a0",
+    },
+    {
+      name: "PDFCatalyst.exe",
+      size: 67534320,
+      browser_download_url:
+        "https://github.com/SarthAyush/PDFcatalyst-App/releases/download/v1.0.2/PDFCatalyst.exe",
+      digest: "sha256:28d8721512b04cd711d5db4a957335dec5a8741a13f240bc9c0028bbc907614c",
     },
   ],
 };
@@ -443,7 +452,7 @@ function Samsung3DHeroStage({ soundEnabled }) {
 /* ==========================================================================
    Samsung-Style Sticky Sub-Navigation Bar
    ========================================================================== */
-function SamsungSubNav({ activeSection, onSelectSection }) {
+function SamsungSubNav({ activeSection, onSelectSection, downloadUrl }) {
   const items = [
     { id: "overview", label: "Overview" },
     { id: "intelligence", label: "Intelligence" },
@@ -459,7 +468,7 @@ function SamsungSubNav({ activeSection, onSelectSection }) {
       <div className="samsung-subnav-inner">
         <div className="subnav-brand-title">
           <span>PDFCatalyst</span>
-          <span className="subnav-model-pill">Flagship v1.0</span>
+          <span className="subnav-model-pill">Flagship</span>
         </div>
 
         <nav className="subnav-links-cluster">
@@ -475,7 +484,7 @@ function SamsungSubNav({ activeSection, onSelectSection }) {
           ))}
         </nav>
 
-        <a href={DOWNLOAD_INSTALLER} className="subnav-cta-btn">
+        <a href={downloadUrl || DOWNLOAD_INSTALLER} className="subnav-cta-btn" target="_blank" rel="noopener noreferrer">
           <span>Download Free</span>
           <Icon name="arrowRight" size={12} />
         </a>
@@ -1405,7 +1414,7 @@ function SamsungBenchmarksSection({ soundEnabled }) {
 /* ==========================================================================
    Command Menu (⌘K / Ctrl+K)
    ========================================================================== */
-function CommandPalette({ isOpen, onClose }) {
+function CommandPalette({ isOpen, onClose, installerUrl, portableUrl }) {
   const [query, setQuery] = useState("");
   const inputRef = useRef(null);
 
@@ -1432,8 +1441,8 @@ function CommandPalette({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   const actions = [
-    { id: "dl-inst", category: "Download", title: "Download Windows Installer (.exe)", shortcut: "↵", link: DOWNLOAD_INSTALLER },
-    { id: "dl-port", category: "Download", title: "Download Standalone Portable (.exe)", shortcut: "P", link: DOWNLOAD_PORTABLE },
+    { id: "dl-inst", category: "Download", title: "Download Windows Installer (.exe)", shortcut: "↵", link: installerUrl || DOWNLOAD_INSTALLER },
+    { id: "dl-port", category: "Download", title: "Download Standalone Portable (.exe)", shortcut: "P", link: portableUrl || DOWNLOAD_PORTABLE },
     { id: "feat-intel", category: "Intelligence", title: "Explore Smart Tools & OCR", shortcut: "I", hash: "#intelligence" },
     { id: "feat-studio", category: "3D Studio", title: "Open 3D Interactive Studio", shortcut: "S", hash: "#studio" },
     { id: "feat-show", category: "Showcase", title: "Explore Flagship Media Showcase", shortcut: "M", hash: "#showcase" },
@@ -1703,7 +1712,7 @@ function App() {
       </header>
 
       {/* Samsung Sticky Product Sub-Bar */}
-      <SamsungSubNav activeSection={activeSection} onSelectSection={setActiveSection} />
+      <SamsungSubNav activeSection={activeSection} onSelectSection={setActiveSection} downloadUrl={installerUrl} />
 
       <main id="top">
         {/* ==========================================================================
@@ -1804,10 +1813,10 @@ function App() {
                 <div className="dl-card-content">
                   <div className="dl-card-tag">RECOMMENDED</div>
                   <strong className="dl-card-title">Windows Installer</strong>
-                  <span className="dl-card-meta">v1.0.0 • x64 • {installerSize}</span>
+                  <span className="dl-card-meta">{currentVersion} • x64 • {installerSize}</span>
                   <p className="dl-card-desc">Automatic shortcuts, start menu integration, and file associations.</p>
                 </div>
-                <a href={installerUrl} className="btn-dl-action">
+                <a href={installerUrl} className="btn-dl-action" target="_blank" rel="noopener noreferrer">
                   <span>Download Installer</span>
                   <Icon name="download" size={15} />
                 </a>
@@ -1817,10 +1826,10 @@ function App() {
                 <div className="dl-card-content">
                   <div className="dl-card-tag">PORTABLE</div>
                   <strong className="dl-card-title">Standalone Portable</strong>
-                  <span className="dl-card-meta">Run anywhere • {portableSize}</span>
+                  <span className="dl-card-meta">{currentVersion} • Portable • {portableSize}</span>
                   <p className="dl-card-desc">Run directly from any folder or USB drive with zero admin permissions required.</p>
                 </div>
-                <a href={portableUrl} className="btn-dl-action secondary">
+                <a href={portableUrl} className="btn-dl-action secondary" target="_blank" rel="noopener noreferrer">
                   <span>Download Portable</span>
                   <Icon name="download" size={15} />
                 </a>
@@ -1928,8 +1937,8 @@ function App() {
             </div>
             <div className="f-col">
               <strong>DOWNLOAD</strong>
-              <a href={installerUrl}>Windows Installer</a>
-              <a href={portableUrl}>Portable Executable</a>
+              <a href={installerUrl} target="_blank" rel="noopener noreferrer">Windows Installer ({currentVersion})</a>
+              <a href={portableUrl} target="_blank" rel="noopener noreferrer">Portable Executable ({currentVersion})</a>
               <a href="https://github.com/SarthAyush/PDFcatalyst-App" target="_blank" rel="noopener noreferrer">GitHub Repository</a>
               <button className="link-clean-btn" onClick={() => setCommandOpen(true)}>Search Menu (⌘K)</button>
             </div>
@@ -1946,6 +1955,8 @@ function App() {
       <CommandPalette
         isOpen={commandOpen}
         onClose={setCommandOpen}
+        installerUrl={installerUrl}
+        portableUrl={portableUrl}
       />
     </div>
   );
