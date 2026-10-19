@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useLayoutEffect } from "react";
 import { createRoot } from "react-dom/client";
 import "./styles.css";
 
@@ -326,6 +326,8 @@ function TiltCard({ children, className = "", maxTilt = 12, glare = true, ...pro
       onMouseLeave={handleMouseLeave}
       style={{
         transform: `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
+        "--mouse-x": `${glarePos.x}%`,
+        "--mouse-y": `${glarePos.y}%`,
       }}
       {...props}
     >
@@ -452,7 +454,7 @@ function Samsung3DHeroStage({ soundEnabled }) {
 /* ==========================================================================
    Samsung-Style Sticky Sub-Navigation Bar
    ========================================================================== */
-function SamsungSubNav({ activeSection, onSelectSection, downloadUrl }) {
+function SamsungSubNav({ activeSection, onSelectSection, downloadUrl, isDockedTop }) {
   const items = [
     { id: "overview", label: "Overview" },
     { id: "intelligence", label: "Intelligence" },
@@ -463,21 +465,67 @@ function SamsungSubNav({ activeSection, onSelectSection, downloadUrl }) {
     { id: "faq", label: "FAQ" },
   ];
 
+  const clusterRef = useRef(null);
+  const itemRefs = useRef({});
+  const [pillStyle, setPillStyle] = useState({ left: 0, width: 0, opacity: 0 });
+
+  useLayoutEffect(() => {
+    const activeEl = itemRefs.current[activeSection];
+    const clusterEl = clusterRef.current;
+    if (activeEl && clusterEl) {
+      const clusterRect = clusterEl.getBoundingClientRect();
+      const itemRect = activeEl.getBoundingClientRect();
+      setPillStyle({
+        left: itemRect.left - clusterRect.left + clusterEl.scrollLeft,
+        width: itemRect.width,
+        opacity: 1,
+      });
+
+      // Smoothly scroll active tab into view if overflowing on mobile
+      const itemOffset = itemRect.left - clusterRect.left + clusterEl.scrollLeft;
+      const targetScroll = itemOffset - clusterRect.width / 2 + itemRect.width / 2;
+      clusterEl.scrollTo({ left: targetScroll, behavior: "smooth" });
+    }
+  }, [activeSection]);
+
+  const handleNavClick = (e, id) => {
+    e.preventDefault();
+    onSelectSection(id);
+    const target = document.getElementById(id);
+    if (target) {
+      const offset = isDockedTop ? 56 : 118;
+      const targetTop = target.getBoundingClientRect().top + window.pageYOffset - offset;
+      window.scrollTo({
+        top: Math.max(0, targetTop),
+        behavior: "smooth",
+      });
+    }
+  };
+
   return (
-    <div className="samsung-subnav-sticky glass-nav-sub">
+    <div className={`samsung-subnav-sticky glass-nav-sub ${isDockedTop ? "subnav-docked-top" : ""}`}>
       <div className="samsung-subnav-inner">
         <div className="subnav-brand-title">
           <span>PDFCatalyst</span>
           <span className="subnav-model-pill">Flagship</span>
         </div>
 
-        <nav className="subnav-links-cluster">
+        <nav className="subnav-links-cluster" ref={clusterRef}>
+          <div
+            className="subnav-active-pill-bg"
+            style={{
+              transform: `translateX(${pillStyle.left}px)`,
+              width: `${pillStyle.width}px`,
+              opacity: pillStyle.opacity,
+            }}
+          />
           {items.map((item) => (
             <a
               key={item.id}
               href={`#${item.id}`}
+              ref={(el) => (itemRefs.current[item.id] = el)}
               className={`subnav-link ${activeSection === item.id ? "active" : ""}`}
-              onClick={() => onSelectSection(item.id)}
+              onClick={(e) => handleNavClick(e, item.id)}
             >
               {item.label}
             </a>
@@ -684,6 +732,15 @@ function SamsungIntelligenceSection() {
 function Samsung3DWorkflowStudio({ soundEnabled }) {
   const [activeTab, setActiveTab] = useState(0);
 
+  const sampleDocs = [
+    { id: "nda", name: "NDA Agreement.pdf", type: "Legal", label: "MUTUAL NON-DISCLOSURE AGREEMENT", sensitive: "SSN: 942-01-0814", bank: "Acct: 4421-8890-1200", signer: "Elena Rostova" },
+    { id: "medical", name: "Patient_HIPAA_Record.pdf", type: "Medical", label: "PATIENT MEDICAL HISTORY RECORD", sensitive: "MRN: #9941-8024-B", bank: "Insurance ID: BCBS-8841-A", signer: "Dr. Marcus Chen" },
+    { id: "blueprint", name: "FloorPlan_A102.pdf", type: "CAD", label: "METROPOLITAN CIVIC TOWER BLUEPRINT", sensitive: "Structural Load: 120 kN/m²", bank: "Zoning Code: R-4C Commercial", signer: "Vance Architects" },
+    { id: "financial", name: "Q4_Payroll_Audit.pdf", type: "Financial", label: "EXECUTIVE COMPENSATION AUDIT", sensitive: "Routing: 021000021", bank: "Base: $185,000.00 / YR", signer: "Apex Global Financial" },
+  ];
+  const [selectedDocIdx, setSelectedDocIdx] = useState(0);
+  const activeDoc = sampleDocs[selectedDocIdx];
+
   // Tab 0: Redact Demo
   const [redacted, setRedacted] = useState(true);
   const [copyFeedback, setCopyFeedback] = useState("");
@@ -712,11 +769,11 @@ function Samsung3DWorkflowStudio({ soundEnabled }) {
   const handleTestCopy = () => {
     if (redacted) {
       if (soundEnabled) playAudioBlip(760);
-      setCopyFeedback("Protected: 0 characters copied. The confidential data is completely erased.");
+      setCopyFeedback("Protected: 0 characters copied. The confidential data is completely erased from bytes.");
     } else {
       if (soundEnabled) playAudioBlip(440);
-      navigator.clipboard?.writeText("984-21-0814");
-      setCopyFeedback("Warning: '984-21-0814' was copied. Standard black box overlays can still be read.");
+      navigator.clipboard?.writeText(activeDoc.sensitive);
+      setCopyFeedback(`Warning: '${activeDoc.sensitive}' was copied. Standard black box overlays can still be read.`);
     }
     setTimeout(() => setCopyFeedback(""), 3500);
   };
@@ -778,6 +835,30 @@ function Samsung3DWorkflowStudio({ soundEnabled }) {
           ))}
         </div>
 
+        {/* Sample Document Selector Strip */}
+        <div className="studio-sample-doc-bar">
+          <span className="sample-bar-label">
+            <Icon name="file" size={13} />
+            <span>SAMPLE WORKBENCH DOCUMENT:</span>
+          </span>
+          <div className="sample-pills-row">
+            {sampleDocs.map((doc, idx) => (
+              <button
+                key={doc.id}
+                className={`sample-doc-pill ${selectedDocIdx === idx ? "active" : ""}`}
+                onClick={() => {
+                  if (soundEnabled) playAudioBlip(600 + idx * 40);
+                  setSelectedDocIdx(idx);
+                }}
+              >
+                <span className="doc-pill-ext">PDF</span>
+                <span className="doc-pill-name">{doc.name}</span>
+                <span className="doc-pill-tag">{doc.type}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Tab Content Display */}
         <div className="studio-content-layout">
           {/* TAB 0: REDACTION */}
@@ -809,20 +890,20 @@ function Samsung3DWorkflowStudio({ soundEnabled }) {
               <TiltCard className="pane-interactive-card glass-panel-3d" maxTilt={8}>
                 <div className="doc-mockup-sheet">
                   <div className="doc-mockup-header">
-                    <span>NON-DISCLOSURE AGREEMENT</span>
+                    <span>{activeDoc.label}</span>
                     <span className="status-badge">{redacted ? "PROTECTED" : "VULNERABLE"}</span>
                   </div>
-                  <p className="doc-row">Signer: <strong>Elena Rostova</strong></p>
+                  <p className="doc-row">Signer / Entity: <strong>{activeDoc.signer}</strong></p>
                   <p className="doc-row">
-                    Social Security Number:{" "}
+                    Sensitive Identifier:{" "}
                     <span className={`redact-chip ${redacted ? "safe" : "leaky"}`}>
-                      {redacted ? "[Permanently Erased]" : "984-21-0814"}
+                      {redacted ? "[Permanently Erased]" : activeDoc.sensitive}
                     </span>
                   </p>
                   <p className="doc-row">
-                    Bank Account Number:{" "}
+                    Confidential Record:{" "}
                     <span className={`redact-chip ${redacted ? "safe" : "leaky"}`}>
-                      {redacted ? "[Permanently Erased]" : "4421-8890-1200"}
+                      {redacted ? "[Permanently Erased]" : activeDoc.bank}
                     </span>
                   </p>
                 </div>
@@ -872,9 +953,9 @@ function Samsung3DWorkflowStudio({ soundEnabled }) {
                     <div className="samsung-laser-beam" style={{ top: `${scanProgress}%` }} />
                   )}
                   <div className="ocr-tags-row">
-                    <span className="ocr-tag-pill">INVOICE #9421</span>
-                    <span className="ocr-tag-pill">TOTAL: $1,420.00</span>
-                    <span className="ocr-tag-pill">STATUS: PAID</span>
+                    <span className="ocr-tag-pill">{activeDoc.name}</span>
+                    <span className="ocr-tag-pill">{activeDoc.amount}</span>
+                    <span className="ocr-tag-pill">CONFIDENCE: 99.8%</span>
                   </div>
                 </div>
               </TiltCard>
@@ -942,16 +1023,16 @@ function Samsung3DWorkflowStudio({ soundEnabled }) {
               <TiltCard className="pane-interactive-card glass-panel-3d" maxTilt={8}>
                 <div className="doc-mockup-sheet signing">
                   <div className="doc-mockup-header">
-                    <span>CONSULTING SERVICES AGREEMENT</span>
+                    <span>{activeDoc.label}</span>
                   </div>
                   <p className="doc-row">
-                    By signing below, all milestones and deliverable terms are formally approved.
+                    By signing below, all milestones and terms for {activeDoc.name} are formally approved.
                   </p>
                   <div className="signature-box-glass">
                     <span className="sig-label">Authorized Signature:</span>
                     {signed ? (
                       <div className="signature-placed-wrap">
-                        <span className="sig-calligraphy">Katherine Vance</span>
+                        <span className="sig-calligraphy">{activeDoc.signer}</span>
                         <span className="sig-stamp-pill">Verified Seal • {new Date().toLocaleDateString()}</span>
                       </div>
                     ) : (
@@ -1160,9 +1241,195 @@ function SamsungMediaShowcase({ soundEnabled }) {
 }
 
 /* ==========================================================================
+   Interactive Privacy Audit Split Slider Showpiece
+   ========================================================================== */
+function InteractivePrivacyAuditSlider({ soundEnabled }) {
+  const [sliderPos, setSliderPos] = useState(50);
+  const [isDragging, setIsDragging] = useState(false);
+  const containerRef = useRef(null);
+
+  const handleMove = (clientX) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
+    const percent = Math.round((x / rect.width) * 100);
+    setSliderPos(percent);
+  };
+
+  const handleTouchMove = (e) => {
+    if (!isDragging) return;
+    handleMove(e.touches[0].clientX);
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging) return;
+    handleMove(e.clientX);
+  };
+
+  const handleQuickSet = (val) => {
+    if (soundEnabled) playAudioBlip(540 + val * 2);
+    setSliderPos(val);
+  };
+
+  return (
+    <div className="privacy-slider-wrapper glass-card-3d">
+      <div className="slider-header-strip">
+        <div className="slider-header-left">
+          <div className="samsung-sparkle-pill">
+            <Icon name="shield" size={13} className="sparkle-icon" />
+            <span>INTERACTIVE SECURITY AUDIT</span>
+          </div>
+          <h3 className="slider-title">Byte-Level Redaction vs. Cosmetic Black Boxes</h3>
+          <p className="slider-subtitle">
+            Drag the split handle below to inspect the document's raw binary payload. See why standard PDF viewers fail enterprise privacy audits.
+          </p>
+        </div>
+        <div className="slider-mode-btns">
+          <button
+            className={`slider-chip-btn ${sliderPos > 70 ? "active-left" : ""}`}
+            onClick={() => handleQuickSet(100)}
+          >
+            Expose Legacy Leak
+          </button>
+          <button
+            className={`slider-chip-btn ${sliderPos === 50 ? "active-mid" : ""}`}
+            onClick={() => handleQuickSet(50)}
+          >
+            50/50 Split
+          </button>
+          <button
+            className={`slider-chip-btn ${sliderPos < 30 ? "active-right" : ""}`}
+            onClick={() => handleQuickSet(0)}
+          >
+            PDFCatalyst True Erase
+          </button>
+        </div>
+      </div>
+
+      <div
+        ref={containerRef}
+        className="split-comparison-stage"
+        onMouseDown={() => setIsDragging(true)}
+        onMouseUp={() => setIsDragging(false)}
+        onMouseLeave={() => setIsDragging(false)}
+        onMouseMove={handleMouseMove}
+        onTouchStart={() => setIsDragging(true)}
+        onTouchEnd={() => setIsDragging(false)}
+        onTouchMove={handleTouchMove}
+      >
+        {/* RIGHT LAYER: PDFCatalyst (Zero Trace Sanitized) */}
+        <div className="split-view-layer layer-safe">
+          <div className="layer-watermark safe-watermark">
+            <Icon name="check" size={16} />
+            <span>PDFCATALYST ZERO-TRACE ENGINE</span>
+          </div>
+          <div className="audit-doc-mockup">
+            <div className="audit-doc-header">
+              <span className="doc-stamp-secure">CONFIDENTIAL EXECUTIVE CONTRACT • SANITIZED</span>
+              <span className="doc-audit-badge green">BYTE STREAM: 100% STERILIZED</span>
+            </div>
+            <div className="audit-doc-body">
+              <p className="doc-text-lead">
+                Executive Employment Terms between Enterprise Corp and <span className="doc-sanitized-pill">Jane Doe</span>
+              </p>
+              <div className="audit-row-highlight safe">
+                <div className="row-meta">
+                  <span className="meta-label">Total Annual Compensation:</span>
+                  <span className="meta-status safe">0x00 ZERO-BYTE ERASED</span>
+                </div>
+                <div className="redact-box-true">
+                  <span className="byte-erased-notice">🔒 DATA PERMANENTLY PURGED FROM BINARY STREAM</span>
+                </div>
+              </div>
+              <div className="audit-row-highlight safe">
+                <div className="row-meta">
+                  <span className="meta-label">Bank Wire Routing / Tax ID:</span>
+                  <span className="meta-status safe">IRREVERSIBLE STERILIZATION</span>
+                </div>
+                <div className="redact-box-true">
+                  <span className="byte-erased-notice">🔒 00 00 00 00 — ZERO RECOVERABLE BYTES FOUND</span>
+                </div>
+              </div>
+              <div className="audit-footer-verdict safe">
+                <Icon name="shield" size={14} />
+                <span>SECURITY AUDIT RESULT: PASSED • Zero data leakage. Complies with GDPR Article 17 & HIPAA.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* LEFT LAYER: Legacy Viewer (Cosmetic Black Box Overlay Leaking Text) */}
+        <div
+          className="split-view-layer layer-danger"
+          style={{ clipPath: `inset(0 ${100 - sliderPos}% 0 0)` }}
+        >
+          <div className="layer-watermark danger-watermark">
+            <Icon name="x" size={16} />
+            <span>STANDARD PDF VIEWERS (THE LEAK)</span>
+          </div>
+          <div className="audit-doc-mockup">
+            <div className="audit-doc-header">
+              <span className="doc-stamp-danger">CONFIDENTIAL EXECUTIVE CONTRACT • COMPROMISED</span>
+              <span className="doc-audit-badge red">BYTE STREAM: RAW TEXT STILL EXPOSED</span>
+            </div>
+            <div className="audit-doc-body">
+              <p className="doc-text-lead">
+                Executive Employment Terms between Enterprise Corp and <span className="doc-leaked-pill">Jane Doe</span>
+              </p>
+              <div className="audit-row-highlight danger">
+                <div className="row-meta">
+                  <span className="meta-label">Total Annual Compensation:</span>
+                  <span className="meta-status red">⚠️ TEXT PRESENT UNDER BLACK BOX</span>
+                </div>
+                <div className="redact-box-fake">
+                  <span className="fake-black-rect">██████████████████</span>
+                  <span className="leaked-text-preview">$245,000.00 / YR + $65,000 BONUS</span>
+                </div>
+              </div>
+              <div className="audit-row-highlight danger">
+                <div className="row-meta">
+                  <span className="meta-label">Bank Wire Routing / Tax ID:</span>
+                  <span className="meta-status red">⚠️ SELECTABLE VIA CTRL+C</span>
+                </div>
+                <div className="redact-box-fake">
+                  <span className="fake-black-rect">████████████████</span>
+                  <span className="leaked-text-preview">ROUTING: 021000021 • ACCT: 9841-8842-10</span>
+                </div>
+              </div>
+              <div className="audit-footer-verdict red">
+                <Icon name="x" size={14} />
+                <span>SECURITY AUDIT RESULT: CRITICAL FAILURE • Black box is only a visual layer. Anyone can copy the data.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Draggable Divider Line & Glass Handle */}
+        <div
+          className="split-divider-handle"
+          style={{ left: `${sliderPos}%` }}
+        >
+          <div className="divider-glass-line" />
+          <div className="handle-orb-glass">
+            <div className="handle-arrows">
+              <span>◀</span>
+              <span>▶</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="slider-bottom-hint">
+        <span>↔ Drag the glowing center handle left or right to compare inspection layers</span>
+      </div>
+    </div>
+  );
+}
+
+/* ==========================================================================
    "Why Switch?" Comparison Cards (Samsung-Style Glass Grid)
    ========================================================================== */
-function SamsungComparisonSection() {
+function SamsungComparisonSection({ soundEnabled }) {
   const cards = [
     {
       title: "Cost & Subscriptions",
@@ -1262,6 +1529,9 @@ function SamsungComparisonSection() {
           </TiltCard>
         ))}
       </div>
+
+      {/* Live Interactive Privacy Audit Split Slider */}
+      <InteractivePrivacyAuditSlider soundEnabled={soundEnabled} />
     </section>
   );
 }
@@ -1570,6 +1840,71 @@ function App() {
     } catch {}
   }, []);
 
+  const [scrolled, setScrolled] = useState(false);
+  const [navHidden, setNavHidden] = useState(false);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentY = window.scrollY;
+      setScrolled(currentY > 30);
+
+      // Auto-collapse top nav on downward scroll past 220px, reveal on upward scroll
+      if (currentY > 220 && currentY > lastScrollY.current + 8) {
+        setNavHidden(true);
+      } else if (currentY < lastScrollY.current - 8 || currentY <= 80) {
+        setNavHidden(false);
+      }
+      lastScrollY.current = currentY;
+
+      // Realtime Scrollspy across sections
+      const sections = ["overview", "intelligence", "studio", "showcase", "why-switch", "performance", "faq"];
+      const triggerY = currentY + 160;
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const el = document.getElementById(sections[i]);
+        if (el && el.offsetTop <= triggerY) {
+          setActiveSection(sections[i]);
+          break;
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToSection = (e, id) => {
+    e.preventDefault();
+    setActiveSection(id);
+    setMobileMenuOpen(false);
+    const target = document.getElementById(id);
+    if (target) {
+      const offset = navHidden ? 56 : 118;
+      const targetTop = target.getBoundingClientRect().top + window.pageYOffset - offset;
+      window.scrollTo({
+        top: Math.max(0, targetTop),
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const [downloadModalOpen, setDownloadModalOpen] = useState(false);
+  const [downloadDetails, setDownloadDetails] = useState({
+    version: "v1.0.2",
+    type: "Installer",
+    filename: "PDFCatalyst-Setup-v1.0.2-x64.exe",
+  });
+
+  const triggerDownload = (e, type, url) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (soundEnabled) playAudioBlip(720);
+    const filename = type === "Portable" ? "PDFCatalyst.exe" : `PDFCatalyst-Setup-${currentVersion}-x64.exe`;
+    setDownloadDetails({ version: currentVersion, type, filename });
+    setDownloadModalOpen(true);
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
   const copy = (text, id) => {
     navigator.clipboard.writeText(text);
     setCopiedId(id);
@@ -1611,9 +1946,9 @@ function App() {
       <FloatingCuteMascot soundEnabled={soundEnabled} setSoundEnabled={setSoundEnabled} />
 
       {/* Flagship Top Navigation Bar */}
-      <header className="samsung-top-nav glass-nav-3d">
+      <header className={`samsung-top-nav glass-nav-3d ${scrolled ? "nav-scrolled" : ""} ${navHidden ? "nav-hidden" : ""}`}>
         <div className="top-nav-inner">
-          <a href="#top" className="samsung-brand">
+          <a href="#top" className="samsung-brand" onClick={(e) => scrollToSection(e, "overview")}>
             <div className="brand-logo-gem">
               <img src="/pdfix-logo.png" alt="PDFCatalyst" width="22" height="22" />
             </div>
@@ -1622,12 +1957,13 @@ function App() {
           </a>
 
           <div className="top-nav-center">
-            <a href="#overview" className="nav-link">Overview</a>
-            <a href="#intelligence" className="nav-link">Intelligence</a>
-            <a href="#studio" className="nav-link">3D Studio</a>
-            <a href="#showcase" className="nav-link">Showcase</a>
-            <a href="#why-switch" className="nav-link">Why Switch</a>
-            <a href="#performance" className="nav-link">Speed</a>
+            <a href="#overview" className={`nav-link ${activeSection === "overview" ? "active" : ""}`} onClick={(e) => scrollToSection(e, "overview")}>Overview</a>
+            <a href="#intelligence" className={`nav-link ${activeSection === "intelligence" ? "active" : ""}`} onClick={(e) => scrollToSection(e, "intelligence")}>Intelligence</a>
+            <a href="#studio" className={`nav-link ${activeSection === "studio" ? "active" : ""}`} onClick={(e) => scrollToSection(e, "studio")}>3D Studio</a>
+            <a href="#showcase" className={`nav-link ${activeSection === "showcase" ? "active" : ""}`} onClick={(e) => scrollToSection(e, "showcase")}>Showcase</a>
+            <a href="#why-switch" className={`nav-link ${activeSection === "why-switch" ? "active" : ""}`} onClick={(e) => scrollToSection(e, "why-switch")}>Why Switch</a>
+            <a href="#performance" className={`nav-link ${activeSection === "performance" ? "active" : ""}`} onClick={(e) => scrollToSection(e, "performance")}>Speed</a>
+            <a href="#faq" className={`nav-link ${activeSection === "faq" ? "active" : ""}`} onClick={(e) => scrollToSection(e, "faq")}>FAQ</a>
           </div>
 
           <div className="top-nav-actions">
@@ -1677,7 +2013,13 @@ function App() {
               </button>
             </div>
 
-            <a href={installerUrl} className="btn-samsung-primary">
+            <a
+              href={installerUrl}
+              className="btn-samsung-primary"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => triggerDownload(e, "Installer", installerUrl)}
+            >
               <span>Download Free</span>
               <Icon name="arrowRight" size={12} />
             </a>
@@ -1694,15 +2036,22 @@ function App() {
 
         {mobileMenuOpen && (
           <div className="mobile-samsung-drawer glass-card-3d">
-            <a href="#overview" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>Overview</a>
-            <a href="#intelligence" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>Intelligence</a>
-            <a href="#studio" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>3D Studio</a>
-            <a href="#showcase" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>Showcase</a>
-            <a href="#why-switch" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>Why Switch</a>
-            <a href="#performance" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>Speed</a>
-            <a href="#faq" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>FAQ</a>
+            <a href="#overview" className="mobile-nav-link" onClick={(e) => scrollToSection(e, "overview")}>Overview</a>
+            <a href="#intelligence" className="mobile-nav-link" onClick={(e) => scrollToSection(e, "intelligence")}>Intelligence</a>
+            <a href="#studio" className="mobile-nav-link" onClick={(e) => scrollToSection(e, "studio")}>3D Studio</a>
+            <a href="#showcase" className="mobile-nav-link" onClick={(e) => scrollToSection(e, "showcase")}>Showcase</a>
+            <a href="#why-switch" className="mobile-nav-link" onClick={(e) => scrollToSection(e, "why-switch")}>Why Switch</a>
+            <a href="#performance" className="mobile-nav-link" onClick={(e) => scrollToSection(e, "performance")}>Speed</a>
+            <a href="#faq" className="mobile-nav-link" onClick={(e) => scrollToSection(e, "faq")}>FAQ</a>
             <div className="mobile-cta-row">
-              <a href={installerUrl} className="btn-samsung-primary" style={{ width: "100%", justifyContent: "center" }}>
+              <a
+                href={installerUrl}
+                className="btn-samsung-primary"
+                style={{ width: "100%", justifyContent: "center" }}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => triggerDownload(e, "Installer", installerUrl)}
+              >
                 <Icon name="download" size={14} />
                 <span>Download Free Installer</span>
               </a>
@@ -1712,7 +2061,12 @@ function App() {
       </header>
 
       {/* Samsung Sticky Product Sub-Bar */}
-      <SamsungSubNav activeSection={activeSection} onSelectSection={setActiveSection} downloadUrl={installerUrl} />
+      <SamsungSubNav
+        activeSection={activeSection}
+        onSelectSection={setActiveSection}
+        downloadUrl={installerUrl}
+        isDockedTop={navHidden}
+      />
 
       <main id="top">
         {/* ==========================================================================
@@ -1738,12 +2092,21 @@ function App() {
             </p>
 
             <div className="hero-cta-cluster">
-              <a href={installerUrl} className="btn-samsung-hero-primary">
+              <a
+                href={installerUrl}
+                className="btn-samsung-hero-primary"
+                onClick={(e) => triggerDownload(e, "Installer", installerUrl)}
+              >
                 <Icon name="download" size={16} />
                 <span>Download for {detectedOs}</span>
                 <span className="cta-filesize">({installerSize})</span>
               </a>
-              <a href={portableUrl} className="btn-samsung-hero-secondary" title="No installation needed">
+              <a
+                href={portableUrl}
+                className="btn-samsung-hero-secondary"
+                title="No installation needed"
+                onClick={(e) => triggerDownload(e, "Portable", portableUrl)}
+              >
                 <Icon name="file" size={14} />
                 <span>Portable (.exe)</span>
               </a>
@@ -1791,7 +2154,7 @@ function App() {
         <SamsungMediaShowcase soundEnabled={soundEnabled} />
 
         {/* Why Switch: The Flagship Advantage */}
-        <SamsungComparisonSection />
+        <SamsungComparisonSection soundEnabled={soundEnabled} />
 
         {/* Speed & Benchmarks */}
         <SamsungBenchmarksSection soundEnabled={soundEnabled} />
@@ -1816,7 +2179,13 @@ function App() {
                   <span className="dl-card-meta">{currentVersion} • x64 • {installerSize}</span>
                   <p className="dl-card-desc">Automatic shortcuts, start menu integration, and file associations.</p>
                 </div>
-                <a href={installerUrl} className="btn-dl-action" target="_blank" rel="noopener noreferrer">
+                <a
+                  href={installerUrl}
+                  className="btn-dl-action"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => triggerDownload(e, "Installer", installerUrl)}
+                >
                   <span>Download Installer</span>
                   <Icon name="download" size={15} />
                 </a>
@@ -1829,7 +2198,13 @@ function App() {
                   <span className="dl-card-meta">{currentVersion} • Portable • {portableSize}</span>
                   <p className="dl-card-desc">Run directly from any folder or USB drive with zero admin permissions required.</p>
                 </div>
-                <a href={portableUrl} className="btn-dl-action secondary" target="_blank" rel="noopener noreferrer">
+                <a
+                  href={portableUrl}
+                  className="btn-dl-action secondary"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => triggerDownload(e, "Portable", portableUrl)}
+                >
                   <span>Download Portable</span>
                   <Icon name="download" size={15} />
                 </a>
@@ -1937,8 +2312,22 @@ function App() {
             </div>
             <div className="f-col">
               <strong>DOWNLOAD</strong>
-              <a href={installerUrl} target="_blank" rel="noopener noreferrer">Windows Installer ({currentVersion})</a>
-              <a href={portableUrl} target="_blank" rel="noopener noreferrer">Portable Executable ({currentVersion})</a>
+              <a
+                href={installerUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => triggerDownload(e, "Installer", installerUrl)}
+              >
+                Windows Installer ({currentVersion})
+              </a>
+              <a
+                href={portableUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => triggerDownload(e, "Portable", portableUrl)}
+              >
+                Portable Executable ({currentVersion})
+              </a>
               <a href="https://github.com/SarthAyush/PDFcatalyst-App" target="_blank" rel="noopener noreferrer">GitHub Repository</a>
               <button className="link-clean-btn" onClick={() => setCommandOpen(true)}>Search Menu (⌘K)</button>
             </div>
@@ -1958,6 +2347,49 @@ function App() {
         installerUrl={installerUrl}
         portableUrl={portableUrl}
       />
+
+      {/* Smart Post-Download Guidance Toast */}
+      {downloadModalOpen && (
+        <div className="download-toast-card glass-card-3d">
+          <div className="toast-header-row">
+            <div className="toast-badge-pill">
+              <Icon name="check" size={12} />
+              <span>DOWNLOAD INITIATED</span>
+            </div>
+            <button
+              className="toast-close-btn"
+              onClick={() => setDownloadModalOpen(false)}
+              aria-label="Close download notification"
+            >
+              <Icon name="x" size={14} />
+            </button>
+          </div>
+          <div className="toast-content">
+            <strong className="toast-title">PDFCatalyst {downloadDetails.version} is starting</strong>
+            <p className="toast-filename">{downloadDetails.filename}</p>
+
+            <div className="toast-quick-steps">
+              <div className="step-item">
+                <span className="step-num">1</span>
+                <span>Open the downloaded file directly from your browser or downloads folder.</span>
+              </div>
+              <div className="step-item">
+                <span className="step-num">2</span>
+                <span>Launches in sub-200ms. Zero accounts, zero tracking, and 100% on-device privacy.</span>
+              </div>
+            </div>
+
+            <button
+              className="btn-toast-copy-sha"
+              onClick={() => copy(installerSha, "toast-sha")}
+            >
+              <Icon name={copiedId === "toast-sha" ? "check" : "shield"} size={13} />
+              <span>{copiedId === "toast-sha" ? "SHA-256 Copied to Clipboard!" : "Copy SHA-256 Checksum"}</span>
+            </button>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
