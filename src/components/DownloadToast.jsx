@@ -62,3 +62,4 @@ export function DownloadToast({ downloadInfo, onClose }) {
     </div>
   );
 }
+

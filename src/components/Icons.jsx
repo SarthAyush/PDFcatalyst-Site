@@ -181,3 +181,4 @@ export function Icon({ name, size = 16, stroke = 2, className = "" }) {
   const pathContent = icons[name] || icons.zap;
   return <svg {...common}>{pathContent}</svg>;
 }
+

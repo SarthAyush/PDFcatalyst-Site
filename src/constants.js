@@ -9,3 +9,4 @@ export const SHA256_PORTABLE =
 export const GITHUB_REPO_URL = "https://github.com/SarthAyush/PDFcatalyst-App";
 export const WINGET_COMMAND = "winget install SarthAyush.PDFcatalyst";
 export const APP_VERSION = "v1.0.2";
+

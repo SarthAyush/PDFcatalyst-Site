@@ -221,3 +221,4 @@ export function CommandPalette({ isOpen, onClose, toggleTheme, onTriggerDownload
     </div>
   );
 }
+
