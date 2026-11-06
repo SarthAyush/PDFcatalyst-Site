@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import "./styles.css";
 
+import { useScrollReveal } from "./hooks/useScrollReveal";
 import { Navbar } from "./components/Navbar";
 import { Hero } from "./components/Hero";
 import { BentoFeatures } from "./components/BentoFeatures";
@@ -20,6 +21,9 @@ function App() {
   });
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [downloadToastInfo, setDownloadToastInfo] = useState(null);
+
+  // Initialize scroll-triggered animations
+  useScrollReveal();
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -47,8 +51,8 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg-canvas)] text-[var(--text-primary)] antialiased selection:bg-cyan-500/30 selection:text-white">
-      {/* Fixed Header */}
+    <div className="min-h-screen bg-[var(--bg-canvas)] text-[var(--text-primary)] antialiased selection:bg-cyan-500/30 selection:text-white transition-colors duration-250">
+      {/* Sticky Solid Navbar */}
       <Navbar
         theme={theme}
         toggleTheme={toggleTheme}

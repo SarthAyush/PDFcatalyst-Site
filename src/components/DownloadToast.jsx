@@ -29,31 +29,32 @@ export function DownloadToast({ downloadInfo, onClose }) {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 max-w-sm w-full p-4 rounded-2xl bg-[#111522] border border-cyan-500/40 shadow-2xl shadow-cyan-500/10 text-xs animate-in slide-in-from-bottom duration-300">
+    <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:w-96 z-50 p-4 rounded-2xl bg-white dark:bg-[#111522] border border-cyan-500/40 shadow-2xl shadow-cyan-500/10 text-xs animate-in slide-in-from-bottom duration-300">
       <div className="flex items-start justify-between gap-3 mb-2">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+          <div className="w-6 h-6 rounded-md bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
             <Icon name="download" size={13} />
           </div>
-          <span className="font-semibold text-white">Download Started</span>
+          <span className="font-semibold text-slate-900 dark:text-white">Download Started</span>
         </div>
         <button
           onClick={onClose}
-          className="text-slate-400 hover:text-white p-1"
+          className="text-slate-400 hover:text-slate-700 dark:hover:text-white p-1"
+          aria-label="Close notification"
         >
           <Icon name="x" size={12} />
         </button>
       </div>
 
-      <p className="text-[11px] text-slate-300 font-mono mb-2 truncate">
+      <p className="text-[11px] text-slate-700 dark:text-slate-300 font-mono mb-2 truncate">
         {fileName}
       </p>
 
-      <div className="p-2 rounded bg-black/60 border border-white/5 font-mono text-[10px] text-slate-400 flex items-center justify-between gap-2">
+      <div className="p-2 rounded bg-slate-100 dark:bg-black/60 border border-slate-200 dark:border-white/5 font-mono text-[10px] text-slate-700 dark:text-slate-400 flex items-center justify-between gap-2">
         <span className="truncate">SHA: {hash.slice(0, 16)}...</span>
         <button
           onClick={copyHash}
-          className="text-cyan-400 hover:underline shrink-0 flex items-center gap-1"
+          className="text-cyan-600 dark:text-cyan-400 hover:underline shrink-0 flex items-center gap-1 font-semibold"
         >
           <Icon name={copied ? "check" : "copy"} size={10} />
           <span>{copied ? "Copied" : "Copy"}</span>
@@ -62,4 +63,3 @@ export function DownloadToast({ downloadInfo, onClose }) {
     </div>
   );
 }
-

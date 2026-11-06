@@ -87,7 +87,7 @@ export function CommandPalette({ isOpen, onClose, toggleTheme, onTriggerDownload
       },
     },
     {
-      title: "Toggle Color Theme",
+      title: "Toggle Light / Dark Theme",
       desc: "Switch between OLED Dark and High-Contrast Light",
       icon: "sun",
       action: () => {
@@ -133,16 +133,16 @@ export function CommandPalette({ isOpen, onClose, toggleTheme, onTriggerDownload
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4 bg-black/75 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-start justify-center pt-8 sm:pt-20 px-3 sm:px-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-xl rounded-2xl bg-[#111522] border border-white/15 shadow-2xl overflow-hidden text-left"
+        className="w-full max-w-xl rounded-2xl bg-white dark:bg-[#111522] border border-slate-200 dark:border-white/15 shadow-2xl overflow-hidden text-left"
         onClick={(e) => e.stopPropagation()}
         onKeyDown={handleKeyDown}
       >
         {/* Search Input */}
-        <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/10 bg-white/[0.02]">
+        <div className="flex items-center gap-3 px-4 py-3.5 border-b border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/[0.02]">
           <Icon name="search" size={16} className="text-slate-400" />
           <input
             ref={inputRef}
@@ -153,15 +153,15 @@ export function CommandPalette({ isOpen, onClose, toggleTheme, onTriggerDownload
               setQuery(e.target.value);
               setSelectedIndex(0);
             }}
-            className="flex-1 bg-transparent text-sm text-white placeholder-slate-500 focus:outline-none"
+            className="flex-1 bg-transparent text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none"
           />
-          <kbd className="px-1.5 py-0.5 text-[10px] font-mono text-slate-400 bg-white/10 rounded">
+          <kbd className="px-1.5 py-0.5 text-[10px] font-mono text-slate-500 dark:text-slate-400 bg-slate-200 dark:bg-white/10 rounded">
             ESC
           </kbd>
         </div>
 
         {/* Command List */}
-        <div className="max-h-80 overflow-y-auto p-2 divide-y divide-white/[0.03]">
+        <div className="max-h-72 sm:max-h-80 overflow-y-auto p-2 divide-y divide-slate-100 dark:divide-white/[0.03]">
           {filtered.length === 0 ? (
             <div className="p-6 text-center text-xs text-slate-500 font-mono">
               No matching commands found.
@@ -176,25 +176,25 @@ export function CommandPalette({ isOpen, onClose, toggleTheme, onTriggerDownload
                   onMouseEnter={() => setSelectedIndex(index)}
                   className={`w-full p-2.5 rounded-xl flex items-center justify-between text-left transition-colors ${
                     isSelected
-                      ? "bg-cyan-500/15 text-cyan-300"
-                      : "text-slate-300 hover:bg-white/5"
+                      ? "bg-cyan-50 dark:bg-cyan-500/15 text-cyan-800 dark:text-cyan-300"
+                      : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5"
                   }`}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 truncate">
                     <div
                       className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
                         isSelected
-                          ? "bg-cyan-500/20 text-cyan-400"
-                          : "bg-white/5 text-slate-400"
+                          ? "bg-cyan-100 dark:bg-cyan-500/20 text-cyan-600 dark:text-cyan-400"
+                          : "bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400"
                       }`}
                     >
                       <Icon name={cmd.icon} size={14} />
                     </div>
-                    <div>
-                      <div className="text-xs font-semibold text-white">
+                    <div className="truncate">
+                      <div className="text-xs font-semibold text-slate-900 dark:text-white truncate">
                         {cmd.title}
                       </div>
-                      <div className="text-[11px] text-slate-400 truncate max-w-sm">
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-xs sm:max-w-sm">
                         {cmd.desc}
                       </div>
                     </div>
@@ -202,8 +202,8 @@ export function CommandPalette({ isOpen, onClose, toggleTheme, onTriggerDownload
                   <Icon
                     name="chevronRight"
                     size={12}
-                    className={`transition-opacity ${
-                      isSelected ? "opacity-100 text-cyan-400" : "opacity-0"
+                    className={`transition-opacity shrink-0 ${
+                      isSelected ? "opacity-100 text-cyan-600 dark:text-cyan-400" : "opacity-0"
                     }`}
                   />
                 </button>
@@ -213,7 +213,7 @@ export function CommandPalette({ isOpen, onClose, toggleTheme, onTriggerDownload
         </div>
 
         {/* Palette Footer */}
-        <div className="px-4 py-2 border-t border-white/5 bg-black/40 flex items-center justify-between text-[10px] font-mono text-slate-500">
+        <div className="px-4 py-2 border-t border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-black/40 flex items-center justify-between text-[10px] font-mono text-slate-500">
           <span>Navigate with ↑ ↓ and Enter</span>
           <span>PDFCatalyst Command Menu</span>
         </div>
@@ -221,4 +221,3 @@ export function CommandPalette({ isOpen, onClose, toggleTheme, onTriggerDownload
     </div>
   );
 }
-

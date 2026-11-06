@@ -10,7 +10,7 @@ export function BentoFeatures() {
       icon: "eyeOff",
       accent: "from-rose-500/20 to-orange-500/10",
       borderAccent: "group-hover:border-rose-500/50",
-      badgeColor: "text-rose-400 bg-rose-500/10 border-rose-500/20",
+      badgeColor: "text-rose-500 dark:text-rose-400 bg-rose-500/10 border-rose-500/20",
       stat: "100% Sanitized",
       statLabel: "Zero data leakage",
     },
@@ -21,7 +21,7 @@ export function BentoFeatures() {
       icon: "cpu",
       accent: "from-cyan-500/20 to-blue-500/10",
       borderAccent: "group-hover:border-cyan-500/50",
-      badgeColor: "text-cyan-400 bg-cyan-500/10 border-cyan-500/20",
+      badgeColor: "text-cyan-600 dark:text-cyan-400 bg-cyan-500/10 border-cyan-500/20",
       stat: "0 ms Upload",
       statLabel: "Local inference",
     },
@@ -32,7 +32,7 @@ export function BentoFeatures() {
       icon: "zap",
       accent: "from-emerald-500/20 to-teal-500/10",
       borderAccent: "group-hover:border-emerald-500/50",
-      badgeColor: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+      badgeColor: "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
       stat: "60 FPS",
       statLabel: "Hardware accelerated",
     },
@@ -43,7 +43,7 @@ export function BentoFeatures() {
       icon: "crosshair",
       accent: "from-amber-500/20 to-yellow-500/10",
       borderAccent: "group-hover:border-amber-500/50",
-      badgeColor: "text-amber-400 bg-amber-500/10 border-amber-500/20",
+      badgeColor: "text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/20",
       stat: "Sub-pixel",
       statLabel: "Scale precision",
     },
@@ -54,7 +54,7 @@ export function BentoFeatures() {
       icon: "lock",
       accent: "from-violet-500/20 to-indigo-500/10",
       borderAccent: "group-hover:border-violet-500/50",
-      badgeColor: "text-violet-400 bg-violet-500/10 border-violet-500/20",
+      badgeColor: "text-violet-600 dark:text-violet-400 bg-violet-500/10 border-violet-500/20",
       stat: "SHA-256",
       statLabel: "PKCS#7 standard",
     },
@@ -65,37 +65,38 @@ export function BentoFeatures() {
       icon: "layers",
       accent: "from-blue-500/20 to-cyan-500/10",
       borderAccent: "group-hover:border-blue-500/50",
-      badgeColor: "text-blue-400 bg-blue-500/10 border-blue-500/20",
+      badgeColor: "text-blue-600 dark:text-blue-400 bg-blue-500/10 border-blue-500/20",
       stat: "Multi-threaded",
       statLabel: "Rayon parallel engine",
     },
   ];
 
   return (
-    <section id="features" className="py-20 relative">
+    <section id="features" className="py-14 sm:py-20 relative">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         {/* Header */}
-        <div className="text-center max-w-2xl mx-auto mb-14">
+        <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-14 reveal-on-scroll">
           <div className="inline-flex items-center gap-2 mb-3">
             <span className="linear-badge">
-              <Icon name="layers" size={12} className="text-cyan-400" />
+              <Icon name="layers" size={12} className="text-cyan-500 dark:text-cyan-400" />
               CORE ARCHITECTURE
             </span>
           </div>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white dark:text-white text-slate-900 mb-3">
+          <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-white dark:text-white text-slate-900 mb-2 sm:mb-3">
             Engineered for Precision.
           </h2>
-          <p className="text-sm sm:text-base text-slate-400 dark:text-slate-400 text-slate-600">
+          <p className="text-xs sm:text-base text-slate-400 dark:text-slate-400 text-slate-600">
             Everything essential for high-performance PDF workflows. No subscription bloat, no cloud tracking.
           </p>
         </div>
 
         {/* 6-Card Bento Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
           {features.map((feat, i) => (
             <div
               key={i}
-              className={`group relative p-6 rounded-2xl bg-[#111522]/80 dark:bg-[#111522]/80 bg-white border border-white/10 dark:border-white/10 border-slate-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-cyan-500/5 ${feat.borderAccent}`}
+              className={`glint-card reveal-on-scroll group relative p-5 sm:p-6 rounded-2xl bg-[#111522]/85 dark:bg-[#111522]/85 bg-white border border-white/10 dark:border-white/10 border-slate-200 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-cyan-500/5 ${feat.borderAccent}`}
+              style={{ transitionDelay: `${i * 60}ms` }}
             >
               {/* Subtle top corner gradient */}
               <div
@@ -103,7 +104,7 @@ export function BentoFeatures() {
               />
 
               {/* Tag & Icon */}
-              <div className="flex items-center justify-between mb-4 relative z-10">
+              <div className="flex items-center justify-between mb-3 sm:mb-4 relative z-10">
                 <span
                   className={`text-[10px] font-mono font-semibold px-2 py-0.5 rounded border ${feat.badgeColor}`}
                 >
@@ -115,8 +116,8 @@ export function BentoFeatures() {
               </div>
 
               {/* Title & Desc */}
-              <div className="relative z-10 mb-6">
-                <h3 className="text-base font-semibold text-white dark:text-white text-slate-900 mb-2">
+              <div className="relative z-10 mb-5 sm:mb-6">
+                <h3 className="text-sm sm:text-base font-semibold text-white dark:text-white text-slate-900 mb-2">
                   {feat.title}
                 </h3>
                 <p className="text-xs text-slate-400 dark:text-slate-400 text-slate-600 leading-relaxed">
@@ -125,11 +126,11 @@ export function BentoFeatures() {
               </div>
 
               {/* Metric Stat Footer */}
-              <div className="pt-4 border-t border-white/5 dark:border-white/5 border-slate-100 flex items-baseline justify-between relative z-10">
-                <span className="text-xs font-mono font-semibold text-white dark:text-white text-slate-800">
+              <div className="pt-3 sm:pt-4 border-t border-white/5 dark:border-white/5 border-slate-100 flex items-baseline justify-between relative z-10">
+                <span className="text-xs font-mono font-semibold text-white dark:text-white text-slate-900">
                   {feat.stat}
                 </span>
-                <span className="text-[11px] font-mono text-slate-500 dark:text-slate-500 text-slate-400">
+                <span className="text-[11px] font-mono text-slate-500 dark:text-slate-500 text-slate-500">
                   {feat.statLabel}
                 </span>
               </div>
@@ -140,4 +141,3 @@ export function BentoFeatures() {
     </section>
   );
 }
-
