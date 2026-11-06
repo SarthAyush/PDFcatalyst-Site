@@ -1,75 +1,78 @@
 @import "tailwindcss";
 
 /* ==========================================================================
-   PDFCatalyst — Samsung Flagship 3D Glass Design Language
-   Cinematic Obsidian, Multi-Depth Glassmorphism 3.0 & Spatial Animations
+   PDFCatalyst — Obsidian & Rust Precision Design System
+   Engineered Dark Mode (OLED), Swiss Bento Architecture & High-Contrast A11y
+   Guided by UI/UX Pro Max Design Intelligence
    ========================================================================== */
 
 :root {
-  --font-sans: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
-  --font-display: 'Manrope', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
-  --font-mono: 'DM Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'DM Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-  /* Samsung Obsidian & Titanium Canvas */
-  --bg-canvas: #04060a;
-  --bg-card-3d: rgba(13, 17, 26, 0.65);
-  --bg-card-hover: rgba(20, 26, 40, 0.82);
-  --bg-panel: rgba(10, 13, 20, 0.6);
+  /* Obsidian & Technical Navy Canvas */
+  --bg-canvas: #07090e;
+  --bg-card-3d: rgba(15, 23, 42, 0.7);
+  --bg-card-hover: rgba(22, 33, 58, 0.88);
+  --bg-panel: rgba(11, 16, 27, 0.75);
   --bg-surface: rgba(255, 255, 255, 0.04);
 
-  /* Metallic Silver & Titanium */
+  /* Metallic Silver & High-Contrast Typography */
   --silver-white: #ffffff;
-  --silver-bright: #f3f6fa;
+  --silver-bright: #f8fafc;
   --silver-mid: #cbd5e1;
   --silver-dim: #94a3b8;
   --silver-dark: #64748b;
 
-  /* Specular Glass Borders */
-  --glass-border: rgba(255, 255, 255, 0.12);
-  --glass-border-hover: rgba(255, 255, 255, 0.28);
-  --glass-specular-top: rgba(255, 255, 255, 0.35);
-  --glass-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 -1px 0 rgba(0, 0, 0, 0.4);
+  /* Specular Precision Glass Borders */
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border-hover: rgba(255, 255, 255, 0.22);
+  --glass-specular-top: rgba(255, 255, 255, 0.25);
+  --glass-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.12), inset 0 -1px 0 rgba(0, 0, 0, 0.4);
 
-  /* Samsung Flagship Accents */
+  /* Precision Technical Accents */
   --accent-cyan: #38bdf8;
   --accent-blue: #2563eb;
-  --accent-green: #34d399;
+  --accent-green: #22c55e;
   --accent-purple: #a855f7;
   --accent-pink: #ec4899;
   --accent-amber: #f59e0b;
-  --accent-red: #f87171;
+  --accent-red: #ef4444;
 
-  --shimmer-titanium: linear-gradient(135deg, #ffffff 0%, #cbd5e1 40%, #7dd3fc 70%, #c084fc 100%);
-  --btn-samsung-gradient: linear-gradient(135deg, #2563eb 0%, #38bdf8 100%);
+  --shimmer-titanium: linear-gradient(135deg, #ffffff 0%, #cbd5e1 45%, #7dd3fc 75%, #34d399 100%);
+  --btn-primary-gradient: linear-gradient(135deg, #1d4ed8 0%, #0ea5e9 100%);
+  --btn-samsung-gradient: linear-gradient(135deg, #1d4ed8 0%, #0ea5e9 100%);
 
   color-scheme: dark;
 }
 
 :root[data-theme="light"] {
-  --bg-canvas: #f5f7fa;
-  --bg-card-3d: rgba(255, 255, 255, 0.82);
-  --bg-card-hover: rgba(255, 255, 255, 0.95);
-  --bg-panel: rgba(248, 250, 253, 0.85);
-  --bg-surface: rgba(0, 0, 0, 0.035);
+  --bg-canvas: #f8fafc;
+  --bg-card-3d: rgba(255, 255, 255, 0.92);
+  --bg-card-hover: #ffffff;
+  --bg-panel: rgba(241, 245, 249, 0.95);
+  --bg-surface: rgba(0, 0, 0, 0.04);
 
-  --silver-white: #0a0f1d;
-  --silver-bright: #1e293b;
-  --silver-mid: #334155;
-  --silver-dim: #64748b;
-  --silver-dark: #94a3b8;
+  --silver-white: #0f172a;
+  --silver-bright: #0f172a;
+  --silver-mid: #1e293b;
+  --silver-dim: #475569;
+  --silver-dark: #64748b;
 
-  --glass-border: rgba(0, 0, 0, 0.09);
-  --glass-border-hover: rgba(0, 0, 0, 0.2);
+  --glass-border: rgba(0, 0, 0, 0.1);
+  --glass-border-hover: rgba(0, 0, 0, 0.22);
   --glass-specular-top: rgba(255, 255, 255, 0.95);
-  --glass-shadow: 0 18px 45px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --glass-shadow: 0 12px 36px rgba(15, 23, 42, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.9);
 
   --accent-cyan: #0284c7;
   --accent-blue: #1d4ed8;
-  --accent-green: #059669;
+  --accent-green: #16a34a;
   --accent-purple: #9333ea;
   --accent-red: #dc2626;
 
   --shimmer-titanium: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0369a1 100%);
+  --btn-primary-gradient: linear-gradient(135deg, #1d4ed8 0%, #0284c7 100%);
   --btn-samsung-gradient: linear-gradient(135deg, #1d4ed8 0%, #0284c7 100%);
 
   color-scheme: light;
@@ -94,7 +97,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 a {
@@ -107,6 +110,15 @@ button {
   cursor: pointer;
   border: none;
   background: none;
+}
+
+/* Accessibility: Visible Focus Rings */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
 }
 
 /* ==========================================================================
@@ -2321,107 +2333,22 @@ button {
 }
 
 /* ==========================================================================
-   Mascot Assistant (Floating Gentle Companion)
+   Accessibility & Reduced Motion Standards
    ========================================================================== */
-.floating-mascot-container {
-  position: fixed;
-  bottom: 28px;
-  right: 28px;
-  z-index: 999;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  pointer-events: none;
-}
-
-.mascot-speech-bubble {
-  pointer-events: auto;
-  max-width: 250px;
-  padding: 10px 14px;
-  margin-bottom: 8px;
-  font-size: 12px;
-  line-height: 1.4;
-  color: var(--silver-bright);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  animation: bubble-float 4s ease-in-out infinite;
-}
-
-.speech-text {
-  font-weight: 500;
-}
-
-.bubble-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 6px;
-}
-
-.btn-bubble-sound,
-.btn-bubble-close {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--silver-dim);
-  transition: all 0.2s;
-}
-
-.btn-bubble-sound:hover,
-.btn-bubble-close:hover {
-  background: rgba(255, 255, 255, 0.2);
-  color: #fff;
-}
-
-.mascot-avatar-wrap {
-  pointer-events: auto;
-  cursor: pointer;
-  width: 76px;
-  height: 76px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.2s;
-}
-
-.mascot-avatar-wrap:hover {
-  transform: scale(1.08);
-}
-
-.mascot-minimized-pill {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  z-index: 999;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 14px;
-  border-radius: 999px;
-  cursor: pointer;
-  pointer-events: auto;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--silver-bright);
-}
-
-.gently-nodding {
-  animation: mascot-nod 0.5s ease;
-}
-
-@keyframes mascot-nod {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
-}
-
-@keyframes bubble-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .samsung-3d-stage-viewport,
+  .aurora-orb {
+    animation: none !important;
+    transform: none !important;
+  }
 }
 
 /* Command Palette Overlay */
