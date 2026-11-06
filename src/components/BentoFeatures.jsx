@@ -10,7 +10,7 @@ export function BentoFeatures() {
       icon: "eyeOff",
       accent: "from-rose-500/20 to-orange-500/10",
       borderAccent: "group-hover:border-rose-500/50",
-      badgeColor: "text-rose-500 dark:text-rose-400 bg-rose-500/10 border-rose-500/20",
+      badgeColor: "text-rose-600 dark:text-rose-400 bg-rose-500/10 border-rose-500/20",
       stat: "100% Sanitized",
       statLabel: "Zero data leakage",
     },
@@ -78,14 +78,14 @@ export function BentoFeatures() {
         <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-14 reveal-on-scroll">
           <div className="inline-flex items-center gap-2 mb-3">
             <span className="linear-badge">
-              <Icon name="layers" size={12} className="text-cyan-500 dark:text-cyan-400" />
+              <Icon name="layers" size={12} className="text-cyan-600 dark:text-cyan-400" />
               CORE ARCHITECTURE
             </span>
           </div>
-          <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-white dark:text-white text-slate-900 mb-2 sm:mb-3">
+          <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white mb-2 sm:mb-3">
             Engineered for Precision.
           </h2>
-          <p className="text-xs sm:text-base text-slate-400 dark:text-slate-400 text-slate-600">
+          <p className="text-xs sm:text-base text-slate-600 dark:text-slate-400">
             Everything essential for high-performance PDF workflows. No subscription bloat, no cloud tracking.
           </p>
         </div>
@@ -95,7 +95,7 @@ export function BentoFeatures() {
           {features.map((feat, i) => (
             <div
               key={i}
-              className={`glint-card reveal-on-scroll group relative p-5 sm:p-6 rounded-2xl bg-[#111522]/85 dark:bg-[#111522]/85 bg-white border border-white/10 dark:border-white/10 border-slate-200 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-cyan-500/5 ${feat.borderAccent}`}
+              className={`glint-card reveal-on-scroll group relative p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#111522]/85 border border-slate-200 dark:border-white/10 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-cyan-500/5 ${feat.borderAccent}`}
               style={{ transitionDelay: `${i * 60}ms` }}
             >
               {/* Subtle top corner gradient */}
@@ -110,27 +110,27 @@ export function BentoFeatures() {
                 >
                   {feat.tag}
                 </span>
-                <div className="w-8 h-8 rounded-lg bg-white/5 dark:bg-white/5 bg-slate-100 border border-white/10 dark:border-white/10 border-slate-200 flex items-center justify-center text-slate-300 dark:text-slate-300 text-slate-700 group-hover:text-cyan-400 transition-colors">
+                <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-700 dark:text-slate-300 group-hover:text-cyan-500 dark:group-hover:text-cyan-400 transition-colors">
                   <Icon name={feat.icon} size={16} />
                 </div>
               </div>
 
               {/* Title & Desc */}
               <div className="relative z-10 mb-5 sm:mb-6">
-                <h3 className="text-sm sm:text-base font-semibold text-white dark:text-white text-slate-900 mb-2">
+                <h3 className="text-sm sm:text-base font-semibold text-slate-900 dark:text-white mb-2">
                   {feat.title}
                 </h3>
-                <p className="text-xs text-slate-400 dark:text-slate-400 text-slate-600 leading-relaxed">
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                   {feat.desc}
                 </p>
               </div>
 
               {/* Metric Stat Footer */}
-              <div className="pt-3 sm:pt-4 border-t border-white/5 dark:border-white/5 border-slate-100 flex items-baseline justify-between relative z-10">
-                <span className="text-xs font-mono font-semibold text-white dark:text-white text-slate-900">
+              <div className="pt-3 sm:pt-4 border-t border-slate-100 dark:border-white/5 flex items-baseline justify-between relative z-10">
+                <span className="text-xs font-mono font-semibold text-slate-900 dark:text-white">
                   {feat.stat}
                 </span>
-                <span className="text-[11px] font-mono text-slate-500 dark:text-slate-500 text-slate-500">
+                <span className="text-[11px] font-mono text-slate-500">
                   {feat.statLabel}
                 </span>
               </div>

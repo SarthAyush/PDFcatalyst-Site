@@ -14,16 +14,16 @@ export function Navbar({ theme, toggleTheme, onOpenCommandPalette }) {
   ];
 
   return (
-    <header className="sticky top-0 left-0 right-0 z-50 h-16 w-full bg-[#090a0f] dark:bg-[#090a0f] bg-white border-b border-white/10 dark:border-white/10 border-slate-200 shadow-sm transition-colors duration-250">
+    <header className="sticky top-0 left-0 right-0 z-50 h-16 w-full bg-white dark:bg-[#090a0f] border-b border-slate-200 dark:border-white/10 shadow-sm transition-colors duration-250">
       <div className="max-w-7xl mx-auto h-full px-4 sm:px-6 flex items-center justify-between">
         {/* Brand */}
         <a href="#" className="flex items-center gap-2.5 sm:gap-3 group select-none">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500/20 to-emerald-500/20 border border-cyan-500/40 flex items-center justify-center relative overflow-hidden group-hover:border-cyan-400 transition-colors">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
             <div className="absolute inset-0 bg-cyan-400/10 opacity-0 group-hover:opacity-100 transition-opacity" />
           </div>
           <div className="flex items-center gap-2">
-            <span className="font-semibold tracking-tight text-white dark:text-white text-slate-900 text-base">
+            <span className="font-semibold tracking-tight text-slate-900 dark:text-white text-base">
               PDFCatalyst
             </span>
             <span className="linear-badge text-[10px] py-0.5 px-2">
@@ -38,7 +38,7 @@ export function Navbar({ theme, toggleTheme, onOpenCommandPalette }) {
             <a
               key={link.href}
               href={link.href}
-              className="px-3 py-1.5 text-xs font-medium text-slate-400 dark:text-slate-400 text-slate-600 hover:text-white dark:hover:text-white hover:text-slate-900 hover:bg-white/5 dark:hover:bg-white/5 hover:bg-slate-100 rounded-lg transition-all"
+              className="px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg transition-all"
             >
               {link.label}
             </a>
@@ -51,14 +51,14 @@ export function Navbar({ theme, toggleTheme, onOpenCommandPalette }) {
           <button
             onClick={onOpenCommandPalette}
             type="button"
-            className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-white/10 dark:border-white/10 border-slate-200 bg-white/5 dark:bg-white/5 bg-slate-100 text-slate-400 dark:text-slate-400 text-slate-600 hover:text-white dark:hover:text-white hover:text-slate-900 hover:border-white/20 transition-all text-xs"
+            className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-white/20 transition-all text-xs"
             title="Search commands (⌘K or Ctrl+K)"
           >
             <Icon name="search" size={14} />
             <span className="hidden sm:inline text-[11px] font-mono">
               Search
             </span>
-            <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono rounded bg-white/10 dark:bg-white/10 bg-slate-200 text-slate-300 dark:text-slate-300 text-slate-700">
+            <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono rounded bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300">
               ⌘K
             </kbd>
           </button>
@@ -68,7 +68,7 @@ export function Navbar({ theme, toggleTheme, onOpenCommandPalette }) {
             href={GITHUB_REPO_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="p-2 rounded-lg text-slate-400 dark:text-slate-400 text-slate-600 hover:text-white dark:hover:text-white hover:text-slate-900 hover:bg-white/5 dark:hover:bg-white/5 hover:bg-slate-100 transition-colors"
+            className="p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
             title="View on GitHub"
           >
             <Icon name="github" size={16} />
@@ -78,7 +78,7 @@ export function Navbar({ theme, toggleTheme, onOpenCommandPalette }) {
           <button
             onClick={toggleTheme}
             type="button"
-            className="p-2 rounded-lg text-slate-400 dark:text-slate-400 text-slate-600 hover:text-white dark:hover:text-white hover:text-slate-900 hover:bg-white/5 dark:hover:bg-white/5 hover:bg-slate-100 transition-colors"
+            className="p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
             title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
             aria-label="Toggle theme"
           >
@@ -97,7 +97,7 @@ export function Navbar({ theme, toggleTheme, onOpenCommandPalette }) {
           {/* Mobile menu toggle */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg text-slate-400 dark:text-slate-400 text-slate-600 hover:text-white dark:hover:text-white hover:text-slate-900 hover:bg-white/5 dark:hover:bg-white/5 hover:bg-slate-100"
+            className="md:hidden p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"
             aria-label="Toggle Navigation Menu"
           >
             <Icon name={mobileMenuOpen ? "x" : "layers"} size={18} />
@@ -107,13 +107,13 @@ export function Navbar({ theme, toggleTheme, onOpenCommandPalette }) {
 
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-[#090a0f] dark:bg-[#090a0f] bg-white border-b border-white/10 dark:border-white/10 border-slate-200 px-4 py-3 flex flex-col gap-2 shadow-xl animate-in slide-in-from-top-2 duration-200">
+        <div className="md:hidden bg-white dark:bg-[#090a0f] border-b border-slate-200 dark:border-white/10 px-4 py-3 flex flex-col gap-2 shadow-xl animate-in slide-in-from-top-2 duration-200">
           {navLinks.map((link) => (
             <a
               key={link.href}
               href={link.href}
               onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2.5 text-sm font-medium text-slate-300 dark:text-slate-300 text-slate-700 hover:bg-white/5 dark:hover:bg-white/5 hover:bg-slate-100 rounded-lg transition-colors"
+              className="px-3 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg transition-colors"
             >
               {link.label}
             </a>

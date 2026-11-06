@@ -34,14 +34,14 @@ export function FAQ() {
         <div className="text-center max-w-xl mx-auto mb-8 sm:mb-12 reveal-on-scroll">
           <div className="inline-flex items-center gap-2 mb-3">
             <span className="linear-badge">
-              <Icon name="fileText" size={12} className="text-cyan-500 dark:text-cyan-400" />
+              <Icon name="fileText" size={12} className="text-cyan-600 dark:text-cyan-400" />
               CLARIFICATIONS
             </span>
           </div>
-          <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-white dark:text-white text-slate-900 mb-2">
+          <h2 className="text-2xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white mb-2">
             Frequently Asked Questions
           </h2>
-          <p className="text-xs sm:text-sm text-slate-400 dark:text-slate-400 text-slate-600">
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
             Essential facts about PDFCatalyst's architecture, licensing, and security model.
           </p>
         </div>
@@ -53,25 +53,25 @@ export function FAQ() {
             return (
               <div
                 key={i}
-                className="reveal-on-scroll rounded-xl border border-white/10 dark:border-white/10 border-slate-200 bg-[#111522]/80 dark:bg-[#111522]/80 bg-white overflow-hidden shadow-sm transition-all"
+                className="reveal-on-scroll rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#111522]/80 overflow-hidden shadow-sm transition-all"
                 style={{ transitionDelay: `${i * 50}ms` }}
               >
                 <button
                   onClick={() => setOpenIndex(isOpen ? -1 : i)}
-                  className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-3 text-xs sm:text-sm font-semibold text-white dark:text-white text-slate-900 hover:text-cyan-500 dark:hover:text-cyan-400 transition-colors"
+                  className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-3 text-xs sm:text-sm font-semibold text-slate-900 dark:text-white hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
                 >
                   <span className="pr-2">{faq.q}</span>
                   <div className="w-6 h-6 rounded-md bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-500 dark:text-slate-400 shrink-0">
                     <Icon
                       name="chevronDown"
                       size={14}
-                      className={`transition-transform duration-200 ${isOpen ? "rotate-180 text-cyan-500 dark:text-cyan-400" : ""}`}
+                      className={`transition-transform duration-200 ${isOpen ? "rotate-180 text-cyan-600 dark:text-cyan-400" : ""}`}
                     />
                   </div>
                 </button>
 
                 {isOpen && (
-                  <div className="px-4 pb-4 sm:px-5 sm:pb-5 text-xs text-slate-600 dark:text-slate-400 leading-relaxed border-t border-slate-100 dark:border-white/5 pt-3 animate-in fade-in duration-200">
+                  <div className="px-4 pb-4 sm:px-5 sm:pb-5 text-xs text-slate-700 dark:text-slate-400 leading-relaxed border-t border-slate-100 dark:border-white/5 pt-3 animate-in fade-in duration-200">
                     {faq.a}
                   </div>
                 )}

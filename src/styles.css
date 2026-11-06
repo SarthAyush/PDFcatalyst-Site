@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *, .dark, .dark *));
+
 /* ==========================================================================
    PDFCatalyst — Raycast / Linear Dark Precision & Obsidian Design System
    OLED Dark & High-Contrast Light Modes, Fluid Animations & Mobile Precision
@@ -45,7 +47,8 @@
   color-scheme: dark;
 }
 
-:root[data-theme="light"] {
+:root[data-theme="light"],
+html:not(.dark) {
   --bg-canvas: #f8fafc;
   --bg-surface: #ffffff;
   --bg-card: #ffffff;
@@ -152,8 +155,9 @@ body {
   transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
-:root[data-theme="light"] .linear-badge {
-  background: rgba(0, 0, 0, 0.04);
+:root[data-theme="light"] .linear-badge,
+html:not(.dark) .linear-badge {
+  background: rgba(0, 0, 0, 0.05);
   border-color: #cbd5e1;
   color: #1e293b;
 }
@@ -167,7 +171,8 @@ body {
   animation: shineGradient 6s ease-in-out infinite alternate;
 }
 
-:root[data-theme="light"] .shimmer-headline {
+:root[data-theme="light"] .shimmer-headline,
+html:not(.dark) .shimmer-headline {
   background: linear-gradient(135deg, #0f172a 0%, #1e40af 45%, #0284c7 80%, #047857 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
@@ -236,13 +241,15 @@ body {
   transform: translateY(-1px);
 }
 
-:root[data-theme="light"] .btn-secondary {
+:root[data-theme="light"] .btn-secondary,
+html:not(.dark) .btn-secondary {
   background: #ffffff;
   border-color: #cbd5e1;
   color: #0f172a;
 }
 
-:root[data-theme="light"] .btn-secondary:hover {
+:root[data-theme="light"] .btn-secondary:hover,
+html:not(.dark) .btn-secondary:hover {
   background: #f1f5f9;
   border-color: #94a3b8;
   color: #0f172a;
